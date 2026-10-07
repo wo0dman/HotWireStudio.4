@@ -3,774 +3,830 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HotWire 4D CNC - Пенопласт</title>
+<title>HotWire 4D CNC — резка пенопласта</title>
 <style>
-:root {
-  --bg: #1a1a2e;
-  --panel: #16213e;
-  --accent: #0f3460;
-  --highlight: #e94560;
-  --text: #eee;
-  --green: #4caf50;
-  --orange: #ff9800;
-  --blue: #2196f3;
+:root{
+  --bg:#11131d; --panel:#181c2a; --card:#161927; --border:#2a3049;
+  --red:#ff6b6b; --blue:#4dabf7; --green:#51cf66; --yellow:#ffd43b;
+  --text:#e7eaf2; --muted:#8b93a8; --foam:#e8dcbf;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Segoe UI',sans-serif; background:var(--bg); color:var(--text); overflow:hidden; height:100vh; }
-#app { display:grid; grid-template-columns:320px 1fr 300px; grid-template-rows:50px 1fr 200px; height:100vh; }
-header { grid-column:1/-1; background:var(--accent); display:flex; align-items:center; padding:0 20px; gap:15px; border-bottom:2px solid var(--highlight); }
-header h1 { font-size:18px; color:var(--highlight); }
-header .btn { padding:6px 14px; border:none; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold; }
-header .btn-gen { background:var(--green); color:#fff; }
-header .btn-sim { background:var(--orange); color:#fff; }
-header .btn-export { background:var(--blue); color:#fff; }
-header .btn-clear { background:#666; color:#fff; }
-.sidebar-left { background:var(--panel); padding:10px; overflow-y:auto; border-right:1px solid #333; }
-.viewport { position:relative; background:#0a0a1a; overflow:hidden; }
-.sidebar-right { background:var(--panel); padding:10px; overflow-y:auto; border-left:1px solid #333; }
-.gcode-panel { grid-column:1/-1; background:#0d0d1a; border-top:1px solid #333; padding:10px; display:flex; flex-direction:column; }
-.gcode-panel textarea { flex:1; background:#111; color:#0f0; font-family:'Courier New',monospace; font-size:11px; border:1px solid #333; padding:8px; resize:none; }
-.section { margin-bottom:15px; }
-.section h3 { font-size:12px; color:var(--highlight); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px; }
-.param-row { display:flex; align-items:center; margin-bottom:6px; gap:8px; }
-.param-row label { font-size:11px; flex:1; color:#aaa; }
-.param-row input[type="range"] { width:100px; }
-.param-row input[type="number"] { width:60px; background:#222; border:1px solid #444; color:#fff; padding:3px 5px; font-size:11px; border-radius:3px; }
-.param-row .val { font-size:11px; color:var(--green); min-width:40px; text-align:right; }
-canvas#editorCanvas { width:100%; height:100%; cursor:crosshair; }
-canvas#viewport3d { width:100%; height:100%; }
-.tool-btn { display:block; width:100%; padding:8px; margin-bottom:5px; background:var(--accent); border:1px solid #444; color:var(--text); border-radius:4px; cursor:pointer; font-size:11px; text-align:left; }
-.tool-btn:hover { background:var(--highlight); }
-.tool-btn.active { background:var(--highlight); border-color:#fff; }
-.status-bar { position:absolute; bottom:5px; left:5px; font-size:10px; color:#888; background:rgba(0,0,0,0.7); padding:3px 8px; border-radius:3px; }
-.sim-controls { display:flex; gap:5px; margin-bottom:10px; }
-.sim-controls button { flex:1; padding:6px; border:none; border-radius:3px; cursor:pointer; font-size:11px; font-weight:bold; }
-.sim-controls .play { background:var(--green); color:#fff; }
-.sim-controls .stop { background:var(--highlight); color:#fff; }
-.sim-controls .reset { background:#666; color:#fff; }
-.info-box { background:#111; border:1px solid #333; padding:8px; border-radius:4px; font-size:10px; margin-top:10px; }
-.info-box div { margin-bottom:3px; }
-.info-box span { color:var(--green); }
-.tab-bar { display:flex; gap:2px; margin-bottom:10px; }
-.tab-bar button { flex:1; padding:5px; border:none; background:#222; color:#888; font-size:10px; cursor:pointer; border-radius:3px 3px 0 0; }
-.tab-bar button.active { background:var(--accent); color:#fff; }
-.profile-select { width:100%; padding:5px; background:#222; border:1px solid #444; color:#fff; border-radius:3px; font-size:11px; margin-bottom:10px; }
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;font-size:13px}
+#app{display:grid;grid-template-rows:50px 1fr;height:100vh}
+header{display:flex;align-items:center;gap:8px;padding:0 14px;background:linear-gradient(90deg,#1a1e30,#222848);border-bottom:1px solid var(--border)}
+header h1{font-size:15px;font-weight:700;margin-right:8px;letter-spacing:.4px}
+header h1 span{color:var(--yellow)}
+.hbtn{padding:7px 13px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:#fff;transition:filter .15s}
+.hbtn:hover{filter:brightness(1.18)}
+.hbtn.gen{background:#2f9e44}.hbtn.exp{background:#1971c2}.hbtn.copy{background:#6741d9}
+.hbtn.demo{background:#e8590c}.hbtn.clr{background:#495057}
+main{display:grid;grid-template-columns:302px 1fr;min-height:0}
+/* ---------- left panel ---------- */
+#panel{background:var(--panel);border-right:1px solid var(--border);overflow-y:auto;padding:10px}
+.sec{margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px}
+.sec h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.row label{font-size:11px;color:#b9c0d2;flex:1}
+.row input[type=number]{width:64px;background:#0f1220;border:1px solid #333c5c;color:#fff;padding:4px 6px;border-radius:4px;font-size:12px}
+.row input[type=range]{width:100px;accent-color:var(--yellow)}
+.row select{background:#0f1220;border:1px solid #333c5c;color:#fff;padding:3px;border-radius:4px;font-size:12px}
+.row .val{font-size:11px;color:var(--yellow);min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.row3 div{display:flex;flex-direction:column;gap:2px;font-size:10px;color:var(--muted)}
+.row3 input{width:100%;background:#0f1220;border:1px solid #333c5c;color:#fff;padding:4px 5px;border-radius:4px;font-size:12px}
+textarea.hdr{width:100%;background:#0d1017;color:#7ef07e;font-family:'Courier New',monospace;font-size:11px;border:1px solid #333c5c;border-radius:4px;padding:5px;resize:vertical}
+.simrow{display:flex;gap:5px;margin-bottom:7px}
+.simrow button{flex:1;padding:7px 0;border:none;border-radius:5px;cursor:pointer;font-weight:700;font-size:13px;color:#fff}
+.simrow .play{background:#2f9e44}.simrow .pause{background:#e8590c}.simrow .reset{background:#495057}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.badge.ccw{background:#14532d;color:#86efac}
+.badge.cw{background:#5c3a00;color:#fcd34d}
+.badge.na{background:#2a2f45;color:#8b93a8}
+.warn{color:#ff8787;font-size:11px;line-height:1.45;margin-top:3px}
+.ok{color:#69db7c;font-size:11px;margin-top:3px}
+.smallbtn{width:100%;padding:6px;border:1px solid #3b4468;background:#20263e;color:#cdd5ea;border-radius:5px;cursor:pointer;font-size:11px;margin-top:6px}
+.smallbtn:hover{background:#2b3355}
+#stats{font-size:11px;color:#aeb6ca;line-height:1.5}
+/* ---------- center ---------- */
+#center{display:flex;flex-direction:column;min-width:0;min-height:0}
+#viz{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:8px;padding:8px;min-height:0}
+#editorsCol{display:flex;flex-direction:column;gap:8px;min-height:0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.editor-card{flex:1}
+.card-head{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);flex-wrap:wrap}
+.card-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.dot.red{background:var(--red)}.dot.blue{background:var(--blue)}.dot.yel{background:var(--yellow)}
+.pts-info{font-size:10px;color:var(--muted);margin-left:auto}
+.toolbar{display:flex;align-items:center;gap:3px;padding:4px 8px;border-bottom:1px solid var(--border);flex-wrap:wrap;user-select:none}
+.toolbar button{min-width:28px;height:26px;padding:0 6px;background:#20263e;border:1px solid #333c5c;color:#d6dcec;border-radius:5px;cursor:pointer;font-size:13px;line-height:1}
+.toolbar button:hover{background:#2e3657}
+.toolbar button.active{background:var(--yellow);color:#1a1a1a;border-color:var(--yellow);font-weight:700}
+.toolbar .sep{width:1px;height:18px;background:#333c5c;margin:0 4px}
+.toolbar .coord{margin-left:auto;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+canvas{display:block;width:100%;flex:1;min-height:0}
+#gcodeCard{height:186px;margin:0 8px 8px}
+#gcodeOut{flex:1;width:100%;background:#0b0e14;color:#6ee76e;font-family:'Courier New',monospace;font-size:11px;border:none;padding:8px;resize:none;outline:none}
+.hint{font-size:10px;color:var(--muted)}
+/* iso view buttons */
+.viewbtns{display:flex;gap:4px;margin-left:auto}
+.viewbtns button{padding:3px 8px;background:#20263e;border:1px solid #333c5c;color:#cfd6ea;border-radius:4px;cursor:pointer;font-size:10px}
+.viewbtns button:hover{background:#2e3657}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#333c5c;border-radius:5px}::-webkit-scrollbar-track{background:transparent}
 </style>
 </head>
 <body>
 <div id="app">
 <header>
-  <h1>⚡ HotWire 4D CNC</h1>
-  <button class="btn btn-gen" onclick="generateGCode()">▶ Генерация G-Code</button>
-  <button class="btn btn-sim" onclick="toggleSimulation()">⏯ Симуляция</button>
-  <button class="btn btn-export" onclick="exportGCode()">💾 Экспорт .nc</button>
-  <button class="btn btn-clear" onclick="clearAll()">✕ Очистить</button>
+  <h1>⚡ HotWire <span>4D</span> CNC — резка пенопласта</h1>
+  <button class="hbtn gen" id="btnGen">⚙️ Генерировать G-Code</button>
+  <button class="hbtn exp" id="btnExp">💾 Экспорт .nc</button>
+  <button class="hbtn copy" id="btnCopy">📋 Копировать</button>
+  <button class="hbtn demo" id="btnDemo">🎯 Демо: круг → квадрат</button>
+  <button class="hbtn clr" id="btnClr">🗑 Очистить всё</button>
 </header>
-
-<div class="sidebar-left">
-  <div class="section">
-    <h3>🎨 Редактор профилей</h3>
-    <select class="profile-select" id="profileSelect" onchange="switchProfile()">
-      <option value="left">Левый вектор (профиль)</option>
-      <option value="right">Правый вектор (профиль)</option>
-      <option value="start">Стартовая линия</option>
-    </select>
-    <button class="tool-btn" id="btnDraw" onclick="setTool('draw')">✏️ Рисовать кривую</button>
-    <button class="tool-btn" id="btnMove" onclick="setTool('move')">↔️ Двигать точки</button>
-    <button class="tool-btn" id="btnErase" onclick="setTool('erase')">🗑️ Удалить точки</button>
-    <button class="tool-btn" onclick="smoothCurve()">〰️ Сгладить кривую</button>
-    <button class="tool-btn" onclick="closeCurve()">⭕ Замкнуть кривую</button>
-  </div>
-
-  <div class="section">
-    <h3>⚙️ Параметры станка</h3>
-    <div class="param-row">
-      <label>Точки на мм</label>
-      <input type="range" id="pointsPerMM" min="0.01" max="1" step="0.01" value="0.26" oninput="updateParam(this)">
-      <span class="val" id="pointsPerMM_val">0.26</span>
+<main>
+  <div id="panel">
+    <div class="sec">
+      <h3>🏭 Рабочая зона станка, мм</h3>
+      <div class="row"><label>Ширина (мир Y → оси X, A)</label><input type="number" id="zoneW" value="2100" min="10"></div>
+      <div class="row"><label>Длина (вдоль струны, мир X)</label><input type="number" id="zoneL" value="2400" min="10"></div>
+      <div class="row"><label>Высота (мир Z → оси Y, B)</label><input type="number" id="zoneH" value="1300" min="10"></div>
     </div>
-    <div class="param-row">
-      <label>Отступ лево</label>
-      <input type="range" id="offsetLeft" min="-10" max="10" step="0.1" value="0" oninput="updateParam(this)">
-      <span class="val" id="offsetLeft_val">0.0</span>
+    <div class="sec">
+      <h3>📦 Заготовка (центр = центр зоны)</h3>
+      <div class="row"><label>Длина (между плоскостями)</label><input type="number" id="wpL" value="1200" min="10"></div>
+      <div class="row"><label>Ширина</label><input type="number" id="wpW" value="1000" min="10"></div>
+      <div class="row"><label>Высота</label><input type="number" id="wpH" value="600" min="10"></div>
+      <div class="row3">
+        <div>смещ. X<input type="number" id="offX" value="0"></div>
+        <div>смещ. Y<input type="number" id="offY" value="0"></div>
+        <div>смещ. Z<input type="number" id="offZ" value="0"></div>
+      </div>
     </div>
-    <div class="param-row">
-      <label>Отступ право</label>
-      <input type="range" id="offsetRight" min="-10" max="10" step="0.1" value="0" oninput="updateParam(this)">
-      <span class="val" id="offsetRight_val">0.0</span>
+    <div class="sec">
+      <h3>✂️ Параметры резки</h3>
+      <div class="row"><label>Точек на мм</label><input type="range" id="ppm" min="0.01" max="1" step="0.01" value="0.26"><span class="val" id="ppmV">0.26</span></div>
+      <div class="row"><label>Отступ струны — лево</label><input type="range" id="offL" min="-10" max="10" step="0.1" value="0"><span class="val" id="offLV">0.0</span></div>
+      <div class="row"><label>Отступ струны — право</label><input type="range" id="offR" min="-10" max="10" step="0.1" value="0"><span class="val" id="offRV">0.0</span></div>
+      <div class="row"><label>Подача F</label><input type="number" id="feed" value="300" min="1"></div>
+      <div class="row"><label>Масштаб координат</label>
+        <select id="scaleSel"><option value="1" selected>1</option><option value="10">10</option><option value="100">100</option><option value="1000">1000</option></select>
+      </div>
+      <div class="row"><label>Знаков после точки</label><input type="number" id="dec" value="3" min="0" max="6" style="width:48px"></div>
     </div>
-  </div>
-
-  <div class="section">
-    <h3>📐 Габариты рабочей зоны</h3>
-    <div class="param-row">
-      <label>Ширина (мм)</label>
-      <input type="number" id="workWidth" value="2100" min="10" max="2100" onchange="updateWorkArea()">
+    <div class="sec">
+      <h3>🧭 Направление обхода</h3>
+      <div class="row"><label>Левая кривая</label><span class="badge na" id="dirLB">—</span></div>
+      <div class="row"><label>Правая кривая</label><span class="badge na" id="dirRB">—</span></div>
+      <button class="smallbtn" id="btnAlign">⇉ Выровнять направления (право ← лево)</button>
+      <div id="warnBox"></div>
     </div>
-    <div class="param-row">
-      <label>Длина (мм)</label>
-      <input type="number" id="workLength" value="2400" min="10" max="2400" onchange="updateWorkArea()">
+    <div class="sec">
+      <h3>🎮 Симуляция</h3>
+      <div class="simrow">
+        <button class="play" id="btnPlay">▶</button>
+        <button class="pause" id="btnPause">⏸</button>
+        <button class="reset" id="btnReset">⏹</button>
+      </div>
+      <div class="row"><label>Скорость</label><input type="range" id="simSpeed" min="0.001" max="0.05" step="0.001" value="0.004"><span class="val" id="simSpeedV">0.004</span></div>
+      <div class="row"><label>Параметр t</label><span class="val" id="simT" style="min-width:60px">0.000</span></div>
     </div>
-    <div class="param-row">
-      <label>Высота (мм)</label>
-      <input type="number" id="workHeight" value="1300" min="10" max="1300" onchange="updateWorkArea()">
-    </div>
-  </div>
-
-  <div class="section">
-    <h3>📝 G-Code настройки</h3>
-    <div class="param-row">
-      <label>Масштаб</label>
-      <select id="gcodeScale" style="width:60px;background:#222;border:1px solid #444;color:#fff;padding:2px;font-size:11px;">
-        <option value="1">1</option>
-        <option value="10">10</option>
-        <option value="100">100</option>
-        <option value="1000">1000</option>
-      </select>
-    </div>
-    <div class="param-row">
-      <label>Скорость (F)</label>
-      <input type="number" id="feedRate" value="300" min="1" max="5000">
-    </div>
-    <div class="param-row">
-      <label>Знаков после точки</label>
-      <input type="number" id="decimals" value="3" min="1" max="6" style="width:40px;">
-    </div>
-  </div>
-</div>
-
-<div class="viewport" id="viewport">
-  <canvas id="editorCanvas"></canvas>
-  <div class="status-bar" id="statusBar">Готово | Точек: 0</div>
-</div>
-
-<div class="sidebar-right">
-  <div class="section">
-    <h3>🎮 Симуляция</h3>
-    <div class="sim-controls">
-      <button class="play" onclick="startSim()">▶</button>
-      <button class="stop" onclick="stopSim()">⏸</button>
-      <button class="reset" onclick="resetSim()">⏹</button>
-    </div>
-    <div class="param-row">
-      <label>Скорость</label>
-      <input type="range" id="simSpeed" min="0.001" max="0.05" step="0.001" value="0.005" oninput="updateParam(this)">
-      <span class="val" id="simSpeed_val">0.005</span>
-    </div>
-    <canvas id="viewport3d" width="280" height="300" style="background:#0a0a1a;border:1px solid #333;border-radius:4px;"></canvas>
-  </div>
-
-  <div class="section">
-    <h3>📊 Информация</h3>
-    <div class="info-box" id="infoBox">
-      <div>Точек левый: <span id="infoLeftPts">0</span></div>
-      <div>Точек правый: <span id="infoRightPts">0</span></div>
-      <div>Строк G-кода: <span id="infoGcodeLines">0</span></div>
-      <div>Длина пути: <span id="infoPathLen">0</span> мм</div>
-      <div>Параметр: <span id="infoParam">0.000</span></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h3>📋 Заголовок</h3>
-    <textarea id="gcodeHeader" style="width:100%;height:80px;background:#111;color:#0f0;font-family:monospace;font-size:10px;border:1px solid #333;padding:5px;resize:none;">G90 G92 G80 G17
+    <div class="sec">
+      <h3>📋 Заголовок программы</h3>
+      <textarea class="hdr" id="gcodeHeader" rows="6">G90 G92 G80 G17
 T1M6
 G54
 M7
-M8</textarea>
-  </div>
-
-  <div class="section">
-    <h3>📋 Конец программы</h3>
-    <textarea id="gcodeFooter" style="width:100%;height:40px;background:#111;color:#0f0;font-family:monospace;font-size:10px;border:1px solid #333;padding:5px;resize:none;">M9
+M8
+F300</textarea>
+      <h3 style="margin-top:8px">📋 Конец программы</h3>
+      <textarea class="hdr" id="gcodeFooter" rows="2">M9
 M30</textarea>
+    </div>
+    <div class="sec">
+      <h3>📊 Информация</h3>
+      <div id="stats">—</div>
+    </div>
   </div>
-</div>
 
-<div class="gcode-panel">
-  <h3 style="font-size:11px;color:var(--highlight);margin-bottom:5px;">G-CODE OUTPUT</h3>
-  <textarea id="gcodeOutput" readonly placeholder="Нажмите 'Генерация G-Code' для создания программы..."></textarea>
-</div>
+  <div id="center">
+    <div id="viz">
+      <div id="editorsCol">
+        <div class="card editor-card">
+          <div class="card-head">
+            <span class="card-title"><span class="dot red"></span>ЛЕВАЯ ПЛОСКОСТЬ заготовки</span>
+            <span class="badge na" id="dirL">—</span>
+            <span class="pts-info" id="ptsL">0 т.</span>
+          </div>
+          <div class="toolbar" id="tbL"></div>
+          <canvas id="cvL"></canvas>
+        </div>
+        <div class="card editor-card">
+          <div class="card-head">
+            <span class="card-title"><span class="dot blue"></span>ПРАВАЯ ПЛОСКОСТЬ заготовки</span>
+            <span class="badge na" id="dirR">—</span>
+            <span class="pts-info" id="ptsR">0 т.</span>
+          </div>
+          <div class="toolbar" id="tbR"></div>
+          <canvas id="cvR"></canvas>
+        </div>
+      </div>
+      <div class="card" id="isoCard">
+        <div class="card-head">
+          <span class="card-title"><span class="dot yel"></span>ИЗОМЕТРИЯ — визуальный контроль</span>
+          <div class="viewbtns">
+            <button data-v="iso">Изометрия</button>
+            <button data-v="front">Спереди</button>
+            <button data-v="top">Сверху</button>
+            <button data-v="side">Сбоку</button>
+          </div>
+        </div>
+        <canvas id="cvIso"></canvas>
+      </div>
+    </div>
+    <div class="card" id="gcodeCard">
+      <div class="card-head">
+        <span class="card-title">📟 G-CODE OUTPUT</span>
+        <span class="hint">оси станка: X ← лев.мирY · Y ← лев.мирZ · A ← прав.мирY · B ← прав.мирZ</span>
+        <span class="pts-info" id="glines"></span>
+      </div>
+      <textarea id="gcodeOut" spellcheck="false" placeholder="Нажмите «Генерировать G-Code»…"></textarea>
+    </div>
+  </div>
+</main>
 </div>
 
 <script>
-// ==================== GLOBAL STATE ====================
+/* ============================== STATE ============================== */
 const state = {
-  profiles: {
-    left: [],
-    right: [],
-    start: []
+  zone: { width: 2100, length: 2400, height: 1300 },
+  work: { l: 1200, w: 1000, h: 600, ox: 0, oy: 0, oz: 0 },
+  cut:  { ppm: 0.26, offL: 0, offR: 0, feed: 300, scale: 1, dec: 3 },
+  left: { curve: [], starts: [] },
+  right:{ curve: [], starts: [] },
+  sim:  { running: false, t: 0, speed: 0.004 },
+  toolpath: null
+};
+const isoView = { az: -0.62, el: 0.46, zoomK: 1, zoom: 0.2 };
+let isoDrag = null, isoCX = 0, isoCY = 0, isoW = 0, isoH = 0;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ============================== GEOMETRY HELPERS ============================== */
+function workBox(){
+  const Z = state.zone, W = state.work;
+  const x0 = (Z.length - W.l) / 2 + W.ox, x1 = x0 + W.l;
+  const y0 = (Z.width  - W.w) / 2 + W.oy, y1 = y0 + W.w;
+  const z0 = (Z.height - W.h) / 2 + W.oz, z1 = z0 + W.h;
+  return { x0, x1, y0, y1, z0, z1 };
+}
+function faceRect(){ const b = workBox(); return { y0: b.y0, y1: b.y1, z0: b.z0, z1: b.z1 }; }
+function faceX(){ const b = workBox(); return { left: b.x0, right: b.x1 }; }
+function polyLen(pts){ let l = 0; for (let i = 1; i < pts.length; i++) l += Math.hypot(pts[i].y - pts[i-1].y, pts[i].z - pts[i-1].z); return l; }
+function signedArea(pts){
+  if (pts.length < 3) return 0;
+  let a = 0;
+  for (let i = 0; i < pts.length; i++){ const p = pts[i], q = pts[(i + 1) % pts.length]; a += p.y * q.z - q.y * p.z; }
+  return a / 2;
+}
+function resampleCurve(pts, count){
+  if (pts.length < 2) return [];
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i-1] + Math.hypot(pts[i].y - pts[i-1].y, pts[i].z - pts[i-1].z));
+  const total = cum[cum.length - 1];
+  if (total < 1e-9) return pts.slice(0, 1);
+  const out = []; let seg = 0;
+  for (let i = 0; i < count; i++){
+    const target = total * i / (count - 1);
+    while (seg < pts.length - 2 && cum[seg + 1] < target) seg++;
+    const span = (cum[seg + 1] - cum[seg]) || 1;
+    const t = clamp((target - cum[seg]) / span, 0, 1);
+    out.push({ y: pts[seg].y + (pts[seg+1].y - pts[seg].y) * t, z: pts[seg].z + (pts[seg+1].z - pts[seg].z) * t });
+  }
+  return out;
+}
+function offsetCurve2D(pts, d){
+  if (Math.abs(d) < 1e-9 || pts.length < 2) return pts.map(p => ({ y: p.y, z: p.z }));
+  const out = [];
+  for (let i = 0; i < pts.length; i++){
+    const p0 = pts[Math.max(0, i-1)], p1 = pts[Math.min(pts.length-1, i+1)];
+    let dy = p1.y - p0.y, dz = p1.z - p0.z;
+    const len = Math.hypot(dy, dz) || 1; dy /= len; dz /= len;
+    out.push({ y: pts[i].y - dz * d, z: pts[i].z + dy * d });
+  }
+  return out;
+}
+function computeToolpath(){
+  const lc = state.left.curve, rc = state.right.curve;
+  if (lc.length < 2 || rc.length < 2) return null;
+  const ol = offsetCurve2D(lc, state.cut.offL);
+  const orr = offsetCurve2D(rc, state.cut.offR);
+  const N = clamp(Math.round(Math.max(polyLen(ol), polyLen(orr)) * state.cut.ppm), 2, 5000);
+  const L = resampleCurve(ol, N), R = resampleCurve(orr, N);
+  const pts = [];
+  for (let i = 0; i < N; i++) pts.push({ X: L[i].y, Y: L[i].z, A: R[i].y, B: R[i].z });
+  return { pts, L, R, N };
+}
+
+/* ============================== CANVAS UTIL ============================== */
+function fitCanvas(cv){
+  const r = cv.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const W = Math.max(2, Math.round(r.width * dpr)), H = Math.max(2, Math.round(r.height * dpr));
+  if (cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { w: r.width, h: r.height };
+}
+
+/* ============================== 2D EDITORS ============================== */
+const TOOLS = [
+  { t: 'draw',  icon: '✏️', tip: 'Рисовать кривую (клики или ведите мышь)' },
+  { t: 'move',  icon: '✥',  tip: 'Перемещать точки' },
+  { t: 'erase', icon: '🗑', tip: 'Удалить точки' },
+  { t: 'start', icon: '📍', tip: 'Стартовая (направляющая) линия: от угла заготовки к узлу кривой. ПКМ — отмена.' }
+];
+const ACTIONS = [
+  { icon: '⭕', tip: 'Вписать круг', fn: 'addCircle' },
+  { icon: '⬜', tip: 'Вписать квадрат', fn: 'addSquare' },
+  { icon: '〰️', tip: 'Сгладить кривую', fn: 'smooth' },
+  { icon: '⭘',  tip: 'Замкнуть кривую', fn: 'close' },
+  { icon: '⇄',  tip: 'Реверс направления (по/против часовой)', fn: 'reverse' },
+  { icon: '✖',  tip: 'Очистить плоскость', fn: 'clear' }
+];
+const actions = {
+  addCircle(side){
+    const d = state[side];
+    if (d.curve.length && !confirm('Заменить текущую кривую кругом?')) return;
+    const fr = faceRect();
+    const cy = (fr.y0 + fr.y1) / 2, cz = (fr.z0 + fr.z1) / 2;
+    const r = Math.min(fr.y1 - fr.y0, fr.z1 - fr.z0) / 2 * 0.75;
+    const pts = [];
+    for (let i = 0; i < 64; i++){
+      const th = Math.PI / 2 + i / 64 * Math.PI * 2; // старт сверху, против часовой
+      pts.push({ y: cy + Math.cos(th) * r, z: cz + Math.sin(th) * r });
+    }
+    pts.push({ ...pts[0] });
+    d.curve = pts; drawAll();
   },
-  currentProfile: 'left',
-  tool: 'draw',
-  drawing: false,
-  selectedPoint: -1,
-  workArea: { width: 2100, length: 2400, height: 1300 },
-  simulation: { running: false, param: 0, speed: 0.005 },
-  gcode: [],
-  toolpath: []
+  addSquare(side){
+    const d = state[side];
+    if (d.curve.length && !confirm('Заменить текущую кривую квадратом?')) return;
+    const fr = faceRect();
+    const cy = (fr.y0 + fr.y1) / 2, cz = (fr.z0 + fr.z1) / 2;
+    const s = Math.min(fr.y1 - fr.y0, fr.z1 - fr.z0) * 0.75 / 2;
+    d.curve = [ // старт сверху-слева, против часовой
+      { y: cy - s, z: cz + s }, { y: cy - s, z: cz - s },
+      { y: cy + s, z: cz - s }, { y: cy + s, z: cz + s }, { y: cy - s, z: cz + s }
+    ];
+    drawAll();
+  },
+  smooth(side){
+    const c = state[side].curve;
+    if (c.length < 3) return;
+    for (let pass = 0; pass < 2; pass++){
+      const nc = [c[0]];
+      for (let i = 1; i < c.length - 1; i++)
+        nc.push({ y: c[i-1].y * .25 + c[i].y * .5 + c[i+1].y * .25, z: c[i-1].z * .25 + c[i].z * .5 + c[i+1].z * .25 });
+      nc.push(c[c.length - 1]);
+      c = nc; state[side].curve = nc;
+    }
+    drawAll();
+  },
+  close(side){
+    const c = state[side].curve;
+    if (c.length > 2 && Math.hypot(c[0].y - c[c.length-1].y, c[0].z - c[c.length-1].z) > 1e-6)
+      c.push({ ...c[0] });
+    drawAll();
+  },
+  reverse(side){ state[side].curve.reverse(); drawAll(); },
+  clear(side){
+    if (!confirm('Очистить плоскость (кривая + стартовые линии)?')) return;
+    state[side].curve = []; state[side].starts = []; drawAll();
+  }
 };
 
-// ==================== CANVAS SETUP ====================
-const canvas = document.getElementById('editorCanvas');
-const ctx = canvas.getContext('2d');
-const canvas3d = document.getElementById('viewport3d');
-const ctx3d = canvas3d.getContext('2d');
+function makeEditor(canvasId, tbId, side, coordSide){
+  const cv = document.getElementById(canvasId);
+  const ed = { canvas: cv, ctx: cv.getContext('2d'), side, tool: 'draw', drawing: false, drag: null, tempStart: null, tempEnd: null, w: 0, h: 0, t: null, toolBtns: {} };
+  const tb = document.getElementById(tbId);
+  TOOLS.forEach(t => {
+    const b = document.createElement('button');
+    b.textContent = t.icon; b.title = t.tip;
+    b.onclick = () => setTool(ed, t.t);
+    tb.appendChild(b); ed.toolBtns[t.t] = b;
+  });
+  const sep = document.createElement('span'); sep.className = 'sep'; tb.appendChild(sep);
+  ACTIONS.forEach(a => {
+    const b = document.createElement('button');
+    b.textContent = a.icon; b.title = a.tip;
+    b.onclick = () => actions[a.fn](ed.side);
+    tb.appendChild(b);
+  });
+  const co = document.createElement('span'); co.className = 'coord'; co.textContent = 'Y: —  Z: —'; tb.appendChild(co);
+  ed.coordEl = co;
 
-function resizeCanvas() {
-  const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
-  redraw();
-}
-window.addEventListener('resize', resizeCanvas);
-setTimeout(resizeCanvas, 100);
+  const mpos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const toWorld = m => {
+    const t = ed.t, Z = state.zone;
+    return { y: clamp((m.x - t.ox) / t.s, 0, Z.width), z: clamp((ed.h - m.y - t.oy) / t.s, 0, Z.height) };
+  };
+  const scrOf = p => ({ x: ed.t.ox + p.y * ed.t.s, y: ed.h - (ed.t.oy + p.z * ed.t.s) });
 
-// ==================== DRAWING TOOLS ====================
-function setTool(tool) {
-  state.tool = tool;
-  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('btn' + tool.charAt(0).toUpperCase() + tool.slice(1)).classList.add('active');
-}
-
-function switchProfile() {
-  state.currentProfile = document.getElementById('profileSelect').value;
-  redraw();
-}
-
-canvas.addEventListener('mousedown', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const pts = state.profiles[state.currentProfile];
-
-  if (state.tool === 'draw') {
-    pts.push({ x, y });
-    redraw();
-  } else if (state.tool === 'move') {
-    state.selectedPoint = findNearestPoint(pts, x, y, 15);
-    if (state.selectedPoint >= 0) state.drawing = true;
-  } else if (state.tool === 'erase') {
-    const idx = findNearestPoint(pts, x, y, 15);
-    if (idx >= 0) { pts.splice(idx, 1); redraw(); }
+  function snapPt(wpt){
+    const m = scrOf(wpt), fr = faceRect();
+    let best = { p: { y: wpt.y, z: wpt.z }, d: 14 };
+    const corners = [{ y: fr.y0, z: fr.z0 }, { y: fr.y1, z: fr.z0 }, { y: fr.y1, z: fr.z1 }, { y: fr.y0, z: fr.z1 }];
+    for (const c of corners){ const q = scrOf(c), d = Math.hypot(q.x - m.x, q.y - m.y); if (d < best.d) best = { p: { ...c }, d }; }
+    for (const p of state[ed.side].curve){ const q = scrOf(p), d = Math.hypot(q.x - m.x, q.y - m.y); if (d < Math.min(best.d, 12)) best = { p: { ...p }, d }; }
+    return best.p;
   }
-});
-
-canvas.addEventListener('mousemove', (e) => {
-  if (state.drawing && state.selectedPoint >= 0) {
-    const rect = canvas.getBoundingClientRect();
-    const pts = state.profiles[state.currentProfile];
-    pts[state.selectedPoint].x = e.clientX - rect.left;
-    pts[state.selectedPoint].y = e.clientY - rect.top;
-    redraw();
+  function hitTest(m){
+    const c = state[ed.side].curve;
+    for (let i = 0; i < c.length; i++){ const q = scrOf(c[i]); if (Math.hypot(q.x - m.x, q.y - m.y) < 10) return { type: 'curve', idx: i }; }
+    const st = state[ed.side].starts;
+    for (let i = 0; i < st.length; i++){
+      for (const k of ['p1', 'p2']){ const q = scrOf(st[i][k]); if (Math.hypot(q.x - m.x, q.y - m.y) < 10) return { type: 'start', idx: i, k }; }
+      const mid = { y: (st[i].p1.y + st[i].p2.y) / 2, z: (st[i].p1.z + st[i].p2.z) / 2 };
+      const qm = scrOf(mid); if (Math.hypot(qm.x - m.x, qm.y - m.y) < 10) return { type: 'startSeg', idx: i };
+    }
+    return null;
   }
-});
 
-canvas.addEventListener('mouseup', () => { state.drawing = false; state.selectedPoint = -1; });
+  cv.addEventListener('mousedown', e => {
+    if (e.button === 2){ ed.tempStart = null; ed.tempEnd = null; drawAll(); return; }
+    if (!ed.t) return;
+    const m = mpos(e), w = toWorld(m);
+    if (ed.tool === 'draw'){ state[side].curve.push(w); ed.drawing = true; }
+    else if (ed.tool === 'move'){ ed.drag = hitTest(m); }
+    else if (ed.tool === 'erase'){
+      const hit = hitTest(m);
+      if (hit){
+        if (hit.type === 'curve') state[side].curve.splice(hit.idx, 1);
+        else state[side].starts.splice(hit.idx, 1);
+      }
+    }
+    else if (ed.tool === 'start'){ ed.tempStart = snapPt(w); ed.tempEnd = snapPt(w); }
+    drawAll();
+  });
+  cv.addEventListener('mousemove', e => {
+    if (!ed.t) return;
+    const m = mpos(e), w = toWorld(m);
+    ed.coordEl.textContent = 'Y: ' + w.y.toFixed(1) + '  Z: ' + w.z.toFixed(1);
+  });
+  cv.addEventListener('contextmenu', e => e.preventDefault());
 
-function findNearestPoint(pts, x, y, threshold) {
-  let minDist = threshold, idx = -1;
-  for (let i = 0; i < pts.length; i++) {
-    const d = Math.hypot(pts[i].x - x, pts[i].y - y);
-    if (d < minDist) { minDist = d; idx = i; }
-  }
-  return idx;
+  window.addEventListener('mousemove', e => {
+    if (!ed.drawing && !ed.drag && !ed.tempStart) return;
+    const m = mpos(e), w = toWorld(m);
+    if (ed.drawing && ed.tool === 'draw'){
+      const c = state[side].curve, last = c[c.length - 1];
+      const q1 = scrOf(last), q2 = scrOf(w);
+      if (Math.hypot(q2.x - q1.x, q2.y - q1.y) > 3) c.push(w);
+      drawAll();
+    } else if (ed.drag){
+      if (ed.drag.type === 'curve') state[side].curve[ed.drag.idx] = w;
+      else if (ed.drag.type === 'start') state[side].starts[ed.drag.idx][ed.drag.k] = w;
+      drawAll();
+    } else if (ed.tempStart){ ed.tempEnd = snapPt(w); drawAll(); }
+  });
+  window.addEventListener('mouseup', () => {
+    if (ed.tempStart && ed.tempEnd && Math.hypot(ed.tempEnd.y - ed.tempStart.y, ed.tempEnd.z - ed.tempStart.z) > 1e-6){
+      state[side].starts.push({ p1: ed.tempStart, p2: ed.tempEnd });
+    }
+    ed.tempStart = null; ed.tempEnd = null; ed.drawing = false; ed.drag = null;
+    drawAll();
+  });
+
+  setTool(ed, 'draw');
+  return ed;
 }
-
-function smoothCurve() {
-  const pts = state.profiles[state.currentProfile];
-  if (pts.length < 3) return;
-  const smoothed = [pts[0]];
-  for (let i = 1; i < pts.length - 1; i++) {
-    smoothed.push({
-      x: pts[i-1].x * 0.25 + pts[i].x * 0.5 + pts[i+1].x * 0.25,
-      y: pts[i-1].y * 0.25 + pts[i].y * 0.5 + pts[i+1].y * 0.25
-    });
-  }
-  smoothed.push(pts[pts.length - 1]);
-  state.profiles[state.currentProfile] = smoothed;
-  redraw();
+function setTool(ed, t){
+  ed.tool = t;
+  TOOLS.forEach(x => ed.toolBtns[x.t].classList.toggle('active', x.t === t));
+  ed.canvas.style.cursor = t === 'move' ? 'grab' : (t === 'erase' ? 'pointer' : 'crosshair');
 }
+const edL = makeEditor('cvL', 'tbL', 'left');
+const edR = makeEditor('cvR', 'tbR', 'right');
 
-function closeCurve() {
-  const pts = state.profiles[state.currentProfile];
-  if (pts.length > 2) {
-    pts.push({ ...pts[0] });
-    redraw();
-  }
-}
-
-// ==================== RENDERING ====================
-function redraw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawGrid();
-  drawProfile(state.profiles.left, '#ff4444', 'Левый');
-  drawProfile(state.profiles.right, '#44aaff', 'Правый');
-  drawProfile(state.profiles.start, '#44ff44', 'Старт');
-  highlightCurrent();
-  updateStatus();
-}
-
-function drawGrid() {
-  ctx.strokeStyle = '#1a1a3a';
-  ctx.lineWidth = 0.5;
-  const step = 50;
-  for (let x = 0; x < canvas.width; x += step) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-  }
-  for (let y = 0; y < canvas.height; y += step) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-  }
-}
-
-function drawProfile(pts, color, label) {
-  if (pts.length === 0) return;
-  ctx.beginPath();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) {
-    ctx.lineTo(pts[i].x, pts[i].y);
-  }
-  ctx.stroke();
-  // Points
-  ctx.fillStyle = color;
-  for (const p of pts) {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-function highlightCurrent() {
-  const pts = state.profiles[state.currentProfile];
-  if (pts.length === 0) return;
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([5, 5]);
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.stroke();
+/* ============================== EDITOR RENDER ============================== */
+function drawEditor(ed){
+  const ctx = ed.ctx;
+  const { w, h } = fitCanvas(ed.canvas);
+  ed.w = w; ed.h = h;
+  const Z = state.zone, pad = 26;
+  const s = Math.min((w - pad * 2) / Z.width, (h - pad * 2) / Z.height);
+  const ox = (w - Z.width * s) / 2, oy = (h - Z.height * s) / 2;
+  ed.t = { s, ox, oy };
+  const SX = y => ox + y * s, SY = z => h - (oy + z * s);
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#0f1119'; ctx.fillRect(0, 0, w, h);
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 1;
+  for (let y = 0; y <= Z.width; y += 100){ ctx.beginPath(); ctx.moveTo(SX(y), SY(0)); ctx.lineTo(SX(y), SY(Z.height)); ctx.stroke(); }
+  for (let z = 0; z <= Z.height; z += 100){ ctx.beginPath(); ctx.moveTo(SX(0), SY(z)); ctx.lineTo(SX(Z.width), SY(z)); ctx.stroke(); }
+  // zone border
+  ctx.strokeStyle = '#3a4468'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(SX(0), SY(Z.height), Z.width * s, Z.height * s);
+  ctx.fillStyle = '#5a6488'; ctx.font = '10px sans-serif';
+  ctx.fillText('рабочая зона ' + Z.width + '×' + Z.height, SX(0) + 4, SY(Z.height) + 12);
+  // workpiece face
+  const fr = faceRect();
+  ctx.fillStyle = 'rgba(232,220,191,.08)';
+  ctx.fillRect(SX(fr.y0), SY(fr.z1), (fr.y1 - fr.y0) * s, (fr.z1 - fr.z0) * s);
+  ctx.strokeStyle = '#a8935f'; ctx.setLineDash([7, 4]); ctx.lineWidth = 1.2;
+  ctx.strokeRect(SX(fr.y0), SY(fr.z1), (fr.y1 - fr.y0) * s, (fr.z1 - fr.z0) * s);
   ctx.setLineDash([]);
-}
-
-function updateStatus() {
-  const total = state.profiles.left.length + state.profiles.right.length + state.profiles.start.length;
-  document.getElementById('statusBar').textContent = 
-    `Профиль: ${state.currentProfile} | Точек: ${state.profiles[state.currentProfile].length} | Всего: ${total} | Инструмент: ${state.tool}`;
-  document.getElementById('infoLeftPts').textContent = state.profiles.left.length;
-  document.getElementById('infoRightPts').textContent = state.profiles.right.length;
-}
-
-// ==================== PARAMETER UPDATES ====================
-function updateParam(el) {
-  document.getElementById(el.id + '_val').textContent = parseFloat(el.value).toFixed(3);
-}
-
-function updateWorkArea() {
-  state.workArea.width = parseInt(document.getElementById('workWidth').value) || 2100;
-  state.workArea.length = parseInt(document.getElementById('workLength').value) || 2400;
-  state.workArea.height = parseInt(document.getElementById('workHeight').value) || 1300;
-}
-
-// ==================== G-CODE GENERATION ====================
-function generateGCode() {
-  const leftPts = state.profiles.left;
-  const rightPts = state.profiles.right;
-  
-  if (leftPts.length < 2 || rightPts.length < 2) {
-    alert('Необходимо нарисовать хотя бы левый и правый профили (минимум 2 точки каждый)!');
-    return;
+  // corners
+  ctx.fillStyle = '#c8b070';
+  [[fr.y0, fr.z0], [fr.y1, fr.z0], [fr.y1, fr.z1], [fr.y0, fr.z1]].forEach(c => {
+    ctx.fillRect(SX(c[0]) - 3, SY(c[1]) - 3, 6, 6);
+  });
+  // start lines
+  const col = ed.side === 'left' ? '#ff6b6b' : '#4dabf7';
+  state[ed.side].starts.forEach((sg, i) => {
+    const a = { x: SX(sg.p1.y), y: SY(sg.p1.z) }, b = { x: SX(sg.p2.y), y: SY(sg.p2.z) };
+    ctx.strokeStyle = '#51cf66'; ctx.lineWidth = 1.6; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]);
+    arrow(ctx, a, b, 8, '#51cf66');
+    ctx.fillStyle = '#51cf66'; ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('старт ' + (i + 1), (a.x + b.x) / 2 + 6, (a.y + b.y) / 2 - 6);
+  });
+  // temp start line preview
+  if (ed.tempStart && ed.tempEnd){
+    ctx.strokeStyle = 'rgba(81,207,102,.7)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(SX(ed.tempStart.y), SY(ed.tempStart.z)); ctx.lineTo(SX(ed.tempEnd.y), SY(ed.tempEnd.z)); ctx.stroke();
+    ctx.setLineDash([]);
   }
-
-  const pointsPerMM = parseFloat(document.getElementById('pointsPerMM').value);
-  const offsetL = parseFloat(document.getElementById('offsetLeft').value);
-  const offsetR = parseFloat(document.getElementById('offsetRight').value);
-  const scale = parseInt(document.getElementById('gcodeScale').value);
-  const decimals = parseInt(document.getElementById('decimals').value);
-  const feedRate = parseInt(document.getElementById('feedRate').value);
-  
-  // Interpolate curves to uniform spacing
-  const leftInterp = interpolateCurve(leftPts, pointsPerMM, offsetL);
-  const rightInterp = interpolateCurve(rightPts, pointsPerMM, offsetR);
-  
-  // Ensure same number of points
-  const numPoints = Math.min(leftInterp.length, rightInterp.length);
-  
-  // Generate toolpath
-  state.toolpath = [];
-  for (let i = 0; i < numPoints; i++) {
-    const lp = leftInterp[i];
-    const rp = rightInterp[i];
-    
-    // Coordinate mapping from Grasshopper file:
-    // Y world axis = X and A axis
-    // Z world axis = Y and B axis
-    // Left point -> X, Y (position of left wire end)
-    // Right point -> A, B (position of right wire end)
-    state.toolpath.push({
-      X: (lp.y * scale),  // world Y -> machine X
-      Y: (lp.x * scale),  // world Z -> machine Y  
-      A: (rp.y * scale),  // right Y -> machine A
-      B: (rp.x * scale)   // right Z -> machine B
-    });
-  }
-  
-  // Build G-code
-  const header = document.getElementById('gcodeHeader').value.trim();
-  const footer = document.getElementById('gcodeFooter').value.trim();
-  
-  let lines = [];
-  // Header
-  lines.push(...header.split('\n'));
-  // Replace feed rate
-  lines = lines.map(l => l.replace(/F\d+/, 'F' + feedRate));
-  lines.push('F' + feedRate);
-  
-  // Toolpath
-  for (const pt of state.toolpath) {
-    const x = pt.X.toFixed(decimals);
-    const y = pt.Y.toFixed(decimals);
-    const a = pt.A.toFixed(decimals);
-    const b = pt.B.toFixed(decimals);
-    lines.push(`G1 X${x} Y${y} A${a} B${b}`);
-  }
-  
-  // Footer
-  lines.push(...footer.split('\n'));
-  
-  state.gcode = lines;
-  document.getElementById('gcodeOutput').value = lines.join('\n');
-  document.getElementById('infoGcodeLines').textContent = lines.length;
-  
-  // Calculate path length
-  let pathLen = 0;
-  for (let i = 1; i < state.toolpath.length; i++) {
-    pathLen += Math.hypot(
-      state.toolpath[i].X - state.toolpath[i-1].X,
-      state.toolpath[i].Y - state.toolpath[i-1].Y
-    );
-  }
-  document.getElementById('infoPathLen').textContent = (pathLen / scale).toFixed(1);
-  
-  render3DPreview();
-}
-
-function interpolateCurve(points, pointsPerMM, offset) {
-  if (points.length < 2) return points;
-  
-  // Calculate total length
-  let totalLen = 0;
-  for (let i = 1; i < points.length; i++) {
-    totalLen += Math.hypot(points[i].x - points[i-1].x, points[i].y - points[i-1].y);
-  }
-  
-  const numPoints = Math.max(2, Math.round(totalLen * pointsPerMM));
-  const result = [];
-  
-  for (let i = 0; i <= numPoints; i++) {
-    const t = i / numPoints;
-    const pt = getPointOnPolyline(points, t);
-    
-    // Apply offset (perpendicular to curve direction)
-    if (offset !== 0) {
-      const normal = getNormalAtT(points, t);
-      pt.x += normal.x * offset;
-      pt.y += normal.y * offset;
+  // curve
+  const curve = state[ed.side].curve;
+  if (curve.length){
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    curve.forEach((p, i) => i ? ctx.lineTo(SX(p.y), SY(p.z)) : ctx.moveTo(SX(p.y), SY(p.z)));
+    ctx.stroke();
+    if (curve.length <= 300){
+      ctx.fillStyle = col;
+      curve.forEach(p => { ctx.beginPath(); ctx.arc(SX(p.y), SY(p.z), 2.4, 0, Math.PI * 2); ctx.fill(); });
     }
-    
-    result.push(pt);
-  }
-  
-  return result;
-}
-
-function getPointOnPolyline(points, t) {
-  const totalLen = getPolylineLength(points);
-  const targetLen = t * totalLen;
-  let accLen = 0;
-  
-  for (let i = 1; i < points.length; i++) {
-    const segLen = Math.hypot(points[i].x - points[i-1].x, points[i].y - points[i-1].y);
-    if (accLen + segLen >= targetLen) {
-      const localT = (targetLen - accLen) / segLen;
-      return {
-        x: points[i-1].x + (points[i].x - points[i-1].x) * localT,
-        y: points[i-1].y + (points[i].y - points[i-1].y) * localT
-      };
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(SX(curve[0].y), SY(curve[0].z), 4, 0, Math.PI * 2); ctx.fill();
+    if (curve.length > 2){ // direction arrow at ~60%
+      const i = Math.floor(curve.length * 0.6);
+      arrow(ctx, { x: SX(curve[i-1].y), y: SY(curve[i-1].z) }, { x: SX(curve[i].y), y: SY(curve[i].z) }, 11, col);
     }
-    accLen += segLen;
   }
-  return { ...points[points.length - 1] };
-}
-
-function getPolylineLength(points) {
-  let len = 0;
-  for (let i = 1; i < points.length; i++) {
-    len += Math.hypot(points[i].x - points[i-1].x, points[i].y - points[i-1].y);
-  }
-  return len;
-}
-
-function getNormalAtT(points, t) {
-  const p1 = getPointOnPolyline(points, Math.max(0, t - 0.01));
-  const p2 = getPointOnPolyline(points, Math.min(1, t + 0.01));
-  const dx = p2.x - p1.x;
-  const dy = p2.y - p1.y;
-  const len = Math.hypot(dx, dy) || 1;
-  return { x: -dy / len, y: dx / len };
-}
-
-// ==================== 3D PREVIEW ====================
-function render3DPreview() {
-  ctx3d.clearRect(0, 0, canvas3d.width, canvas3d.height);
-  
-  if (state.toolpath.length === 0) {
-    ctx3d.fillStyle = '#666';
-    ctx3d.font = '12px sans-serif';
-    ctx3d.textAlign = 'center';
-    ctx3d.fillText('Нет данных для отображения', canvas3d.width/2, canvas3d.height/2);
-    return;
-  }
-  
-  const w = canvas3d.width;
-  const h = canvas3d.height;
-  const scale = Math.min(w, h) / (state.workArea.width + 100);
-  const ox = w / 2;
-  const oy = h / 2;
-  
-  // Draw work area
-  ctx3d.strokeStyle = '#333';
-  ctx3d.strokeRect(20, 20, w - 40, h - 40);
-  
-  // Draw wire path (simple 2D projection)
-  const maxPts = Math.min(state.toolpath.length, 500);
-  const step = Math.max(1, Math.floor(state.toolpath.length / maxPts));
-  
-  // Left end path (X, Y)
-  ctx3d.beginPath();
-  ctx3d.strokeStyle = '#ff4444';
-  ctx3d.lineWidth = 1;
-  for (let i = 0; i < state.toolpath.length; i += step) {
-    const pt = state.toolpath[i];
-    const x = 20 + (pt.X / (state.workArea.width * parseInt(document.getElementById('gcodeScale').value))) * (w - 40);
-    const y = 20 + (pt.Y / (state.workArea.height * parseInt(document.getElementById('gcodeScale').value))) * (h - 40);
-    if (i === 0) ctx3d.moveTo(x, y);
-    else ctx3d.lineTo(x, y);
-  }
-  ctx3d.stroke();
-  
-  // Right end path (A, B)
-  ctx3d.beginPath();
-  ctx3d.strokeStyle = '#44aaff';
-  ctx3d.lineWidth = 1;
-  for (let i = 0; i < state.toolpath.length; i += step) {
-    const pt = state.toolpath[i];
-    const x = 20 + (pt.A / (state.workArea.width * parseInt(document.getElementById('gcodeScale').value))) * (w - 40);
-    const y = 20 + (pt.B / (state.workArea.height * parseInt(document.getElementById('gcodeScale').value))) * (h - 40);
-    if (i === 0) ctx3d.moveTo(x, y);
-    else ctx3d.lineTo(x, y);
-  }
-  ctx3d.stroke();
-  
-  // Legend
-  ctx3d.fillStyle = '#ff4444';
-  ctx3d.fillRect(25, h - 35, 10, 3);
-  ctx3d.fillStyle = '#aaa';
-  ctx3d.font = '9px sans-serif';
-  ctx3d.textAlign = 'left';
-  ctx3d.fillText('Левый конец (X,Y)', 40, h - 32);
-  
-  ctx3d.fillStyle = '#44aaff';
-  ctx3d.fillRect(25, h - 22, 10, 3);
-  ctx3d.fillStyle = '#aaa';
-  ctx3d.fillText('Правый конец (A,B)', 40, h - 19);
-}
-
-// ==================== SIMULATION ====================
-let simInterval = null;
-
-function startSim() {
-  if (state.toolpath.length === 0) {
-    alert('Сначала сгенерируйте G-код!');
-    return;
-  }
-  state.simulation.running = true;
-  if (!simInterval) {
-    simInterval = setInterval(simulationStep, 20); // 20ms like in Grasshopper
+  // sim marker
+  if (state.toolpath){
+    const idx = clamp(Math.round(state.sim.t * (state.toolpath.N - 1)), 0, state.toolpath.N - 1);
+    const p = ed.side === 'left' ? state.toolpath.L[idx] : state.toolpath.R[idx];
+    ctx.fillStyle = '#ffd43b'; ctx.shadowColor = '#ffd43b'; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(SX(p.y), SY(p.z), 5, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
   }
 }
-
-function stopSim() {
-  state.simulation.running = false;
+function arrow(ctx, a, b, size, color){
+  const ang = Math.atan2(b.y - a.y, b.x - a.x);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(b.x, b.y);
+  ctx.lineTo(b.x - size * Math.cos(ang - .45), b.y - size * Math.sin(ang - .45));
+  ctx.lineTo(b.x - size * Math.cos(ang + .45), b.y - size * Math.sin(ang + .45));
+  ctx.closePath(); ctx.fill();
 }
 
-function resetSim() {
-  state.simulation.running = false;
-  state.simulation.param = 0;
-  if (simInterval) { clearInterval(simInterval); simInterval = null; }
-  render3DPreview();
-  document.getElementById('infoParam').textContent = '0.000';
+/* ============================== ISOMETRIC RENDER ============================== */
+const cvIso = document.getElementById('cvIso');
+const isoCtx = cvIso.getContext('2d');
+function project(p){
+  const v = isoView, Z = state.zone;
+  const cx = Z.length / 2, cyw = Z.width / 2, cz = Z.height / 2;
+  const x = p.x - cx, y = p.y - cyw, z = p.z - cz;
+  const ca = Math.cos(v.az), sa = Math.sin(v.az);
+  const x1 = x * ca - y * sa, y1 = x * sa + y * ca;
+  const ce = Math.cos(v.el), se = Math.sin(v.el);
+  const y2 = y1 * ce - z * se, z2 = y1 * se + z * ce;
+  return { x: isoCX + x1 * v.zoom, y: isoCY - z2 * v.zoom, d: y2 };
 }
-
-function simulationStep() {
-  if (!state.simulation.running) return;
-  
-  const speed = parseFloat(document.getElementById('simSpeed').value);
-  state.simulation.param += speed;
-  
-  if (state.simulation.param > 1) {
-    state.simulation.param = 0;
+function drawBox3D(c0, c1, col, alpha, edge){
+  const V = [
+    [c0.x,c0.y,c0.z],[c1.x,c0.y,c0.z],[c1.x,c1.y,c0.z],[c0.x,c1.y,c0.z],
+    [c0.x,c0.y,c1.z],[c1.x,c0.y,c1.z],[c1.x,c1.y,c1.z],[c0.x,c1.y,c1.z]
+  ].map(v => project({ x: v[0], y: v[1], z: v[2] }));
+  const F = [[0,1,2,3],[4,7,6,5],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0]];
+  const shade = [.45, 1, .8, .62, .7, .9];
+  const order = F.map((f, i) => ({ f, i, d: f.reduce((a, vi) => a + V[vi].d, 0) / 4 })).sort((a, b) => a.d - b.d);
+  for (const o of order){
+    isoCtx.beginPath();
+    o.f.forEach((vi, j) => { const p = V[vi]; j ? isoCtx.lineTo(p.x, p.y) : isoCtx.moveTo(p.x, p.y); });
+    isoCtx.closePath();
+    const k = shade[o.i];
+    isoCtx.fillStyle = 'rgba(' + (col.r * k | 0) + ',' + (col.g * k | 0) + ',' + (col.b * k | 0) + ',' + alpha + ')';
+    isoCtx.fill();
+    isoCtx.strokeStyle = edge; isoCtx.lineWidth = 1; isoCtx.stroke();
   }
-  
-  document.getElementById('infoParam').textContent = state.simulation.param.toFixed(3);
-  renderSimulationFrame();
 }
-
-function renderSimulationFrame() {
-  ctx3d.clearRect(0, 0, canvas3d.width, canvas3d.height);
-  const w = canvas3d.width, h = canvas3d.height;
-  const scale = parseInt(document.getElementById('gcodeScale').value);
-  
-  // Background
-  ctx3d.fillStyle = '#0a0a1a';
-  ctx3d.fillRect(0, 0, w, h);
-  
-  // Work area border
-  ctx3d.strokeStyle = '#333';
-  ctx3d.strokeRect(20, 20, w - 40, h - 40);
-  
-  if (state.toolpath.length === 0) return;
-  
-  const idx = Math.floor(state.simulation.param * (state.toolpath.length - 1));
-  const pt = state.toolpath[idx];
-  
-  // Calculate screen positions
-  const lx = 20 + (pt.X / (state.workArea.width * scale)) * (w - 40);
-  const ly = 20 + (pt.Y / (state.workArea.height * scale)) * (h - 40);
-  const rx = 20 + (pt.A / (state.workArea.width * scale)) * (w - 40);
-  const ry = 20 + (pt.B / (state.workArea.height * scale)) * (h - 40);
-  
-  // Draw path up to current point
-  ctx3d.beginPath();
-  ctx3d.strokeStyle = 'rgba(255,68,68,0.3)';
-  ctx3d.lineWidth = 1;
-  for (let i = 0; i <= idx; i++) {
-    const p = state.toolpath[i];
-    const x = 20 + (p.X / (state.workArea.width * scale)) * (w - 40);
-    const y = 20 + (p.Y / (state.workArea.height * scale)) * (h - 40);
-    if (i === 0) ctx3d.moveTo(x, y); else ctx3d.lineTo(x, y);
+function path3D(pts, x, color, width, dash){
+  if (pts.length < 2) return;
+  isoCtx.strokeStyle = color; isoCtx.lineWidth = width;
+  if (dash) isoCtx.setLineDash(dash);
+  isoCtx.beginPath();
+  pts.forEach((p, i) => { const q = project({ x, y: p.y, z: p.z }); i ? isoCtx.lineTo(q.x, q.y) : isoCtx.moveTo(q.x, q.y); });
+  isoCtx.stroke(); isoCtx.setLineDash([]);
+}
+function avgDepth(pts, x){
+  let d = 0;
+  for (const p of pts) d += project({ x, y: p.y, z: p.z }).d;
+  return d / Math.max(1, pts.length);
+}
+function drawIso(){
+  const ctx = isoCtx;
+  const { w, h } = fitCanvas(cvIso);
+  isoW = w; isoH = h;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#0c0e16'; ctx.fillRect(0, 0, w, h);
+  const Z = state.zone, v = isoView;
+  const span = Z.length + Z.width;
+  v.zoom = Math.min(w / (span * .8), h / (span * .46 + Z.height * 1.2)) * v.zoomK;
+  isoCX = w / 2; isoCY = h / 2 + Z.height * v.zoom * .05;
+  // boxes
+  drawBox3D({ x: 0, y: 0, z: 0 }, { x: Z.length, y: Z.width, z: Z.height }, { r: 90, g: 130, b: 200 }, .05, 'rgba(95,125,190,.4)');
+  const b = workBox();
+  drawBox3D({ x: b.x0, y: b.y0, z: b.z0 }, { x: b.x1, y: b.y1, z: b.z1 }, { r: 236, g: 224, b: 196 }, .17, 'rgba(205,190,150,.85)');
+  // face outlines
+  function faceOutline(x, color){
+    const pts = [{ y: b.y0, z: b.z0 }, { y: b.y1, z: b.z0 }, { y: b.y1, z: b.z1 }, { y: b.y0, z: b.z1 }].map(p => project({ x, y: p.y, z: p.z }));
+    ctx.strokeStyle = color; ctx.lineWidth = 1.4;
+    ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.stroke();
   }
-  ctx3d.stroke();
-  
-  // Draw wire (line between left and right endpoints)
-  ctx3d.beginPath();
-  ctx3d.strokeStyle = '#ff0';
-  ctx3d.lineWidth = 2;
-  ctx3d.moveTo(lx, ly);
-  ctx3d.lineTo(rx, ry);
-  ctx3d.stroke();
-  
-  // Draw endpoints
-  ctx3d.beginPath();
-  ctx3d.fillStyle = '#ff4444';
-  ctx3d.arc(lx, ly, 5, 0, Math.PI * 2);
-  ctx3d.fill();
-  
-  ctx3d.beginPath();
-  ctx3d.fillStyle = '#44aaff';
-  ctx3d.arc(rx, ry, 5, 0, Math.PI * 2);
-  ctx3d.fill();
-  
-  // Labels
-  ctx3d.fillStyle = '#fff';
-  ctx3d.font = '9px monospace';
-  ctx3d.textAlign = 'left';
-  ctx3d.fillText(`X:${pt.X.toFixed(1)} Y:${pt.Y.toFixed(1)}`, 25, 15);
-  ctx3d.fillText(`A:${pt.A.toFixed(1)} B:${pt.B.toFixed(1)}`, 150, 15);
-  ctx3d.fillText(`t=${state.simulation.param.toFixed(3)}`, w - 70, 15);
-}
-
-function toggleSimulation() {
-  if (state.simulation.running) stopSim();
-  else startSim();
-}
-
-// ==================== EXPORT ====================
-function exportGCode() {
-  const gcode = document.getElementById('gcodeOutput').value;
-  if (!gcode) {
-    alert('Сначала сгенерируйте G-код!');
-    return;
+  faceOutline(b.x0, 'rgba(255,107,107,.8)');
+  faceOutline(b.x1, 'rgba(77,171,247,.8)');
+  // axis labels
+  ctx.font = 'bold 11px sans-serif';
+  let q = project({ x: Z.length * .5, y: -120, z: 0 }); ctx.fillStyle = '#7f8db3'; ctx.fillText('X — вдоль струны', q.x - 40, q.y + 14);
+  q = project({ x: -120, y: Z.width * .5, z: 0 }); ctx.fillText('Y', q.x, q.y + 14);
+  q = project({ x: -60, y: -60, z: Z.height }); ctx.fillText('Z', q.x, q.y);
+  // curves with depth sort
+  const items = [];
+  if (state.left.curve.length > 1) items.push({ d: avgDepth(state.left.curve, b.x0), fn: () => path3D(state.left.curve, b.x0, '#ff6b6b', 2.2) });
+  if (state.right.curve.length > 1) items.push({ d: avgDepth(state.right.curve, b.x1), fn: () => path3D(state.right.curve, b.x1, '#4dabf7', 2.2) });
+  state.left.starts.forEach(sg => items.push({ d: (project({ x: b.x0, y: sg.p1.y, z: sg.p1.z }).d + project({ x: b.x0, y: sg.p2.y, z: sg.p2.z }).d) / 2,
+    fn: () => path3D([sg.p1, sg.p2], b.x0, 'rgba(81,207,102,.95)', 1.6, [6, 4]) }));
+  state.right.starts.forEach(sg => items.push({ d: (project({ x: b.x1, y: sg.p1.y, z: sg.p1.z }).d + project({ x: b.x1, y: sg.p2.y, z: sg.p2.z }).d) / 2,
+    fn: () => path3D([sg.p1, sg.p2], b.x1, 'rgba(81,207,102,.95)', 1.6, [6, 4]) }));
+  items.sort((a, c) => a.d - c.d).forEach(it => it.fn());
+  // face labels
+  ctx.font = 'bold 12px sans-serif';
+  q = project({ x: b.x0, y: (b.y0 + b.y1) / 2, z: b.z1 }); ctx.fillStyle = '#ff8787'; ctx.fillText('ЛЕВО', q.x - 18, q.y - 10);
+  q = project({ x: b.x1, y: (b.y0 + b.y1) / 2, z: b.z1 }); ctx.fillStyle = '#74c0fc'; ctx.fillText('ПРАВО', q.x - 20, q.y - 10);
+  // ribbon + wire
+  if (state.toolpath){
+    const tp = state.toolpath;
+    const idx = clamp(Math.round(state.sim.t * (tp.N - 1)), 0, tp.N - 1);
+    const step = Math.max(1, Math.floor(idx / 140));
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= idx; i += step){
+      const p1 = project({ x: b.x0, y: tp.L[i].y, z: tp.L[i].z });
+      const p2 = project({ x: b.x1, y: tp.R[i].y, z: tp.R[i].z });
+      ctx.strokeStyle = 'rgba(255,212,59,.13)';
+      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+    }
+    const p1 = project({ x: b.x0, y: tp.L[idx].y, z: tp.L[idx].z });
+    const p2 = project({ x: b.x1, y: tp.R[idx].y, z: tp.R[idx].z });
+    ctx.strokeStyle = '#ffd43b'; ctx.lineWidth = 2.6; ctx.shadowColor = '#ffd43b'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    [p1, p2].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill(); });
   }
-  
-  const blob = new Blob([gcode], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
+  // legend
+  ctx.fillStyle = '#6f7896'; ctx.font = '10px sans-serif';
+  ctx.fillText('Оси станка: X, A ← мир Y   •   Y, B ← мир Z', 10, 16);
+  ctx.fillText('ЛКМ — вращение • колесо — масштаб', 10, h - 10);
+}
+cvIso.addEventListener('mousedown', e => { isoDrag = { x: e.clientX, y: e.clientY }; });
+window.addEventListener('mousemove', e => {
+  if (!isoDrag) return;
+  isoView.az += (e.clientX - isoDrag.x) * .008;
+  isoView.el = clamp(isoView.el + (e.clientY - isoDrag.y) * .006, -1.35, 1.35);
+  isoDrag = { x: e.clientX, y: e.clientY };
+  drawIso();
+});
+window.addEventListener('mouseup', () => isoDrag = null);
+cvIso.addEventListener('wheel', e => {
+  e.preventDefault();
+  isoView.zoomK = clamp(isoView.zoomK * (e.deltaY < 0 ? 1.1 : .9), .3, 6);
+  drawIso();
+}, { passive: false });
+document.querySelectorAll('.viewbtns button').forEach(btn => {
+  btn.onclick = () => {
+    const v = btn.dataset.v;
+    if (v === 'iso'){ isoView.az = -0.62; isoView.el = 0.46; }
+    else if (v === 'front'){ isoView.az = 0; isoView.el = 0.001; }
+    else if (v === 'top'){ isoView.az = 0; isoView.el = 1.3; }
+    else if (v === 'side'){ isoView.az = Math.PI / 2; isoView.el = 0.001; }
+    isoView.zoomK = 1; drawIso();
+  };
+});
+
+/* ============================== G-CODE ============================== */
+function fmt(v){ return (v * state.cut.scale).toFixed(state.cut.dec); }
+function generateGCode(){
+  const tp = computeToolpath();
+  if (!tp){ alert('Нарисуйте кривые на обеих плоскостях (минимум 2 точки на каждой).'); return; }
+  state.toolpath = tp;
+  const lines = [];
+  let header = document.getElementById('gcodeHeader').value.split('\n');
+  let hasF = false;
+  header = header.map(l => { if (/F\d/.test(l)){ hasF = true; return l.replace(/F[\d.]+/, 'F' + state.cut.feed); } return l; });
+  if (!hasF) header.push('F' + state.cut.feed);
+  header.forEach(l => lines.push(l));
+  // стартовые (направляющие) линии
+  const nS = Math.min(state.left.starts.length, state.right.starts.length);
+  for (let i = 0; i < nS; i++){
+    const a = state.left.starts[i], c = state.right.starts[i];
+    lines.push('G1 X' + fmt(a.p1.y) + ' Y' + fmt(a.p1.z) + ' A' + fmt(c.p1.y) + ' B' + fmt(c.p1.z));
+    lines.push('G1 X' + fmt(a.p2.y) + ' Y' + fmt(a.p2.z) + ' A' + fmt(c.p2.y) + ' B' + fmt(c.p2.z));
+  }
+  // основной контур (синхронное движение обоих концов струны)
+  for (const p of tp.pts) lines.push('G1 X' + fmt(p.X) + ' Y' + fmt(p.Y) + ' A' + fmt(p.A) + ' B' + fmt(p.B));
+  document.getElementById('gcodeFooter').value.split('\n').forEach(l => lines.push(l));
+  document.getElementById('gcodeOut').value = lines.join('\n');
+  document.getElementById('glines').textContent = lines.length + ' строк';
+  updateInfo(); drawAll();
+}
+function ensureToolpath(){
+  const tp = computeToolpath();
+  if (!tp){ alert('Нарисуйте кривые на обеих плоскостях (минимум 2 точки на каждой).'); return false; }
+  state.toolpath = tp;
+  return true;
+}
+function exportGCode(){
+  const txt = document.getElementById('gcodeOut').value;
+  if (!txt){ alert('Сначала сгенерируйте G-код.'); return; }
+  const blob = new Blob([txt], { type: 'text/plain' });
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = 'hotwire4d.nc';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(a.href);
 }
 
-// ==================== CLEAR ====================
-function clearAll() {
-  if (!confirm('Очистить все данные?')) return;
-  state.profiles.left = [];
-  state.profiles.right = [];
-  state.profiles.start = [];
-  state.toolpath = [];
-  state.gcode = [];
-  state.simulation.param = 0;
-  state.simulation.running = false;
-  document.getElementById('gcodeOutput').value = '';
-  resetSim();
-  redraw();
+/* ============================== SIMULATION ============================== */
+function startSim(){ if (!ensureToolpath()) return; state.sim.running = true; }
+function pauseSim(){ state.sim.running = false; }
+function resetSim(){ state.sim.running = false; state.sim.t = 0; document.getElementById('simT').textContent = '0.000'; drawAll(); }
+setInterval(() => {
+  if (!state.sim.running || !state.toolpath) return;
+  state.sim.t += state.sim.speed;
+  if (state.sim.t > 1) state.sim.t = 0;
+  document.getElementById('simT').textContent = state.sim.t.toFixed(3);
+  drawIso(); drawEditor(edL); drawEditor(edR);
+}, 20);
+
+/* ============================== INFO / WARNINGS ============================== */
+function dirBadge(el, a){
+  if (Math.abs(a) < 1e-6){ el.textContent = '— не замкнута'; el.className = 'badge na'; }
+  else if (a > 0){ el.textContent = '↺ против часовой'; el.className = 'badge ccw'; }
+  else { el.textContent = '↻ по часовой'; el.className = 'badge cw'; }
+}
+function updateInfo(){
+  const L = state.left.curve, R = state.right.curve;
+  const aL = signedArea(L), aR = signedArea(R);
+  dirBadge(document.getElementById('dirL'), aL);
+  dirBadge(document.getElementById('dirR'), aR);
+  dirBadge(document.getElementById('dirLB'), aL);
+  dirBadge(document.getElementById('dirRB'), aR);
+  const warns = [];
+  if (L.length < 2 || R.length < 2) warns.push('Нарисуйте кривые на обеих плоскостях (минимум 2 точки).');
+  if (Math.abs(aL) > 1e-6 && Math.abs(aR) > 1e-6 && Math.sign(aL) !== Math.sign(aR))
+    warns.push('⚠ Направления левой и правой кривой НЕ совпадают — струна будет перекрещиваться! Нажмите «Выровнять направления».');
+  if (state.left.starts.length !== state.right.starts.length)
+    warns.push('⚠ Стартовых линий: слева ' + state.left.starts.length + ', справа ' + state.right.starts.length + ' — должно быть поровну.');
+  document.getElementById('warnBox').innerHTML = warns.length
+    ? warns.map(x => '<div class="warn">' + x + '</div>').join('')
+    : '<div class="ok">✓ Противоречий не обнаружено</div>';
+  let s = 'Левая: ' + L.length + ' т., ' + polyLen(L).toFixed(0) + ' мм<br>Правая: ' + R.length + ' т., ' + polyLen(R).toFixed(0) + ' мм';
+  if (state.toolpath){
+    const len = Math.max(polyLen(state.toolpath.L), polyLen(state.toolpath.R));
+    s += '<br>G-code: ' + state.toolpath.N + ' кадров, путь ≈ ' + len.toFixed(0) + ' мм, время ≈ ' + (len / state.cut.feed).toFixed(1) + ' мин при F' + state.cut.feed;
+  }
+  document.getElementById('stats').innerHTML = s;
+  document.getElementById('ptsL').textContent = L.length + ' т. / ' + state.left.starts.length + ' старт.';
+  document.getElementById('ptsR').textContent = R.length + ' т. / ' + state.right.starts.length + ' старт.';
 }
 
-// ==================== DEMO DATA ====================
-function loadDemo() {
-  // Create a simple demo profile
-  const cx = canvas.width / 2, cy = canvas.height / 2;
-  
-  // Left profile - a simple airfoil shape
-  state.profiles.left = [];
-  for (let i = 0; i <= 30; i++) {
-    const t = i / 30;
-    const angle = t * Math.PI;
-    state.profiles.left.push({
-      x: cx - 100 + Math.cos(angle) * 80,
-      y: cy - 50 + Math.sin(angle) * 40 - Math.sin(t * Math.PI) * 20
-    });
+/* ============================== DEMO & GLOBAL ============================== */
+function demo(){
+  const fr = faceRect();
+  const cy = (fr.y0 + fr.y1) / 2, cz = (fr.z0 + fr.z1) / 2;
+  const r = Math.min(fr.y1 - fr.y0, fr.z1 - fr.z0) / 2 * 0.75;
+  const circ = [];
+  for (let i = 0; i < 64; i++){
+    const th = Math.PI / 2 + i / 64 * Math.PI * 2;
+    circ.push({ y: cy + Math.cos(th) * r, z: cz + Math.sin(th) * r });
   }
-  
-  // Right profile - slightly different
-  state.profiles.right = [];
-  for (let i = 0; i <= 30; i++) {
-    const t = i / 30;
-    const angle = t * Math.PI;
-    state.profiles.right.push({
-      x: cx + 100 + Math.cos(angle) * 60,
-      y: cy - 30 + Math.sin(angle) * 50 - Math.sin(t * Math.PI) * 30
-    });
-  }
-  
-  // Start line
-  state.profiles.start = [
-    { x: cx - 100, y: cy - 50 },
-    { x: cx + 100, y: cy - 30 }
+  circ.push({ ...circ[0] });
+  state.left.curve = circ;
+  const s = Math.min(fr.y1 - fr.y0, fr.z1 - fr.z0) * 0.75 / 2;
+  state.right.curve = [
+    { y: cy - s, z: cz + s }, { y: cy - s, z: cz - s },
+    { y: cy + s, z: cz - s }, { y: cy + s, z: cz + s }, { y: cy - s, z: cz + s }
   ];
-  
-  redraw();
+  state.left.starts = [{ p1: { y: fr.y0, z: fr.z1 }, p2: { ...circ[0] } }];
+  state.right.starts = [{ p1: { y: fr.y0, z: fr.z1 }, p2: { ...state.right.curve[0] } }];
+  generateGCode();
 }
+function drawAll(){ drawEditor(edL); drawEditor(edR); drawIso(); updateInfo(); }
 
-// Initialize
-setTool('draw');
-loadDemo();
-redraw();
+/* ============================== BINDINGS ============================== */
+function bindNum(id, obj, key){
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => { obj[key] = parseFloat(el.value) || 0; state.toolpath = null; drawAll(); });
+}
+bindNum('zoneW', state.zone, 'width'); bindNum('zoneL', state.zone, 'length'); bindNum('zoneH', state.zone, 'height');
+bindNum('wpL', state.work, 'l'); bindNum('wpW', state.work, 'w'); bindNum('wpH', state.work, 'h');
+bindNum('offX', state.work, 'ox'); bindNum('offY', state.work, 'oy'); bindNum('offZ', state.work, 'oz');
+bindNum('feed', state.cut, 'feed'); bindNum('dec', state.cut, 'dec');
+function bindRange(id, spanId, obj, key, fix){
+  const el = document.getElementById(id), sp = document.getElementById(spanId);
+  el.addEventListener('input', () => { obj[key] = parseFloat(el.value); sp.textContent = obj[key].toFixed(fix); drawAll(); });
+}
+bindRange('ppm', 'ppmV', state.cut, 'ppm', 2);
+bindRange('offL', 'offLV', state.cut, 'offL', 1);
+bindRange('offR', 'offRV', state.cut, 'offR', 1);
+bindRange('simSpeed', 'simSpeedV', state.sim, 'speed', 3);
+document.getElementById('scaleSel').addEventListener('change', e => { state.cut.scale = parseInt(e.target.value); });
+document.getElementById('btnGen').onclick = generateGCode;
+document.getElementById('btnExp').onclick = exportGCode;
+document.getElementById('btnCopy').onclick = () => {
+  navigator.clipboard.writeText(document.getElementById('gcodeOut').value)
+    .then(() => alert('G-код скопирован в буфер обмена.'));
+};
+document.getElementById('btnDemo').onclick = demo;
+document.getElementById('btnClr').onclick = () => {
+  if (!confirm('Удалить ВСЕ кривые и стартовые линии?')) return;
+  state.left.curve = []; state.left.starts = []; state.right.curve = []; state.right.starts = [];
+  state.toolpath = null; document.getElementById('gcodeOut').value = '';
+  document.getElementById('glines').textContent = ''; drawAll();
+};
+document.getElementById('btnPlay').onclick = startSim;
+document.getElementById('btnPause').onclick = pauseSim;
+document.getElementById('btnReset').onclick = resetSim;
+document.getElementById('btnAlign').onclick = () => {
+  const aL = signedArea(state.left.curve), aR = signedArea(state.right.curve);
+  if (Math.abs(aL) > 1e-6 && Math.abs(aR) > 1e-6 && Math.sign(aL) !== Math.sign(aR)){
+    state.right.curve.reverse();
+    state.right.starts.forEach(sg => { const tmp = sg.p1; sg.p1 = sg.p2; sg.p2 = tmp; });
+  }
+  drawAll();
+};
+window.addEventListener('resize', drawAll);
+
+/* ============================== INIT ============================== */
+demo();
+setTimeout(drawAll, 60);
 </script>
 </body>
 </html>
