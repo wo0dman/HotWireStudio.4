@@ -8,16 +8,16 @@
 :root{
   --bg:#f2f2f7; --card:#ffffff; --hair:rgba(60,60,67,.15); --hair2:rgba(60,60,67,.29);
   --txt:#1c1c1e; --txt2:#8e8e93; --blue:#007aff; --green:#34c759; --red:#ff3b30;
-  --orange:#ff9500; --purple:#af52de; --gold:#e6a400; --teal:#5ac8fa;
+  --orange:#ff9500; --gold:#e6a400;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);overflow:hidden;font-size:14px;-webkit-font-smoothing:antialiased}
-#app{display:grid;grid-template-rows:52px 1fr;height:100vh}
-header{display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(249,249,249,.86);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--hair);z-index:5}
+html{height:auto}
+body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);font-size:14px;-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-y:auto}
+#app{display:grid;grid-template-rows:52px auto;min-height:100vh}
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 16px;background:rgba(249,249,249,.88);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--hair)}
 header h1{font-size:17px;font-weight:700;letter-spacing:-.2px}
 header h1 span{color:var(--blue)}
-.nav-actions{display:flex;gap:8px}
+.nav-actions{display:flex;gap:8px;flex-wrap:wrap}
 .btn{border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:filter .15s, transform .05s}
 .btn:active{transform:scale(.97)}
 .btn:hover{filter:brightness(.96)}
@@ -25,9 +25,9 @@ header h1 span{color:var(--blue)}
 .btn.success{background:var(--green);color:#fff}
 .btn.plain{background:rgba(0,122,255,.12);color:var(--blue)}
 .btn.danger{background:rgba(255,59,48,.12);color:var(--red)}
-main{display:grid;grid-template-columns:322px 1fr;min-height:0}
+main{display:grid;grid-template-columns:322px 1fr;align-items:stretch}
 /* ---------- settings ---------- */
-#settings{background:var(--bg);border-right:.5px solid var(--hair);overflow-y:auto;padding:10px 12px 24px}
+#settings{background:var(--bg);border-right:.5px solid var(--hair);padding:10px 12px 24px}
 .card{background:var(--card);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.05);padding:4px 14px;margin-bottom:12px}
 .sec-label{font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin:14px 6px 6px}
 .row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:.5px solid rgba(60,60,67,.1)}
@@ -53,12 +53,19 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
 #stats{font-size:12px;color:var(--txt2);line-height:1.55;padding:8px 0}
 .smallbtn{width:100%;padding:8px;border:none;border-radius:10px;background:rgba(0,122,255,.12);color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;margin:8px 0}
 /* ---------- work area ---------- */
-#work{display:grid;grid-template-rows:minmax(0,1.05fr) minmax(0,1fr);gap:10px;padding:10px;min-width:0}
-#editorsRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0}
-#bottomRow{display:grid;grid-template-columns:1.35fr 1fr;gap:10px;min-height:0}
-.panel{background:var(--card);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.05);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#work{display:grid;grid-template-rows:420px 10px minmax(280px,1fr);min-height:calc(100vh - 52px);padding:10px;min-width:0}
+#editorsRow{display:grid;grid-template-columns:minmax(320px,1fr) 10px minmax(320px,1fr);min-height:0}
+#bottomRow{display:grid;grid-template-columns:minmax(320px,1.35fr) 10px minmax(320px,1fr);min-height:0}
+.splitter{position:relative;user-select:none;touch-action:none}
+.splitter::after{content:'';position:absolute;inset:0;margin:auto;background:rgba(60,60,67,.18);border-radius:3px}
+.splitter.v{width:10px;cursor:col-resize}
+.splitter.v::after{width:4px;height:44px}
+.splitter.h{height:10px;cursor:row-resize}
+.splitter.h::after{height:4px;width:44px}
+.splitter:hover::after{background:var(--blue)}
+.panel{background:var(--card);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.05);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
 .p-head{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:.5px solid var(--hair);flex-wrap:wrap}
-.p-title{font-size:12px;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;gap:6px}
+.p-title{font-size:12px;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .dot{width:9px;height:9px;border-radius:50%}
 .dot.red{background:var(--red)}.dot.blue{background:var(--blue)}.dot.gold{background:var(--gold)}.dot.green{background:var(--green)}
 .p-info{margin-left:auto;font-size:11px;color:var(--txt2);font-variant-numeric:tabular-nums}
@@ -72,6 +79,7 @@ canvas{display:block;width:100%;flex:1;min-height:0}
 #gcodeOut{flex:1;width:100%;border:none;outline:none;resize:none;background:#fafafc;color:var(--txt);font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;line-height:1.5;padding:10px 12px}
 .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--txt2);padding:6px 12px;border-top:.5px solid var(--hair)}
 .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
+#svgHost{position:fixed;left:-10000px;top:0;width:0;height:0;opacity:0;pointer-events:none;overflow:hidden}
 ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#c8c8cd;border-radius:4px}::-webkit-scrollbar-track{background:transparent}
 </style>
 </head>
@@ -83,6 +91,8 @@ canvas{display:block;width:100%;flex:1;min-height:0}
     <button class="btn primary" id="btnGen">⚙️ Генерация G-Code</button>
     <button class="btn success" id="btnSim">▶ Симуляция</button>
     <button class="btn plain" id="btnExp">💾 Экспорт .nc</button>
+    <button class="btn plain" id="btnImport" title="Импорт SVG: 2 контура → левая и правая плоскости (1:1 мм)">📥 Импорт SVG</button>
+    <button class="btn plain" id="btnSwap" title="Поменять кривые местами (лево ↔ право)">⇆ Плоскости</button>
     <button class="btn plain" id="btnDemo">🎯 Демо круг→квадрат</button>
     <button class="btn danger" id="btnClr">✕ Сброс</button>
   </div>
@@ -162,6 +172,7 @@ M30</textarea>
         </div>
         <canvas id="cvL"></canvas>
       </div>
+      <div class="splitter v" id="splitL" title="Перетащите для изменения ширины окон плоскостей"></div>
       <div class="panel">
         <div class="p-head">
           <span class="p-title"><span class="dot blue"></span>ПРАВАЯ ПЛОСКОСТЬ</span>
@@ -175,6 +186,7 @@ M30</textarea>
         <canvas id="cvR"></canvas>
       </div>
     </div>
+    <div class="splitter h" id="splitH" title="Перетащите для изменения высоты окон (страница прокручивается)"></div>
     <div id="bottomRow">
       <div class="panel">
         <div class="p-head">
@@ -194,6 +206,7 @@ M30</textarea>
           <span><i style="background:rgba(0,122,255,.4)"></i>поверхность реза</span>
         </div>
       </div>
+      <div class="splitter v" id="splitIso" title="Перетащите для изменения ширины изометрии / G-code"></div>
       <div class="panel">
         <div class="p-head">
           <span class="p-title">📟 G-CODE</span>
@@ -205,6 +218,8 @@ M30</textarea>
   </div>
 </main>
 </div>
+<input type="file" id="fileSvg" accept=".svg,image/svg+xml" style="display:none">
+<div id="svgHost"></div>
 
 <script>
 /* ================= STATE ================= */
@@ -220,6 +235,44 @@ const state = {
 const isoView={az:-.62,el:.46,zoomK:1,zoom:.2};
 let isoDrag=null,isoCX=0,isoCY=0;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ================= LAYOUT / SPLITTERS / SCROLL ================= */
+const workEl=document.getElementById('work');
+const editorsRow=document.getElementById('editorsRow');
+const bottomRow=document.getElementById('bottomRow');
+const layout={edH:420,leftW:520,isoW:640};
+function layoutDefaults(){
+  const avail=Math.max(560,window.innerHeight-52-20);
+  layout.edH=Math.max(260,Math.round(avail*.52));
+  const ww=workEl.clientWidth||1000;
+  layout.leftW=clamp(Math.round((ww-10)/2),320,Math.max(340,ww-340));
+  layout.isoW=clamp(Math.round((ww-10)*.575),320,Math.max(340,ww-340));
+  layoutApply();
+}
+function layoutApply(){
+  const ww=workEl.clientWidth||1000;
+  layout.leftW=clamp(layout.leftW,320,Math.max(340,ww-340));
+  layout.isoW=clamp(layout.isoW,320,Math.max(340,ww-340));
+  layout.edH=clamp(layout.edH,240,6000);
+  workEl.style.gridTemplateRows=layout.edH+'px 10px minmax(280px,1fr)';
+  editorsRow.style.gridTemplateColumns=layout.leftW+'px 10px minmax(320px,1fr)';
+  bottomRow.style.gridTemplateColumns=layout.isoW+'px 10px minmax(320px,1fr)';
+  drawAll();
+}
+function makeSplitter(el,fn){
+  el.addEventListener('mousedown',e=>{
+    e.preventDefault();
+    const sx=e.clientX,sy=e.clientY,s={...layout};
+    const move=ev=>fn(s,ev.clientX-sx,ev.clientY-sy);
+    const up=()=>{window.removeEventListener('mousemove',move);window.removeEventListener('mouseup',up);layoutApply();};
+    window.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',up);
+  });
+}
+makeSplitter(document.getElementById('splitH'),(s,dx,dy)=>{layout.edH=clamp(s.edH+dy,240,6000);layoutApply();});
+makeSplitter(document.getElementById('splitL'),(s,dx)=>{const ww=workEl.clientWidth;layout.leftW=clamp(s.leftW+dx,320,Math.max(340,ww-340));layoutApply();});
+makeSplitter(document.getElementById('splitIso'),(s,dx)=>{const ww=workEl.clientWidth;layout.isoW=clamp(s.isoW+dx,320,Math.max(340,ww-340));layoutApply();});
+window.addEventListener('resize',layoutApply);
 
 /* ================= GEOMETRY ================= */
 function workBox(){
@@ -252,7 +305,6 @@ function offsetCurve2D(p,d){
   }
   return out;
 }
-/* Вынос хорды струны на плоскости кареток: x=0 (плоскость XY) и x=L (плоскость AB) */
 function extendChord(pL,pR,x0,x1){
   const dx=pR.x-pL.x;
   const t0=(x0-pL.x)/dx,t1=(x1-pL.x)/dx;
@@ -302,7 +354,7 @@ function fitCanvas(cv){
 }
 
 /* ================= 2D EDITORS ================= */
-const TOOLS=[{t:'draw',n:'Кривая'},{t:'move',n:'Точки'},{t:'erase',n:'Ластик'},{t:'start',n:'Старт'}];
+const TOOLS=[{t:'move',n:'Точки'},{t:'erase',n:'Ластик'},{t:'start',n:'Старт'}];
 const ACTIONS=[
   {icon:'⭕',tip:'Вписать круг',fn:'addCircle'},
   {icon:'⬜',tip:'Вписать квадрат',fn:'addSquare'},
@@ -338,7 +390,7 @@ const actions={
 };
 function makeEditor(cvId,segId,actId,side){
   const cv=document.getElementById(cvId);
-  const ed={canvas:cv,ctx:cv.getContext('2d'),side,tool:'draw',drawing:false,drag:null,tempStart:null,tempEnd:null,w:0,h:0,t:null,btns:{}};
+  const ed={canvas:cv,ctx:cv.getContext('2d'),side,tool:'move',drag:null,tempStart:null,tempEnd:null,w:0,h:0,t:null,btns:{}};
   const seg=document.getElementById(segId);
   TOOLS.forEach(t=>{
     const b=document.createElement('button');b.textContent=t.n;
@@ -374,21 +426,16 @@ function makeEditor(cvId,segId,actId,side){
     if(e.button===2){ed.tempStart=null;ed.tempEnd=null;drawAll();return;}
     if(!ed.t)return;
     const m=mpos(e),w=toWorld(m);
-    if(ed.tool==='draw'){state[side].curve.push(w);ed.drawing=true;}
-    else if(ed.tool==='move')ed.drag=hitTest(m);
+    if(ed.tool==='move')ed.drag=hitTest(m);
     else if(ed.tool==='erase'){const h=hitTest(m);if(h){if(h.type==='curve')state[side].curve.splice(h.idx,1);else state[side].starts.splice(h.idx,1);refresh();}}
     else if(ed.tool==='start'){ed.tempStart=snapPt(w);ed.tempEnd=snapPt(w);}
     drawAll();
   });
   cv.addEventListener('contextmenu',e=>e.preventDefault());
   window.addEventListener('mousemove',e=>{
-    if(!ed.drawing&&!ed.drag&&!ed.tempStart)return;
+    if(!ed.drag&&!ed.tempStart)return;
     const m=mpos(e),w=toWorld(m);
-    if(ed.drawing&&ed.tool==='draw'){
-      const c=state[side].curve,last=c[c.length-1],q1=scrOf(last),q2=scrOf(w);
-      if(Math.hypot(q2.x-q1.x,q2.y-q1.y)>3)c.push(w);
-      drawAll();
-    }else if(ed.drag){
+    if(ed.drag){
       if(ed.drag.type==='curve')state[side].curve[ed.drag.idx]=w;
       else if(ed.drag.type==='start')state[side].starts[ed.drag.idx][ed.drag.k]=w;
       drawAll();
@@ -397,10 +444,10 @@ function makeEditor(cvId,segId,actId,side){
   window.addEventListener('mouseup',()=>{
     if(ed.tempStart&&ed.tempEnd&&Math.hypot(ed.tempEnd.y-ed.tempStart.y,ed.tempEnd.z-ed.tempStart.z)>1e-6)
       state[side].starts.push({p1:ed.tempStart,p2:ed.tempEnd});
-    if(ed.drawing||ed.drag||ed.tempStart)refresh();
-    ed.tempStart=null;ed.tempEnd=null;ed.drawing=false;ed.drag=null;
+    if(ed.drag||ed.tempStart)refresh();
+    ed.tempStart=null;ed.tempEnd=null;ed.drag=null;
   });
-  setTool(ed,'draw');
+  setTool(ed,'move');
   return ed;
 }
 function setTool(ed,t){
@@ -427,7 +474,7 @@ function drawEditor(ed){
   ctx.strokeStyle='#d1d1d6';ctx.lineWidth=1.2;
   ctx.strokeRect(SX(0),SY(Z.height),Z.width*s,Z.height*s);
   ctx.fillStyle='#aeaeb2';ctx.font='10px -apple-system,sans-serif';
-  ctx.fillText('рабочая зона '+Z.width+'×'+Z.height, SX(0)+4, SY(Z.height)+12);
+  ctx.fillText('рабочая зона '+Z.width+'×'+Z.height,SX(0)+4,SY(Z.height)+12);
   const fr=faceRect();
   ctx.fillStyle='rgba(255,204,128,.12)';
   ctx.fillRect(SX(fr.y0),SY(fr.z1),(fr.y1-fr.y0)*s,(fr.z1-fr.z0)*s);
@@ -436,7 +483,6 @@ function drawEditor(ed){
   ctx.setLineDash([]);
   ctx.fillStyle='#b9a880';
   [[fr.y0,fr.z0],[fr.y1,fr.z0],[fr.y1,fr.z1],[fr.y0,fr.z1]].forEach(c=>ctx.fillRect(SX(c[0])-3,SY(c[1])-3,6,6));
-  /* стартовые линии */
   state[ed.side].starts.forEach((sg,i)=>{
     const a={x:SX(sg.p1.y),y:SY(sg.p1.z)},b={x:SX(sg.p2.y),y:SY(sg.p2.z)};
     ctx.strokeStyle='#34c759';ctx.lineWidth=1.6;ctx.setLineDash([5,4]);
@@ -449,14 +495,12 @@ function drawEditor(ed){
     ctx.strokeStyle='rgba(52,199,89,.7)';ctx.setLineDash([3,3]);ctx.lineWidth=1.4;
     ctx.beginPath();ctx.moveTo(SX(ed.tempStart.y),SY(ed.tempStart.z));ctx.lineTo(SX(ed.tempEnd.y),SY(ed.tempEnd.z));ctx.stroke();ctx.setLineDash([]);
   }
-  /* жёлтая траектория G-code (вынос хорды на плоскость каретки) */
   if(state.tp){
     const g=ed.side==='left'?state.tp.gXY:state.tp.gAB;
     ctx.strokeStyle='#e6a400';ctx.lineWidth=1.6;ctx.setLineDash([7,4]);
     ctx.beginPath();
     g.forEach((p,i)=>i?ctx.lineTo(SX(p.y),SY(p.z)):ctx.moveTo(SX(p.y),SY(p.z)));
     ctx.stroke();ctx.setLineDash([]);
-    /* струна в проекции: линия через оба жёлтых конца (тангенциальна профилям) */
     const idx=clamp(Math.round(state.sim.t*(state.tp.N-1)),0,state.tp.N-1);
     const a=state.tp.gXY[idx],b=state.tp.gAB[idx];
     ctx.strokeStyle='rgba(255,59,48,.55)';ctx.lineWidth=1.4;
@@ -467,7 +511,6 @@ function drawEditor(ed){
     const pr=ed.side==='left'?state.tp.profL[idx]:state.tp.profR[idx];
     ctx.fillStyle='#ff3b30';ctx.beginPath();ctx.arc(SX(pr.y),SY(pr.z),4,0,Math.PI*2);ctx.fill();
   }
-  /* профиль */
   const col=ed.side==='left'?'#ff3b30':'#007aff';
   const curve=state[ed.side].curve;
   if(curve.length){
@@ -547,7 +590,6 @@ function drawIso(){
   drawBox3D({x:0,y:0,z:0},{x:Z.length,y:Z.width,z:Z.height},{r:142,g:142,b:147},.05,'rgba(60,60,67,.35)');
   const b=workBox();
   drawBox3D({x:b.x0,y:b.y0,z:b.z0},{x:b.x1,y:b.y1,z:b.z1},{r:236,g:224,b:196},.28,'rgba(185,168,128,.9)');
-  /* поверхность реза (линейчатая, между профилями на гранях заготовки) */
   if(state.tp){
     const tp=state.tp,idx=clamp(Math.round(state.sim.t*(tp.N-1)),0,tp.N-1);
     const step=Math.max(1,Math.floor(idx/140));
@@ -559,20 +601,16 @@ function drawIso(){
       ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
     }
   }
-  /* профили на гранях заготовки */
   path3D(state.left.curve,b.x0,'#ff3b30',2.2);
   path3D(state.right.curve,b.x1,'#007aff',2.2);
-  /* жёлтые траектории G-code на плоскостях XY (x=0) и AB (x=L) */
   if(state.tp){
     path3D(state.tp.gXY,0,'#e6a400',2);
     path3D(state.tp.gAB,Z.length,'#e6a400',2);
-    /* стартовые (направляющие) линии, вынесенные на плоскости кареток */
     extStarts().forEach(e=>{
       path3D([e.s0.p0,e.s1.p0],0,'#34c759',1.6,[6,4]);
       path3D([e.s0.p1,e.s1.p1],Z.length,'#34c759',1.6,[6,4]);
     });
-    /* струна: тангенциальна жёлтым траекториям */
-    const idx=clamp(Math.round(state.sim.t*(tp.N-1)),0,tp.N-1);
+    const idx=clamp(Math.round(state.sim.t*(state.tp.N-1)),0,state.tp.N-1);
     const p1=project({x:0,y:state.tp.gXY[idx].y,z:state.tp.gXY[idx].z});
     const p2=project({x:Z.length,y:state.tp.gAB[idx].y,z:state.tp.gAB[idx].z});
     ctx.strokeStyle='#ff3b30';ctx.lineWidth=2.8;ctx.shadowColor='rgba(255,59,48,.5)';ctx.shadowBlur=6;
@@ -584,7 +622,6 @@ function drawIso(){
     ctx.fillStyle='#fff';ctx.strokeStyle='#8e8e93';ctx.lineWidth=1.4;
     [q1,q2].forEach(q=>{ctx.beginPath();ctx.arc(q.x,q.y,4,0,Math.PI*2);ctx.fill();ctx.stroke();});
   }
-  /* подписи */
   ctx.font='600 11px -apple-system,sans-serif';
   let q=project({x:b.x0,y:(b.y0+b.y1)/2,z:b.z1});
   ctx.fillStyle='#ff3b30';ctx.fillText('ЛЕВО',q.x-16,q.y-10);
@@ -620,6 +657,63 @@ document.querySelectorAll('.seg button[data-v]').forEach(btn=>{
     isoView.zoomK=1;drawIso();
   };
 });
+
+/* ================= SVG IMPORT ================= */
+const fileSvg=document.getElementById('fileSvg');
+document.getElementById('btnImport').onclick=()=>fileSvg.click();
+fileSvg.onchange=()=>{const f=fileSvg.files[0];if(f)importSVGFile(f);fileSvg.value='';};
+function importSVGFile(file){
+  const reader=new FileReader();
+  reader.onload=()=>processSVGText(reader.result);
+  reader.readAsText(file);
+}
+function processSVGText(text){
+  const doc=new DOMParser().parseFromString(text,'image/svg+xml');
+  if(doc.getElementsByTagName('parsererror').length){alert('Ошибка чтения SVG-файла.');return;}
+  const host=document.getElementById('svgHost');
+  host.innerHTML='';
+  const node=document.importNode(doc.documentElement,true);
+  host.appendChild(node);
+  const shapes=Array.from(node.querySelectorAll('path,polygon,polyline,circle,ellipse,rect,line'))
+    .filter(el=>typeof el.getTotalLength==='function'&&el.getTotalLength()>1);
+  const contours=[];
+  for(const el of shapes){
+    let ctm=null;try{ctm=el.getCTM();}catch(e){}
+    const len=el.getTotalLength();
+    const n=clamp(Math.round(len/2),12,1200);
+    const pts=[];
+    for(let i=0;i<=n;i++){
+      const p=el.getPointAtLength(len*i/n);
+      if(ctm){const q=p.matrixTransform(ctm);pts.push({u:q.x,v:q.y});}
+      else pts.push({u:p.x,v:p.y});
+    }
+    contours.push(pts);
+    if(contours.length===2)break;
+  }
+  host.innerHTML='';
+  if(!contours.length){alert('В SVG не найдено контуров (path / polygon / circle / rect…).');return;}
+  let minX=1e9,maxX=-1e9,minV=1e9,maxV=-1e9;
+  contours.forEach(c=>c.forEach(p=>{minX=Math.min(minX,p.u);maxX=Math.max(maxX,p.u);minV=Math.min(minV,p.v);maxV=Math.max(maxV,p.v);}));
+  const cx=(minX+maxX)/2,cv=(minV+maxV)/2;
+  const fr=faceRect();
+  const ty=(fr.y0+fr.y1)/2,tz=(fr.z0+fr.z1)/2;
+  const map=c=>c.map(p=>({y:(p.u-cx)+ty,z:(cv-p.v)+tz}));
+  state.left.curve=map(contours[0]);
+  if(contours[1])state.right.curve=map(contours[1]);
+  refresh();
+  alert(contours.length>=2
+    ?'Импорт SVG: контур 1 → ЛЕВАЯ плоскость, контур 2 → ПРАВАЯ.\nМасштаб 1:1 (мм), взаимное положение контуров сохранено.'
+    :'Импорт SVG: найден один контур → размещён на ЛЕВОЙ плоскости.');
+}
+
+/* ================= SWAP CURVES ================= */
+document.getElementById('btnSwap').onclick=()=>{
+  if(!confirm('Поменять кривые местами (ЛЕВО ↔ ПРАВО)?'))return;
+  const t=state.left.curve;
+  state.left.curve=state.right.curve;
+  state.right.curve=t;
+  refresh();
+};
 
 /* ================= G-CODE ================= */
 const fmt=v=>(v*state.cut.scale).toFixed(state.cut.dec);
@@ -769,11 +863,11 @@ document.getElementById('btnAlign').onclick=()=>{
   }
   refresh();
 };
-window.addEventListener('resize',drawAll);
 
 /* ================= INIT ================= */
+layoutDefaults();
 demo();
-setTimeout(drawAll,60);
+setTimeout(()=>{layoutApply();},60);
 </script>
 </body>
 </html>
