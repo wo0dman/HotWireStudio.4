@@ -4,80 +4,100 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HotWire 4D CNC — резка пенопласта</title>
+<link rel="icon" href='data:image/svg+xml,%3Csvg%20xmlns="http://www.w3.org/2000/svg"%20viewBox="0%200%2032%2032"%3E%3Crect%20x="2"%20y="2"%20width="28"%20height="28"%20rx="7"%20fill="%231c1c1e"/%3E%3Cpath%20d="M8%2022L13%2010L19%2022L24%2010"%20stroke="white"%20stroke-width="2.6"%20fill="none"%20stroke-linecap="round"%20stroke-linejoin="round"/%3E%3C/svg%3E'>
 <style>
 :root{
-  --bg:#f2f2f7; --card:#ffffff; --hair:rgba(60,60,67,.15); --hair2:rgba(60,60,67,.29);
-  --txt:#1c1c1e; --txt2:#8e8e93; --blue:#007aff; --green:#34c759; --red:#ff3b30;
-  --orange:#ff9500; --gold:#e6a400;
+  --bg:#f2f2f7; --card:#fff; --hair:rgba(60,60,67,.16); --hair2:rgba(60,60,67,.3);
+  --txt:#1c1c1e; --txt2:#8e8e93; --tint:#007aff; --green:#34c759; --red:#ff3b30;
+  --gold:#b28600; --grp:rgba(120,120,128,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{height:auto}
-body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);font-size:14px;-webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-y:auto}
-#app{display:grid;grid-template-rows:52px auto;min-height:100vh}
-header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 16px;background:rgba(249,249,249,.88);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--hair)}
-header h1{font-size:17px;font-weight:700;letter-spacing:-.2px}
-header h1 span{color:var(--blue)}
-.nav-actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn{border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:filter .15s, transform .05s}
-.btn:active{transform:scale(.97)}
-.btn:hover{filter:brightness(.96)}
-.btn.primary{background:var(--blue);color:#fff}
-.btn.success{background:var(--green);color:#fff}
-.btn.plain{background:rgba(0,122,255,.12);color:var(--blue)}
-.btn.danger{background:rgba(255,59,48,.12);color:var(--red)}
-main{display:grid;grid-template-columns:322px 1fr;align-items:stretch}
-/* ---------- settings ---------- */
-#settings{background:var(--bg);border-right:.5px solid var(--hair);padding:10px 12px 24px}
-.card{background:var(--card);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.05);padding:4px 14px;margin-bottom:12px}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);font-size:14px;overflow:hidden;-webkit-font-smoothing:antialiased}
+.ic{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;flex:none}
+#app{display:grid;grid-template-rows:52px 1fr;height:100vh}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;background:rgba(249,249,249,.86);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--hair);z-index:9}
+header h1{font-size:17px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:7px}
+header h1 .ic{width:20px;height:20px;color:var(--txt)}
+.nav-actions{display:flex;gap:6px;flex-wrap:wrap}
+.nbtn{display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;color:var(--tint);font-size:13px;font-weight:600;padding:7px 10px;border-radius:9px;cursor:pointer}
+.nbtn:hover{background:rgba(0,122,255,.1)}
+.nbtn:active{transform:scale(.97)}
+.nbtn.primary{background:var(--tint);color:#fff}
+.nbtn.primary:hover{filter:brightness(1.06)}
+.nbtn.danger{color:var(--red)}
+.nbtn.danger:hover{background:rgba(255,59,48,.1)}
+.nbtn .ic{width:17px;height:17px}
+main{display:grid;grid-template-columns:324px 1fr;height:calc(100vh - 52px);min-height:0}
+/* ---------- left ---------- */
+#settings{background:var(--bg);border-right:.5px solid var(--hair);overflow-y:auto;overflow-x:hidden;padding:10px 12px 30px}
+.card{background:var(--card);border-radius:14px;box-shadow:0 .5px 1px rgba(0,0,0,.06);padding:4px 14px;margin-bottom:12px}
 .sec-label{font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin:14px 6px 6px}
 .row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:.5px solid rgba(60,60,67,.1)}
 .row:last-child{border-bottom:none}
 .row label{flex:1;font-size:13px}
-.row .val{font-size:13px;color:var(--blue);min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
-input[type=number]{border:.5px solid var(--hair2);border-radius:8px;padding:5px 8px;font-size:13px;color:var(--txt);background:#fff;width:78px;text-align:right;outline:none}
-input[type=number]:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,122,255,.15)}
-input[type=range]{-webkit-appearance:none;appearance:none;width:120px;height:4px;border-radius:2px;background:linear-gradient(to right,var(--blue) 50%,#e9e9eb 50%);outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25),0 0 0 .5px rgba(0,0,0,.04);cursor:pointer}
-input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);border:none;cursor:pointer}
-select{border:.5px solid var(--hair2);border-radius:8px;padding:5px 6px;font-size:13px;background:#fff;color:var(--txt)}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:8px 0}
-.row3 div{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--txt2)}
-.row3 input{width:100%;text-align:right}
-textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding:6px 8px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:var(--txt);background:#fafafc;resize:vertical;margin:6px 0}
+.row .val{font-size:13px;color:var(--tint);min-width:46px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=number]{border:.5px solid var(--hair2);border-radius:8px;padding:5px 8px;font-size:13px;color:var(--txt);background:#fff;width:76px;text-align:right;outline:none}
+input[type=number]:focus{border-color:var(--tint);box-shadow:0 0 0 3px rgba(0,122,255,.15)}
+input[type=number]:disabled{opacity:.4}
+input[type=range]{-webkit-appearance:none;appearance:none;width:118px;height:4px;border-radius:2px;background:linear-gradient(to right,var(--tint) 50%,#e9e9eb 50%);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.28),0 0 0 .5px rgba(0,0,0,.04);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.28);border:none;cursor:pointer}
+.switch{position:relative;width:51px;height:31px;flex:none}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+.sw{position:absolute;inset:0;background:#e9e9eb;border-radius:16px;transition:background .18s}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .18s}
+.switch input:checked+.sw{background:var(--green)}
+.switch input:checked+.sw::after{left:22px}
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;padding:8px 0}
+.row4 div{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--txt2)}
+.row4 input{width:100%;text-align:right}
 .badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600}
 .badge.ccw{background:rgba(52,199,89,.14);color:#248a3d}
 .badge.cw{background:rgba(255,149,0,.15);color:#c93400}
-.badge.na{background:rgba(142,142,147,.14);color:var(--txt2)}
+.badge.na{background:var(--grp);color:var(--txt2)}
 .warn{color:var(--red);font-size:12px;line-height:1.45;padding:3px 0}
 .ok{color:#248a3d;font-size:12px;padding:3px 0}
 #stats{font-size:12px;color:var(--txt2);line-height:1.55;padding:8px 0}
-.smallbtn{width:100%;padding:8px;border:none;border-radius:10px;background:rgba(0,122,255,.12);color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;margin:8px 0}
-/* ---------- work area ---------- */
-#work{display:grid;grid-template-rows:420px 10px minmax(280px,1fr);min-height:calc(100vh - 52px);padding:10px;min-width:0}
-#editorsRow{display:grid;grid-template-columns:minmax(320px,1fr) 10px minmax(320px,1fr);min-height:0}
-#bottomRow{display:grid;grid-template-columns:minmax(320px,1.35fr) 10px minmax(320px,1fr);min-height:0}
-.splitter{position:relative;user-select:none;touch-action:none}
-.splitter::after{content:'';position:absolute;inset:0;margin:auto;background:rgba(60,60,67,.18);border-radius:3px}
-.splitter.v{width:10px;cursor:col-resize}
-.splitter.v::after{width:4px;height:44px}
-.splitter.h{height:10px;cursor:row-resize}
-.splitter.h::after{height:4px;width:44px}
-.splitter:hover::after{background:var(--blue)}
-.panel{background:var(--card);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.05);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
-.p-head{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:.5px solid var(--hair);flex-wrap:wrap}
-.p-title{font-size:12px;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.smallbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border:none;border-radius:10px;background:rgba(0,122,255,.12);color:var(--tint);font-size:13px;font-weight:600;cursor:pointer;margin:8px 0}
+.smallbtn.red{background:rgba(255,59,48,.1);color:var(--red)}
+/* ---------- right ---------- */
+#work{display:grid;grid-template-rows:minmax(220px,1fr) 10px minmax(240px,1fr);height:100%;padding:10px;min-width:0;gap:0}
+#editorsRow{display:grid;grid-template-columns:minmax(300px,1fr) 10px minmax(300px,1fr);min-height:0;gap:0}
+#bottomRow{display:grid;grid-template-columns:minmax(320px,1.3fr) 10px minmax(380px,1fr);min-height:0;gap:0}
+.splitter{position:relative;user-select:none}
+.splitter::after{content:'';position:absolute;inset:0;margin:auto;background:rgba(60,60,67,.16);border-radius:3px}
+.splitter:hover::after{background:var(--tint)}
+.splitter.v{width:10px;cursor:col-resize}.splitter.v::after{width:4px;height:44px}
+.splitter.h{height:10px;cursor:row-resize}.splitter.h::after{height:4px;width:44px}
+.panel{background:var(--card);border-radius:14px;box-shadow:0 .5px 1px rgba(0,0,0,.06);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+.p-head{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:.5px solid var(--hair);flex-wrap:wrap}
+.p-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.p-title .ic{width:14px;height:14px;color:var(--txt2)}
 .dot{width:9px;height:9px;border-radius:50%}
-.dot.red{background:var(--red)}.dot.blue{background:var(--blue)}.dot.gold{background:var(--gold)}.dot.green{background:var(--green)}
+.dot.red{background:var(--red)}.dot.blue{background:var(--tint)}.dot.gold{background:var(--gold)}.dot.green{background:var(--green)}
 .p-info{margin-left:auto;font-size:11px;color:var(--txt2);font-variant-numeric:tabular-nums}
 .seg{display:flex;background:#e9e9eb;border-radius:9px;padding:2px;gap:2px}
-.seg button{flex:1;border:none;background:transparent;padding:4px 8px;font-size:11px;font-weight:500;border-radius:7px;color:var(--txt);cursor:pointer;white-space:nowrap}
+.seg button{flex:1;border:none;background:transparent;padding:4px 9px;font-size:11px;font-weight:500;border-radius:7px;color:var(--txt);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:4px}
 .seg button.active{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.14);font-weight:600}
+.seg button .ic{width:13px;height:13px}
 .acts{display:flex;gap:4px}
-.acts button{width:28px;height:26px;border:none;border-radius:8px;background:rgba(142,142,147,.12);color:var(--txt);cursor:pointer;font-size:13px}
-.acts button:hover{background:rgba(142,142,147,.22)}
+.acts button{width:28px;height:26px;border:none;border-radius:8px;background:var(--grp);color:var(--txt);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.acts button:hover{background:rgba(120,120,128,.22)}
+.acts button .ic{width:15px;height:15px}
+.acts button.txt{font-size:10px;font-weight:700;width:auto;padding:0 7px}
 canvas{display:block;width:100%;flex:1;min-height:0}
-#gcodeOut{flex:1;width:100%;border:none;outline:none;resize:none;background:#fafafc;color:var(--txt);font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;line-height:1.5;padding:10px 12px}
-.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--txt2);padding:6px 12px;border-top:.5px solid var(--hair)}
+/* gcode card */
+#gcBody{flex:1;display:grid;grid-template-columns:266px 1fr;min-height:0}
+#gcCtl{border-right:.5px solid var(--hair);padding:10px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+#gcCtl .lbl{font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
+.simrow{display:flex;gap:6px}
+.simrow button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;border:none;border-radius:9px;padding:7px 0;background:var(--grp);color:var(--txt);cursor:pointer;font-size:12px;font-weight:600}
+.simrow button.on{background:var(--green);color:#fff}
+.simrow button .ic{width:14px;height:14px}
+textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding:6px 8px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:var(--txt);background:#fafafc;resize:vertical;margin-top:4px}
+#gcodeOut{width:100%;height:100%;border:none;outline:none;resize:none;background:#fafafc;color:var(--txt);font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;line-height:1.5;padding:10px 12px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--txt2);padding:5px 12px;border-top:.5px solid var(--hair)}
 .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
 #svgHost{position:fixed;left:-10000px;top:0;width:0;height:0;opacity:0;pointer-events:none;overflow:hidden}
 ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#c8c8cd;border-radius:4px}::-webkit-scrollbar-track{background:transparent}
@@ -86,76 +106,67 @@ canvas{display:block;width:100%;flex:1;min-height:0}
 <body>
 <div id="app">
 <header>
-  <h1>⚡ HotWire <span>4D</span> CNC</h1>
+  <h1><svg class="ic" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M6 16l3.5-8L14 16l4-8"/></svg>HotWire 4D CNC</h1>
   <div class="nav-actions">
-    <button class="btn primary" id="btnGen">⚙️ Генерация G-Code</button>
-    <button class="btn success" id="btnSim">▶ Симуляция</button>
-    <button class="btn plain" id="btnExp">💾 Экспорт .nc</button>
-    <button class="btn plain" id="btnImport" title="Импорт SVG: 2 контура → левая и правая плоскости (1:1 мм)">📥 Импорт SVG</button>
-    <button class="btn plain" id="btnSwap" title="Поменять кривые местами (лево ↔ право)">⇆ Плоскости</button>
-    <button class="btn plain" id="btnDemo">🎯 Демо круг→квадрат</button>
-    <button class="btn danger" id="btnClr">✕ Сброс</button>
+    <button class="nbtn primary" id="btnGen"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 8V6M12 18v-2M8 12H6M18 12h-2M9.2 9.2 7.8 7.8M16.2 16.2l-1.4-1.4M14.8 9.2l1.4-1.4M7.8 16.2l1.4-1.4"/></svg>Генерация</button>
+    <button class="nbtn" id="btnImport"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v9m-4-4 4 4 4-4"/><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/></svg>Импорт</button>
+    <button class="nbtn" id="btnExp"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14"/></svg>Экспорт .nc</button>
+    <button class="nbtn" id="btnCopy"><svg class="ic" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>Копировать</button>
+    <button class="nbtn" id="btnSwap" title="Поменять кривые местами"><svg class="ic" viewBox="0 0 24 24"><path d="M7 8h11m0 0-3-3m3 3-3 3M17 16H6m0 0 3-3m-3 3 3 3"/></svg>Плоскости</button>
+    <button class="nbtn" id="btnDemo"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>Демо</button>
+    <button class="nbtn danger" id="btnClr"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13h8l1-13"/></svg>Сброс</button>
   </div>
 </header>
 <main>
   <div id="settings">
-    <div class="sec-label">Рабочая зона станка, мм</div>
-    <div class="card">
-      <div class="row"><label>Ширина (мир Y → оси X, A)</label><input type="number" id="zoneW" value="2100"></div>
-      <div class="row"><label>Длина (вдоль струны, мир X)</label><input type="number" id="zoneL" value="2400"></div>
-      <div class="row"><label>Высота (мир Z → оси Y, B)</label><input type="number" id="zoneH" value="1300"></div>
-    </div>
-    <div class="sec-label">Заготовка (центр = центр зоны)</div>
-    <div class="card">
-      <div class="row"><label>Длина (между плоскостями)</label><input type="number" id="wpL" value="1200"></div>
-      <div class="row"><label>Ширина</label><input type="number" id="wpW" value="1000"></div>
-      <div class="row"><label>Высота</label><input type="number" id="wpH" value="600"></div>
-      <div class="row3">
-        <div>смещ. X<input type="number" id="offX" value="0"></div>
-        <div>смещ. Y<input type="number" id="offY" value="0"></div>
-        <div>смещ. Z<input type="number" id="offZ" value="0"></div>
-      </div>
-    </div>
     <div class="sec-label">Параметры резки</div>
     <div class="card">
       <div class="row"><label>Точек на мм</label><input type="range" id="ppm" min="0.01" max="1" step="0.01" value="0.26"><span class="val" id="ppmV">0.26</span></div>
       <div class="row"><label>Отступ струны — лево</label><input type="range" id="offLf" min="-10" max="10" step="0.1" value="0"><span class="val" id="offLfV">0.0</span></div>
       <div class="row"><label>Отступ струны — право</label><input type="range" id="offRt" min="-10" max="10" step="0.1" value="0"><span class="val" id="offRtV">0.0</span></div>
       <div class="row"><label>Подача F</label><input type="number" id="feed" value="300"></div>
-      <div class="row"><label>Масштаб координат</label>
-        <select id="scaleSel"><option value="1" selected>1</option><option value="10">10</option><option value="100">100</option><option value="1000">1000</option></select></div>
       <div class="row"><label>Знаков после точки</label><input type="number" id="dec" value="3" style="width:56px"></div>
+    </div>
+    <div class="sec-label">Заготовка</div>
+    <div class="card">
+      <div class="row"><label>Авто-габарит по кривым</label>
+        <span class="switch"><input type="checkbox" id="autoWP" checked><span class="sw"></span></span></div>
+      <div class="row4">
+        <div>припуск Y−<input type="number" id="alL" value="15"></div>
+        <div>припуск Y+<input type="number" id="alR" value="15"></div>
+        <div>припуск Z−<input type="number" id="alB" value="15"></div>
+        <div>припуск Z+<input type="number" id="alT" value="15"></div>
+      </div>
+      <div class="row"><label>Длина X (между плоск.)</label><input type="number" id="wpL" value="1200"></div>
+      <div class="row"><label>Ширина Y (вручную)</label><input type="number" id="wpW" value="1000" class="man"></div>
+      <div class="row"><label>Высота Z (вручную)</label><input type="number" id="wpH" value="600" class="man"></div>
+      <div class="row4">
+        <div>смещ. X<input type="number" id="offX" value="0"></div>
+        <div>смещ. Y<input type="number" id="offY" value="0" class="man"></div>
+        <div>смещ. Z<input type="number" id="offZ" value="0" class="man"></div>
+        <div></div>
+      </div>
     </div>
     <div class="sec-label">Направление обхода</div>
     <div class="card">
       <div class="row"><label>Левая кривая</label><span class="badge na" id="dirLB">—</span></div>
       <div class="row"><label>Правая кривая</label><span class="badge na" id="dirRB">—</span></div>
-      <button class="smallbtn" id="btnAlign">⇉ Выровнять направления</button>
+      <button class="smallbtn" id="btnAlign"><svg class="ic" viewBox="0 0 24 24"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>Выровнять направления</button>
       <div id="warnBox"></div>
     </div>
-    <div class="sec-label">Симуляция</div>
+    <div class="sec-label">Импорт контуров</div>
     <div class="card">
-      <div class="row"><label>Скорость</label><input type="range" id="simSpeed" min="0.001" max="0.05" step="0.001" value="0.004"><span class="val" id="simSpeedV">0.004</span></div>
-      <div class="row"><label>Параметр t</label><span class="val" id="simT" style="min-width:56px">0.000</span></div>
-      <div class="row" style="gap:6px">
-        <button class="btn success" id="btnPlay" style="flex:1">▶</button>
-        <button class="btn plain" id="btnPause" style="flex:1">⏸</button>
-        <button class="btn danger" id="btnReset" style="flex:1">⏹</button>
-      </div>
-    </div>
-    <div class="sec-label">Заголовок / конец программы</div>
-    <div class="card">
-      <textarea class="hdr" id="gcodeHeader" rows="6">G90 G92 G80 G17
-T1M6
-G54
-M7
-M8
-F300</textarea>
-      <textarea class="hdr" id="gcodeFooter" rows="2">M9
-M30</textarea>
+      <div class="row" style="border:none"><label style="font-size:12px;color:var(--txt2)">SVG (масштаб по width/viewBox), DXF (мм), EPS (pt→мм). Два контура → лево/право, положение сохраняется.</label></div>
     </div>
     <div class="sec-label">Информация</div>
     <div class="card"><div id="stats">—</div></div>
+    <div class="sec-label">Рабочая зона станка</div>
+    <div class="card">
+      <div class="row"><label>Ширина (мир Y → X, A)</label><input type="number" id="zoneW" value="2100"></div>
+      <div class="row"><label>Длина (вдоль струны, X)</label><input type="number" id="zoneL" value="2400"></div>
+      <div class="row"><label>Высота (мир Z → Y, B)</label><input type="number" id="zoneH" value="1300"></div>
+      <button class="smallbtn red" id="btnResetAll"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 1-6 3.5M6 4v4h4"/></svg>Сбросить сохранённые настройки</button>
+    </div>
   </div>
 
   <div id="work">
@@ -172,7 +183,7 @@ M30</textarea>
         </div>
         <canvas id="cvL"></canvas>
       </div>
-      <div class="splitter v" id="splitL" title="Перетащите для изменения ширины окон плоскостей"></div>
+      <div class="splitter v" id="splitL"></div>
       <div class="panel">
         <div class="p-head">
           <span class="p-title"><span class="dot blue"></span>ПРАВАЯ ПЛОСКОСТЬ</span>
@@ -186,7 +197,7 @@ M30</textarea>
         <canvas id="cvR"></canvas>
       </div>
     </div>
-    <div class="splitter h" id="splitH" title="Перетащите для изменения высоты окон (страница прокручивается)"></div>
+    <div class="splitter h" id="splitH"></div>
     <div id="bottomRow">
       <div class="panel">
         <div class="p-head">
@@ -199,88 +210,133 @@ M30</textarea>
         <canvas id="cvIso"></canvas>
         <div class="legend">
           <span><i style="background:var(--red)"></i>профиль лево</span>
-          <span><i style="background:var(--blue)"></i>профиль право</span>
-          <span><i style="background:var(--gold)"></i>траектория G-code (плоскости XY / AB)</span>
+          <span><i style="background:var(--tint)"></i>профиль право</span>
+          <span><i style="background:var(--gold)"></i>траектория G-code (XY / AB)</span>
           <span><i style="background:var(--green)"></i>стартовые линии</span>
           <span><i style="background:var(--red);height:4px"></i>струна</span>
           <span><i style="background:rgba(0,122,255,.4)"></i>поверхность реза</span>
         </div>
       </div>
-      <div class="splitter v" id="splitIso" title="Перетащите для изменения ширины изометрии / G-code"></div>
+      <div class="splitter v" id="splitIso"></div>
       <div class="panel">
         <div class="p-head">
-          <span class="p-title">📟 G-CODE</span>
+          <span class="p-title"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/></svg>G-CODE / СИМУЛЯЦИЯ</span>
           <span class="p-info" id="glines"></span>
         </div>
-        <textarea id="gcodeOut" spellcheck="false" placeholder="Нажмите «Генерация G-Code»…"></textarea>
+        <div id="gcBody">
+          <div id="gcCtl">
+            <div class="lbl">Симуляция</div>
+            <div class="simrow">
+              <button id="btnPlay"><svg class="ic" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>Пуск</button>
+              <button id="btnPause"><svg class="ic" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" stroke-width="2.4"/></svg>Пауза</button>
+              <button id="btnStop"><svg class="ic" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" stroke="none"/></svg>Стоп</button>
+            </div>
+            <div class="row" style="padding:7px 0"><label>Скорость</label><input type="range" id="speedX" min="1" max="60" step="1" value="12"><span class="val" id="speedXV">×12</span></div>
+            <div class="row" style="padding:7px 0;border:none"><label>Траектория ↔</label><input type="range" id="scrub" min="0" max="1000" step="1" value="0" style="width:150px"></div>
+            <div class="lbl">Заголовок программы</div>
+            <textarea class="hdr" id="gcodeHeader" rows="6">G90 G92 G80 G17
+T1M6
+G54
+M7
+M8
+F300</textarea>
+            <div class="lbl">Конец программы</div>
+            <textarea class="hdr" id="gcodeFooter" rows="2">M9
+M30</textarea>
+          </div>
+          <textarea id="gcodeOut" spellcheck="false" placeholder="Нажмите «Генерация»…"></textarea>
+        </div>
       </div>
     </div>
   </div>
 </main>
 </div>
-<input type="file" id="fileSvg" accept=".svg,image/svg+xml" style="display:none">
+<input type="file" id="fileImp" accept=".svg,.dxf,.eps,image/svg+xml" style="display:none">
 <div id="svgHost"></div>
 
 <script>
-/* ================= STATE ================= */
-const state = {
-  zone:{width:2100,length:2400,height:1300},
-  work:{l:1200,w:1000,h:600,ox:0,oy:0,oz:0},
-  cut:{ppm:.26,offL:0,offR:0,feed:300,scale:1,dec:3},
-  left:{curve:[],starts:[]},
-  right:{curve:[],starts:[]},
-  sim:{running:false,t:0,speed:.004},
-  tp:null
+/* ============ ICONS ============ */
+const IP={
+ move:'<path d="M12 3v18M3 12h18M12 3l-2 2m2-2 2 2M12 21l-2-2m2 2 2-2M3 12l2-2m-2 2 2 2M21 12l-2-2m2 2-2 2"/>',
+ erase:'<path d="m7 17 8-8 4 4-8 8H7zM7 17l-3-3 8-8 3 3M7 21h13"/>',
+ start:'<path d="M6 21V4m0 1h11l-2.5 3L17 11H6"/>',
+ smooth:'<path d="M3 14c3-6 6-6 9 0s6 6 9 0"/>',
+ loop:'<path d="M18 12a6 6 0 1 1-2-4.5M18 5v3h-3"/>',
+ rev:'<path d="M8 7h10l-3-3M16 17H6l3 3"/>',
+ clr:'<path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13h8l1-13"/>'
 };
-const isoView={az:-.62,el:.46,zoomK:1,zoom:.2};
-let isoDrag=null,isoCX=0,isoCY=0;
+const ic=n=>'<svg class="ic" viewBox="0 0 24 24">'+IP[n]+'</svg>';
+
+/* ============ STATE + STORAGE ============ */
+const SKEY='hotwire4d.v2';
+const DEF={
+ zone:{width:2100,length:2400,height:1300},
+ work:{l:1200,w:1000,h:600,ox:0,oy:0,oz:0},
+ allow:{l:15,r:15,b:15,t:15},
+ autoWP:true,
+ cut:{ppm:.26,offL:0,offR:0,feed:300,dec:3},
+ sim:{running:false,t:0,speedX:12},
+ left:{curve:[],starts:[]},
+ right:{curve:[],starts:[]},
+ layout:{edF:.5,leftF:.5,isoF:.575},
+ header:'G90 G92 G80 G17\nT1M6\nG54\nM7\nM8\nF300',
+ footer:'M9\nM30'
+};
+let state=JSON.parse(JSON.stringify(DEF));
+state.tp=null;
+let saved=false;
+try{
+  const raw=localStorage.getItem(SKEY);
+  if(raw){const o=JSON.parse(raw);
+    state.zone=Object.assign(state.zone,o.zone||{});state.work=Object.assign(state.work,o.work||{});
+    state.allow=Object.assign(state.allow,o.allow||{});state.autoWP=!!o.autoWP;
+    state.cut=Object.assign(state.cut,o.cut||{});state.sim.speedX=o.sim&&o.sim.speedX||12;
+    state.left=o.left||state.left;state.right=o.right||state.right;
+    state.layout=Object.assign(state.layout,o.layout||{});
+    state.header=o.header||state.header;state.footer=o.footer||state.footer;
+    saved=true;
+  }
+}catch(e){}
+let saveT=null;
+function scheduleSave(){clearTimeout(saveT);saveT=setTimeout(()=>{
+  try{localStorage.setItem(SKEY,JSON.stringify({zone:state.zone,work:state.work,allow:state.allow,autoWP:state.autoWP,cut:state.cut,sim:{speedX:state.sim.speedX},left:state.left,right:state.right,layout:state.layout,header:document.getElementById('gcodeHeader').value,footer:document.getElementById('gcodeFooter').value}));}catch(e){}
+},300);}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
-/* ================= LAYOUT / SPLITTERS / SCROLL ================= */
-const workEl=document.getElementById('work');
-const editorsRow=document.getElementById('editorsRow');
-const bottomRow=document.getElementById('bottomRow');
-const layout={edH:420,leftW:520,isoW:640};
-function layoutDefaults(){
-  const avail=Math.max(560,window.innerHeight-52-20);
-  layout.edH=Math.max(260,Math.round(avail*.52));
-  const ww=workEl.clientWidth||1000;
-  layout.leftW=clamp(Math.round((ww-10)/2),320,Math.max(340,ww-340));
-  layout.isoW=clamp(Math.round((ww-10)*.575),320,Math.max(340,ww-340));
-  layoutApply();
-}
+/* ============ LAYOUT ============ */
+const workEl=document.getElementById('work'),editorsRow=document.getElementById('editorsRow'),bottomRow=document.getElementById('bottomRow');
 function layoutApply(){
-  const ww=workEl.clientWidth||1000;
-  layout.leftW=clamp(layout.leftW,320,Math.max(340,ww-340));
-  layout.isoW=clamp(layout.isoW,320,Math.max(340,ww-340));
-  layout.edH=clamp(layout.edH,240,6000);
-  workEl.style.gridTemplateRows=layout.edH+'px 10px minmax(280px,1fr)';
-  editorsRow.style.gridTemplateColumns=layout.leftW+'px 10px minmax(320px,1fr)';
-  bottomRow.style.gridTemplateColumns=layout.isoW+'px 10px minmax(320px,1fr)';
+  const vh=workEl.clientHeight||600,ww=workEl.clientWidth||900;
+  const minEd=220,minBt=240;
+  let edH=clamp(Math.round((vh-10)*state.layout.edF),minEd,Math.max(minEd,vh-10-minBt));
+  let leftW=clamp(Math.round((ww-10)*state.layout.leftF),300,Math.max(320,ww-320));
+  let isoW=clamp(Math.round((ww-10)*state.layout.isoF),320,Math.max(340,ww-340));
+  workEl.style.gridTemplateRows=edH+'px 10px minmax(240px,1fr)';
+  editorsRow.style.gridTemplateColumns=leftW+'px 10px minmax(300px,1fr)';
+  bottomRow.style.gridTemplateColumns=isoW+'px 10px minmax(380px,1fr)';
   drawAll();
 }
 function makeSplitter(el,fn){
   el.addEventListener('mousedown',e=>{
     e.preventDefault();
-    const sx=e.clientX,sy=e.clientY,s={...layout};
-    const move=ev=>fn(s,ev.clientX-sx,ev.clientY-sy);
-    const up=()=>{window.removeEventListener('mousemove',move);window.removeEventListener('mouseup',up);layoutApply();};
-    window.addEventListener('mousemove',move);
-    window.addEventListener('mouseup',up);
+    const sx=e.clientX,sy=e.clientY,s={...state.layout};
+    const mv=ev=>fn(s,ev.clientX-sx,ev.clientY-sy);
+    const up=()=>{window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);scheduleSave();};
+    window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);
   });
 }
-makeSplitter(document.getElementById('splitH'),(s,dx,dy)=>{layout.edH=clamp(s.edH+dy,240,6000);layoutApply();});
-makeSplitter(document.getElementById('splitL'),(s,dx)=>{const ww=workEl.clientWidth;layout.leftW=clamp(s.leftW+dx,320,Math.max(340,ww-340));layoutApply();});
-makeSplitter(document.getElementById('splitIso'),(s,dx)=>{const ww=workEl.clientWidth;layout.isoW=clamp(s.isoW+dx,320,Math.max(340,ww-340));layoutApply();});
-window.addEventListener('resize',layoutApply);
+makeSplitter(document.getElementById('splitH'),(s,dx,dy)=>{state.layout.edF=clamp(s.edF+dy/((workEl.clientHeight||600)-10),.2,.8);layoutApply();});
+makeSplitter(document.getElementById('splitL'),(s,dx)=>{state.layout.leftF=clamp(s.leftF+dx/((workEl.clientWidth||900)-10),.25,.75);layoutApply();});
+makeSplitter(document.getElementById('splitIso'),(s,dx)=>{state.layout.isoF=clamp(s.isoF+dx/((workEl.clientWidth||900)-10),.3,.75);layoutApply();});
+window.addEventListener('resize',()=>{resetEdViews();layoutApply();});
 
-/* ================= GEOMETRY ================= */
+/* ============ GEOMETRY ============ */
 function workBox(){
   const Z=state.zone,W=state.work;
   const x0=(Z.length-W.l)/2+W.ox,x1=x0+W.l;
   const y0=(Z.width-W.w)/2+W.oy,y1=y0+W.w;
   const z0=(Z.height-W.h)/2+W.oz,z1=z0+W.h;
-  return {x0,x1,y0,y1,z0,z1};
+  return{x0,x1,y0,y1,z0,z1};
 }
 function faceRect(){const b=workBox();return{y0:b.y0,y1:b.y1,z0:b.z0,z1:b.z1};}
 function polyLen(p){let l=0;for(let i=1;i<p.length;i++)l+=Math.hypot(p[i].y-p[i-1].y,p[i].z-p[i-1].z);return l;}
@@ -306,12 +362,20 @@ function offsetCurve2D(p,d){
   return out;
 }
 function extendChord(pL,pR,x0,x1){
-  const dx=pR.x-pL.x;
-  const t0=(x0-pL.x)/dx,t1=(x1-pL.x)/dx;
-  return {
-    p0:{y:pL.y+t0*(pR.y-pL.y),z:pL.z+t0*(pR.z-pL.z)},
-    p1:{y:pL.y+t1*(pR.y-pL.y),z:pL.z+t1*(pR.z-pL.z)}
-  };
+  const dx=pR.x-pL.x,t0=(x0-pL.x)/dx,t1=(x1-pL.x)/dx;
+  return{p0:{y:pL.y+t0*(pR.y-pL.y),z:pL.z+t0*(pR.z-pL.z)},p1:{y:pL.y+t1*(pR.y-pL.y),z:pL.z+t1*(pR.z-pL.z)}};
+}
+function recomputeWork(){
+  if(!state.autoWP)return;
+  const pts=offsetCurve2D(state.left.curve,state.cut.offL).concat(offsetCurve2D(state.right.curve,state.cut.offR));
+  if(pts.length<2)return;
+  let y0=1e9,y1=-1e9,z0=1e9,z1=-1e9;
+  pts.forEach(p=>{y0=Math.min(y0,p.y);y1=Math.max(y1,p.y);z0=Math.min(z0,p.z);z1=Math.max(z1,p.z);});
+  const a=state.allow;
+  y0-=a.l;y1+=a.r;z0-=a.b;z1+=a.t;
+  state.work.w=Math.max(10,y1-y0);state.work.h=Math.max(10,z1-z0);
+  state.work.oy=(y0+y1)/2-state.zone.width/2;
+  state.work.oz=(z0+z1)/2-state.zone.height/2;
 }
 function computeToolpath(){
   const lc=state.left.curve,rc=state.right.curve;
@@ -321,30 +385,25 @@ function computeToolpath(){
   const ol=offsetCurve2D(lc,state.cut.offL),or_=offsetCurve2D(rc,state.cut.offR);
   const N=clamp(Math.round(Math.max(polyLen(ol),polyLen(or_))*state.cut.ppm),2,4000);
   const L=resample(ol,N),R=resample(or_,N);
-  const gXY=[],gAB=[];
-  const bd={minY:1e9,maxY:-1e9,minZ:1e9,maxZ:-1e9};
+  const gXY=[],gAB=[],bd={minY:1e9,maxY:-1e9,minZ:1e9,maxZ:-1e9};
   for(let i=0;i<N;i++){
     const e=extendChord({x:b.x0,y:L[i].y,z:L[i].z},{x:b.x1,y:R[i].y,z:R[i].z},0,state.zone.length);
     gXY.push(e.p0);gAB.push(e.p1);
-    for(const p of[e.p0,e.p1]){
-      bd.minY=Math.min(bd.minY,p.y);bd.maxY=Math.max(bd.maxY,p.y);
-      bd.minZ=Math.min(bd.minZ,p.z);bd.maxZ=Math.max(bd.maxZ,p.z);
-    }
+    for(const p of[e.p0,e.p1]){bd.minY=Math.min(bd.minY,p.y);bd.maxY=Math.max(bd.maxY,p.y);bd.minZ=Math.min(bd.minZ,p.z);bd.maxZ=Math.max(bd.maxZ,p.z);}
   }
-  return {N,profL:L,profR:R,gXY,gAB,bd};
+  return{N,profL:L,profR:R,gXY,gAB,bd,len:Math.max(polyLen(gXY),polyLen(gAB))||1};
 }
 function extStarts(){
   const b=workBox(),n=Math.min(state.left.starts.length,state.right.starts.length),out=[];
   for(let i=0;i<n;i++){
     const a=state.left.starts[i],c=state.right.starts[i];
-    const e1=extendChord({x:b.x0,y:a.p1.y,z:a.p1.z},{x:b.x1,y:c.p1.y,z:c.p1.z},0,state.zone.length);
-    const e2=extendChord({x:b.x0,y:a.p2.y,z:a.p2.z},{x:b.x1,y:c.p2.y,z:c.p2.z},0,state.zone.length);
-    out.push({s0:e1,s1:e2});
+    out.push({s0:extendChord({x:b.x0,y:a.p1.y,z:a.p1.z},{x:b.x1,y:c.p1.y,z:c.p1.z},0,state.zone.length),
+              s1:extendChord({x:b.x0,y:a.p2.y,z:a.p2.z},{x:b.x1,y:c.p2.y,z:c.p2.z},0,state.zone.length)});
   }
   return out;
 }
 
-/* ================= CANVAS ================= */
+/* ============ CANVAS ============ */
 function fitCanvas(cv){
   const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
   const W=Math.max(2,Math.round(r.width*dpr)),H=Math.max(2,Math.round(r.height*dpr));
@@ -353,61 +412,31 @@ function fitCanvas(cv){
   return{w:r.width,h:r.height};
 }
 
-/* ================= 2D EDITORS ================= */
-const TOOLS=[{t:'move',n:'Точки'},{t:'erase',n:'Ластик'},{t:'start',n:'Старт'}];
-const ACTIONS=[
-  {icon:'⭕',tip:'Вписать круг',fn:'addCircle'},
-  {icon:'⬜',tip:'Вписать квадрат',fn:'addSquare'},
-  {icon:'〰️',tip:'Сгладить',fn:'smooth'},
-  {icon:'⭘',tip:'Замкнуть',fn:'close'},
-  {icon:'⇄',tip:'Реверс направления',fn:'reverse'},
-  {icon:'✖',tip:'Очистить плоскость',fn:'clear'}
-];
+/* ============ EDITORS ============ */
+const TOOLS=[{t:'move',n:'Точки',i:'move'},{t:'erase',n:'Ластик',i:'erase'},{t:'start',n:'Старт',i:'start'}];
+const ACTIONS=[{i:'smooth',tip:'Сгладить',fn:'smooth'},{i:'loop',tip:'Замкнуть',fn:'close'},{i:'rev',tip:'Реверс направления',fn:'reverse'},{i:'clr',tip:'Очистить плоскость',fn:'clear'}];
 const actions={
-  addCircle(side){
-    const d=state[side];
-    if(d.curve.length&&!confirm('Заменить кривую кругом?'))return;
-    const fr=faceRect(),cy=(fr.y0+fr.y1)/2,cz=(fr.z0+fr.z1)/2,r=Math.min(fr.y1-fr.y0,fr.z1-fr.z0)/2*.75;
-    const pts=[];for(let i=0;i<64;i++){const th=Math.PI/2+i/64*Math.PI*2;pts.push({y:cy+Math.cos(th)*r,z:cz+Math.sin(th)*r});}
-    pts.push({...pts[0]});d.curve=pts;refresh();
-  },
-  addSquare(side){
-    const d=state[side];
-    if(d.curve.length&&!confirm('Заменить кривую квадратом?'))return;
-    const fr=faceRect(),cy=(fr.y0+fr.y1)/2,cz=(fr.z0+fr.z1)/2,s=Math.min(fr.y1-fr.y0,fr.z1-fr.z0)*.75/2;
-    d.curve=[{y:cy-s,z:cz+s},{y:cy-s,z:cz-s},{y:cy+s,z:cz-s},{y:cy+s,z:cz+s},{y:cy-s,z:cz+s}];refresh();
-  },
-  smooth(side){
-    let c=state[side].curve;if(c.length<3)return;
-    for(let k=0;k<2;k++){const nc=[c[0]];
-      for(let i=1;i<c.length-1;i++)nc.push({y:c[i-1].y*.25+c[i].y*.5+c[i+1].y*.25,z:c[i-1].z*.25+c[i].z*.5+c[i+1].z*.25});
-      nc.push(c[c.length-1]);c=nc;state[side].curve=nc;}
-    refresh();
-  },
-  close(side){const c=state[side].curve;if(c.length>2&&Math.hypot(c[0].y-c[c.length-1].y,c[0].z-c[c.length-1].z)>1e-6)c.push({...c[0]});refresh();},
-  reverse(side){state[side].curve.reverse();refresh();},
-  clear(side){if(!confirm('Очистить плоскость?'))return;state[side].curve=[];state[side].starts=[];refresh();}
+ smooth(side){let c=state[side].curve;if(c.length<3)return;
+  for(let k=0;k<2;k++){const nc=[c[0]];for(let i=1;i<c.length-1;i++)nc.push({y:c[i-1].y*.25+c[i].y*.5+c[i+1].y*.25,z:c[i-1].z*.25+c[i].z*.5+c[i+1].z*.25});nc.push(c[c.length-1]);c=nc;state[side].curve=nc;}refresh();},
+ close(side){const c=state[side].curve;if(c.length>2&&Math.hypot(c[0].y-c[c.length-1].y,c[0].z-c[c.length-1].z)>1e-6)c.push({...c[0]});refresh();},
+ reverse(side){state[side].curve.reverse();refresh();},
+ clear(side){if(!confirm('Очистить плоскость?'))return;state[side].curve=[];state[side].starts=[];refresh();}
 };
+function resetEdViews(){[edL,edR].forEach(ed=>{if(ed)ed.view=null;});}
 function makeEditor(cvId,segId,actId,side){
   const cv=document.getElementById(cvId);
-  const ed={canvas:cv,ctx:cv.getContext('2d'),side,tool:'move',drag:null,tempStart:null,tempEnd:null,w:0,h:0,t:null,btns:{}};
+  const ed={canvas:cv,ctx:cv.getContext('2d'),side,tool:'move',drag:null,tempStart:null,tempEnd:null,pan:null,w:0,h:0,t:null,view:null,btns:{}};
   const seg=document.getElementById(segId);
-  TOOLS.forEach(t=>{
-    const b=document.createElement('button');b.textContent=t.n;
-    b.onclick=()=>setTool(ed,t.t);seg.appendChild(b);ed.btns[t.t]=b;
-  });
+  TOOLS.forEach(t=>{const b=document.createElement('button');b.innerHTML=ic(t.i)+t.n;b.onclick=()=>setTool(ed,t.t);seg.appendChild(b);ed.btns[t.t]=b;});
   const act=document.getElementById(actId);
-  ACTIONS.forEach(a=>{
-    const b=document.createElement('button');b.textContent=a.icon;b.title=a.tip;
-    b.onclick=()=>actions[a.fn](ed.side);act.appendChild(b);
-  });
+  ACTIONS.forEach(a=>{const b=document.createElement('button');b.innerHTML=ic(a.i);b.title=a.tip;b.onclick=()=>actions[a.fn](ed.side);act.appendChild(b);});
+  const rz=document.createElement('button');rz.className='txt';rz.textContent='1:1';rz.title='Сбросить масштаб вида';rz.onclick=()=>{ed.view=null;drawAll();};act.appendChild(rz);
   const mpos=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};};
-  const toWorld=m=>{const t=ed.t,Z=state.zone;return{y:clamp((m.x-t.ox)/t.s,0,Z.width),z:clamp((ed.h-m.y-t.oy)/t.s,0,Z.height)};};
+  const toWorld=m=>{const t=ed.t;return{y:(m.x-t.ox)/t.s,z:(ed.h-m.y-t.oy)/t.s};};
   const scrOf=p=>({x:ed.t.ox+p.y*ed.t.s,y:ed.h-(ed.t.oy+p.z*ed.t.s)});
   function snapPt(w){
     const m=scrOf(w),fr=faceRect();let best={p:{...w},d:14};
-    [{y:fr.y0,z:fr.z0},{y:fr.y1,z:fr.z0},{y:fr.y1,z:fr.z1},{y:fr.y0,z:fr.z1}].forEach(c=>{
-      const q=scrOf(c),d=Math.hypot(q.x-m.x,q.y-m.y);if(d<best.d)best={p:{...c},d};});
+    [{y:fr.y0,z:fr.z0},{y:fr.y1,z:fr.z0},{y:fr.y1,z:fr.z1},{y:fr.y0,z:fr.z1}].forEach(c=>{const q=scrOf(c),d=Math.hypot(q.x-m.x,q.y-m.y);if(d<best.d)best={p:{...c},d};});
     state[ed.side].curve.forEach(p=>{const q=scrOf(p),d=Math.hypot(q.x-m.x,q.y-m.y);if(d<Math.min(best.d,12))best={p:{...p},d};});
     return best.p;
   }
@@ -424,6 +453,7 @@ function makeEditor(cvId,segId,actId,side){
   }
   cv.addEventListener('mousedown',e=>{
     if(e.button===2){ed.tempStart=null;ed.tempEnd=null;drawAll();return;}
+    if(e.button===1||e.altKey){ed.pan={x:e.clientX,y:e.clientY,ox:ed.view?ed.view.ox:0,oy:ed.view?ed.view.oy:0};e.preventDefault();return;}
     if(!ed.t)return;
     const m=mpos(e),w=toWorld(m);
     if(ed.tool==='move')ed.drag=hitTest(m);
@@ -432,7 +462,24 @@ function makeEditor(cvId,segId,actId,side){
     drawAll();
   });
   cv.addEventListener('contextmenu',e=>e.preventDefault());
+  cv.addEventListener('dblclick',()=>{ed.view=null;drawAll();});
+  cv.addEventListener('wheel',e=>{
+    e.preventDefault();
+    if(!ed.t)return;
+    const m=mpos(e),w0=toWorld(m);
+    const k0=ed.view?ed.view.k:1;
+    const k=clamp(k0*(e.deltaY<0?1.15:1/1.15),.2,40);
+    const s0=ed.t.s/ k0;
+    const s=s0*k;
+    ed.view={k,ox:m.x-w0.y*s,oy:(ed.h-m.y)-w0.z*s};
+    drawAll();
+  },{passive:false});
   window.addEventListener('mousemove',e=>{
+    if(ed.pan){
+      if(!ed.view)ed.view={k:1,ox:ed.t.ox,oy:ed.t.oy};
+      ed.view.ox=ed.pan.ox+(e.clientX-ed.pan.x);ed.view.oy=ed.pan.oy+(e.clientY-ed.pan.y);
+      drawAll();return;
+    }
     if(!ed.drag&&!ed.tempStart)return;
     const m=mpos(e),w=toWorld(m);
     if(ed.drag){
@@ -442,6 +489,7 @@ function makeEditor(cvId,segId,actId,side){
     }else if(ed.tempStart){ed.tempEnd=snapPt(w);drawAll();}
   });
   window.addEventListener('mouseup',()=>{
+    if(ed.pan){ed.pan=null;return;}
     if(ed.tempStart&&ed.tempEnd&&Math.hypot(ed.tempEnd.y-ed.tempStart.y,ed.tempEnd.z-ed.tempStart.z)>1e-6)
       state[side].starts.push({p1:ed.tempStart,p2:ed.tempEnd});
     if(ed.drag||ed.tempStart)refresh();
@@ -450,11 +498,7 @@ function makeEditor(cvId,segId,actId,side){
   setTool(ed,'move');
   return ed;
 }
-function setTool(ed,t){
-  ed.tool=t;
-  TOOLS.forEach(x=>ed.btns[x.t].classList.toggle('active',x.t===t));
-  ed.canvas.style.cursor=t==='move'?'grab':(t==='erase'?'pointer':'crosshair');
-}
+function setTool(ed,t){ed.tool=t;TOOLS.forEach(x=>ed.btns[x.t].classList.toggle('active',x.t===t));ed.canvas.style.cursor=t==='move'?'grab':(t==='erase'?'pointer':'crosshair');}
 const edL=makeEditor('cvL','segL','actL','left');
 const edR=makeEditor('cvR','segR','actR','right');
 
@@ -462,15 +506,18 @@ function drawEditor(ed){
   const ctx=ed.ctx,{w,h}=fitCanvas(ed.canvas);
   ed.w=w;ed.h=h;
   const Z=state.zone,pad=26;
-  const s=Math.min((w-pad*2)/Z.width,(h-pad*2)/Z.height);
-  const ox=(w-Z.width*s)/2,oy=(h-Z.height*s)/2;
+  const s0=Math.min((w-pad*2)/Z.width,(h-pad*2)/Z.height);
+  let ox,oy,s;
+  if(ed.view){s=s0*ed.view.k;ox=ed.view.ox;oy=ed.view.oy;}
+  else{s=s0;ox=(w-Z.width*s)/2;oy=(h-Z.height*s)/2;}
   ed.t={s,ox,oy};
   const SX=y=>ox+y*s,SY=z=>h-(oy+z*s);
   ctx.clearRect(0,0,w,h);
   ctx.fillStyle='#fbfbfd';ctx.fillRect(0,0,w,h);
   ctx.strokeStyle='#ededf2';ctx.lineWidth=1;
-  for(let y=0;y<=Z.width;y+=100){ctx.beginPath();ctx.moveTo(SX(y),SY(0));ctx.lineTo(SX(y),SY(Z.height));ctx.stroke();}
-  for(let z=0;z<=Z.height;z+=100){ctx.beginPath();ctx.moveTo(SX(0),SY(z));ctx.lineTo(SX(Z.width),SY(z));ctx.stroke();}
+  const gstep=s>1.2?50:(s>.4?100:500);
+  for(let y=0;y<=Z.width;y+=gstep){ctx.beginPath();ctx.moveTo(SX(y),SY(-2000));ctx.lineTo(SX(y),SY(Z.height+2000));ctx.stroke();}
+  for(let z=0;z<=Z.height;z+=gstep){ctx.beginPath();ctx.moveTo(SX(-2000),SY(z));ctx.lineTo(SX(Z.width+2000),SY(z));ctx.stroke();}
   ctx.strokeStyle='#d1d1d6';ctx.lineWidth=1.2;
   ctx.strokeRect(SX(0),SY(Z.height),Z.width*s,Z.height*s);
   ctx.fillStyle='#aeaeb2';ctx.font='10px -apple-system,sans-serif';
@@ -495,39 +542,42 @@ function drawEditor(ed){
     ctx.strokeStyle='rgba(52,199,89,.7)';ctx.setLineDash([3,3]);ctx.lineWidth=1.4;
     ctx.beginPath();ctx.moveTo(SX(ed.tempStart.y),SY(ed.tempStart.z));ctx.lineTo(SX(ed.tempEnd.y),SY(ed.tempEnd.z));ctx.stroke();ctx.setLineDash([]);
   }
+  const col=ed.side==='left'?'#ff3b30':'#007aff';
+  const off=ed.side==='left'?state.cut.offL:state.cut.offR;
+  const curve=state[ed.side].curve;
+  /* фантомный отступ струны */
+  if(curve.length>1&&Math.abs(off)>1e-9){
+    const ph=offsetCurve2D(curve,off);
+    ctx.strokeStyle=col;ctx.globalAlpha=.4;ctx.lineWidth=1.4;ctx.setLineDash([4,4]);
+    ctx.beginPath();ph.forEach((p,i)=>i?ctx.lineTo(SX(p.y),SY(p.z)):ctx.moveTo(SX(p.y),SY(p.z)));ctx.stroke();
+    ctx.setLineDash([]);ctx.globalAlpha=1;
+    const mp=ph[Math.floor(ph.length/2)];
+    ctx.fillStyle=col;ctx.globalAlpha=.65;ctx.font='600 9px -apple-system,sans-serif';
+    ctx.fillText('фантом '+(off>0?'+':'')+off.toFixed(1),SX(mp.y)+5,SY(mp.z)-5);
+    ctx.globalAlpha=1;
+  }
   if(state.tp){
     const g=ed.side==='left'?state.tp.gXY:state.tp.gAB;
-    ctx.strokeStyle='#e6a400';ctx.lineWidth=1.6;ctx.setLineDash([7,4]);
-    ctx.beginPath();
-    g.forEach((p,i)=>i?ctx.lineTo(SX(p.y),SY(p.z)):ctx.moveTo(SX(p.y),SY(p.z)));
-    ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='#b28600';ctx.lineWidth=1.6;ctx.setLineDash([7,4]);
+    ctx.beginPath();g.forEach((p,i)=>i?ctx.lineTo(SX(p.y),SY(p.z)):ctx.moveTo(SX(p.y),SY(p.z)));ctx.stroke();ctx.setLineDash([]);
     const idx=clamp(Math.round(state.sim.t*(state.tp.N-1)),0,state.tp.N-1);
     const a=state.tp.gXY[idx],b=state.tp.gAB[idx];
-    ctx.strokeStyle='rgba(255,59,48,.55)';ctx.lineWidth=1.4;
+    ctx.strokeStyle='rgba(255,59,48,.5)';ctx.lineWidth=1.3;
     ctx.beginPath();ctx.moveTo(SX(a.y),SY(a.z));ctx.lineTo(SX(b.y),SY(b.z));ctx.stroke();
     const cur=ed.side==='left'?a:b;
-    ctx.fillStyle='#e6a400';ctx.beginPath();ctx.arc(SX(cur.y),SY(cur.z),5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#b28600';ctx.beginPath();ctx.arc(SX(cur.y),SY(cur.z),5,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
     const pr=ed.side==='left'?state.tp.profL[idx]:state.tp.profR[idx];
     ctx.fillStyle='#ff3b30';ctx.beginPath();ctx.arc(SX(pr.y),SY(pr.z),4,0,Math.PI*2);ctx.fill();
   }
-  const col=ed.side==='left'?'#ff3b30':'#007aff';
-  const curve=state[ed.side].curve;
   if(curve.length){
     ctx.strokeStyle=col;ctx.lineWidth=2.2;ctx.lineJoin='round';
-    ctx.beginPath();
-    curve.forEach((p,i)=>i?ctx.lineTo(SX(p.y),SY(p.z)):ctx.moveTo(SX(p.y),SY(p.z)));
-    ctx.stroke();
-    if(curve.length<=300){
-      ctx.fillStyle=col;
-      curve.forEach(p=>{ctx.beginPath();ctx.arc(SX(p.y),SY(p.z),2.4,0,Math.PI*2);ctx.fill();});
-    }
+    ctx.beginPath();curve.forEach((p,i)=>i?ctx.lineTo(SX(p.y),SY(p.z)):ctx.moveTo(SX(p.y),SY(p.z)));ctx.stroke();
+    if(curve.length<=300){ctx.fillStyle=col;curve.forEach(p=>{ctx.beginPath();ctx.arc(SX(p.y),SY(p.z),2.4,0,Math.PI*2);ctx.fill();});}
     ctx.fillStyle='#fff';ctx.strokeStyle=col;ctx.lineWidth=2;
     ctx.beginPath();ctx.arc(SX(curve[0].y),SY(curve[0].z),4.5,0,Math.PI*2);ctx.fill();ctx.stroke();
-    if(curve.length>2){
-      const i=Math.floor(curve.length*.6);
-      arrow(ctx,{x:SX(curve[i-1].y),y:SY(curve[i-1].z)},{x:SX(curve[i].y),y:SY(curve[i].z)},11,col);
-    }
+    if(curve.length>2){const i=Math.floor(curve.length*.6);
+      arrow(ctx,{x:SX(curve[i-1].y),y:SY(curve[i-1].z)},{x:SX(curve[i].y),y:SY(curve[i].z)},11,col);}
   }
 }
 function arrow(ctx,a,b,size,color){
@@ -538,8 +588,10 @@ function arrow(ctx,a,b,size,color){
   ctx.closePath();ctx.fill();
 }
 
-/* ================= ISOMETRIC ================= */
+/* ============ ISO ============ */
 const cvIso=document.getElementById('cvIso'),isoCtx=cvIso.getContext('2d');
+const isoView={az:-.62,el:.46,zoomK:1,zoom:.2};
+let isoDrag=null,isoCX=0,isoCY=0;
 function project(p){
   const v=isoView,Z=state.zone;
   const x=p.x-Z.length/2,y=p.y-Z.width/2,z=p.z-Z.height/2;
@@ -561,8 +613,7 @@ function drawBox3D(c0,c1,col,alpha,edge){
     isoCtx.closePath();
     const k=shade[o.i];
     isoCtx.fillStyle='rgba('+(col.r*k|0)+','+(col.g*k|0)+','+(col.b*k|0)+','+alpha+')';
-    isoCtx.fill();
-    isoCtx.strokeStyle=edge;isoCtx.lineWidth=1;isoCtx.stroke();
+    isoCtx.fill();isoCtx.strokeStyle=edge;isoCtx.lineWidth=1;isoCtx.stroke();
   });
 }
 function path3D(pts,x,color,width,dash){
@@ -573,16 +624,11 @@ function path3D(pts,x,color,width,dash){
   pts.forEach((p,i)=>{const q=project({x,y:p.y,z:p.z});i?isoCtx.lineTo(q.x,q.y):isoCtx.moveTo(q.x,q.y);});
   isoCtx.stroke();isoCtx.setLineDash([]);
 }
-function cross(ctx,p,size,color){
-  ctx.strokeStyle=color;ctx.lineWidth=2.4;
-  ctx.beginPath();ctx.moveTo(p.x-size,p.y-size);ctx.lineTo(p.x+size,p.y+size);
-  ctx.moveTo(p.x+size,p.y-size);ctx.lineTo(p.x-size,p.y+size);ctx.stroke();
-}
+function crossM(ctx,p,s,c){ctx.strokeStyle=c;ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(p.x-s,p.y-s);ctx.lineTo(p.x+s,p.y+s);ctx.moveTo(p.x+s,p.y-s);ctx.lineTo(p.x-s,p.y+s);ctx.stroke();}
 function drawIso(){
   const ctx=isoCtx,{w,h}=fitCanvas(cvIso);
   ctx.clearRect(0,0,w,h);
-  const g=ctx.createLinearGradient(0,0,0,h);
-  g.addColorStop(0,'#fdfdfe');g.addColorStop(1,'#f4f4f8');
+  const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#fdfdfe');g.addColorStop(1,'#f4f4f8');
   ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
   const Z=state.zone,v=isoView,span=Z.length+Z.width;
   v.zoom=Math.min(w/(span*.8),h/(span*.46+Z.height*1.2))*v.zoomK;
@@ -604,8 +650,8 @@ function drawIso(){
   path3D(state.left.curve,b.x0,'#ff3b30',2.2);
   path3D(state.right.curve,b.x1,'#007aff',2.2);
   if(state.tp){
-    path3D(state.tp.gXY,0,'#e6a400',2);
-    path3D(state.tp.gAB,Z.length,'#e6a400',2);
+    path3D(state.tp.gXY,0,'#b28600',2);
+    path3D(state.tp.gAB,Z.length,'#b28600',2);
     extStarts().forEach(e=>{
       path3D([e.s0.p0,e.s1.p0],0,'#34c759',1.6,[6,4]);
       path3D([e.s0.p1,e.s1.p1],Z.length,'#34c759',1.6,[6,4]);
@@ -614,23 +660,20 @@ function drawIso(){
     const p1=project({x:0,y:state.tp.gXY[idx].y,z:state.tp.gXY[idx].z});
     const p2=project({x:Z.length,y:state.tp.gAB[idx].y,z:state.tp.gAB[idx].z});
     ctx.strokeStyle='#ff3b30';ctx.lineWidth=2.8;ctx.shadowColor='rgba(255,59,48,.5)';ctx.shadowBlur=6;
-    ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
-    ctx.shadowBlur=0;
-    cross(ctx,p1,5,'#ff3b30');cross(ctx,p2,5,'#ff3b30');
+    ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();ctx.shadowBlur=0;
+    crossM(ctx,p1,5,'#ff3b30');crossM(ctx,p2,5,'#ff3b30');
     const q1=project({x:0,y:state.tp.gXY[0].y,z:state.tp.gXY[0].z});
     const q2=project({x:Z.length,y:state.tp.gAB[0].y,z:state.tp.gAB[0].z});
     ctx.fillStyle='#fff';ctx.strokeStyle='#8e8e93';ctx.lineWidth=1.4;
     [q1,q2].forEach(q=>{ctx.beginPath();ctx.arc(q.x,q.y,4,0,Math.PI*2);ctx.fill();ctx.stroke();});
   }
   ctx.font='600 11px -apple-system,sans-serif';
-  let q=project({x:b.x0,y:(b.y0+b.y1)/2,z:b.z1});
-  ctx.fillStyle='#ff3b30';ctx.fillText('ЛЕВО',q.x-16,q.y-10);
-  q=project({x:b.x1,y:(b.y0+b.y1)/2,z:b.z1});
-  ctx.fillStyle='#007aff';ctx.fillText('ПРАВО',q.x-20,q.y-10);
+  let q=project({x:b.x0,y:(b.y0+b.y1)/2,z:b.z1});ctx.fillStyle='#ff3b30';ctx.fillText('ЛЕВО',q.x-16,q.y-10);
+  q=project({x:b.x1,y:(b.y0+b.y1)/2,z:b.z1});ctx.fillStyle='#007aff';ctx.fillText('ПРАВО',q.x-20,q.y-10);
   q=project({x:0,y:0,z:Z.height});ctx.fillStyle='#8e8e93';ctx.fillText('плоскость XY',q.x-8,q.y-8);
   q=project({x:Z.length,y:Z.width,z:0});ctx.fillText('плоскость AB',q.x-8,q.y+14);
   ctx.font='10px -apple-system,sans-serif';ctx.fillStyle='#aeaeb2';
-  ctx.fillText('Оси станка: X, A ← мир Y • Y, B ← мир Z',10,16);
+  ctx.fillText('Оси: X, A ← мир Y • Y, B ← мир Z',10,16);
   ctx.fillText('ЛКМ — вращение • колесо — масштаб',10,h-10);
 }
 cvIso.addEventListener('mousedown',e=>isoDrag={x:e.clientX,y:e.clientY});
@@ -641,10 +684,7 @@ window.addEventListener('mousemove',e=>{
   isoDrag={x:e.clientX,y:e.clientY};drawIso();
 });
 window.addEventListener('mouseup',()=>isoDrag=null);
-cvIso.addEventListener('wheel',e=>{
-  e.preventDefault();
-  isoView.zoomK=clamp(isoView.zoomK*(e.deltaY<0?1.1:.9),.3,6);drawIso();
-},{passive:false});
+cvIso.addEventListener('wheel',e=>{e.preventDefault();isoView.zoomK=clamp(isoView.zoomK*(e.deltaY<0?1.1:.9),.3,6);drawIso();},{passive:false});
 document.querySelectorAll('.seg button[data-v]').forEach(btn=>{
   btn.onclick=()=>{
     document.querySelectorAll('.seg button[data-v]').forEach(x=>x.classList.remove('active'));
@@ -658,66 +698,144 @@ document.querySelectorAll('.seg button[data-v]').forEach(btn=>{
   };
 });
 
-/* ================= SVG IMPORT ================= */
-const fileSvg=document.getElementById('fileSvg');
-document.getElementById('btnImport').onclick=()=>fileSvg.click();
-fileSvg.onchange=()=>{const f=fileSvg.files[0];if(f)importSVGFile(f);fileSvg.value='';};
-function importSVGFile(file){
-  const reader=new FileReader();
-  reader.onload=()=>processSVGText(reader.result);
-  reader.readAsText(file);
+/* ============ IMPORT: SVG / DXF / EPS ============ */
+const fileImp=document.getElementById('fileImp');
+document.getElementById('btnImport').onclick=()=>fileImp.click();
+fileImp.onchange=()=>{const f=fileImp.files[0];if(f)importFile(f);fileImp.value='';};
+function parseLenMM(str){
+  if(!str)return null;
+  const m=str.trim().match(/^(-?[\d.]+)\s*(mm|cm|in|pt|pc|px)?$/i);
+  if(!m)return null;
+  const v=parseFloat(m[1]),u=(m[2]||'px').toLowerCase();
+  return v*{mm:1,cm:10,in:25.4,pt:25.4/72,pc:25.4/6,px:25.4/96}[u];
 }
-function processSVGText(text){
+function parseSVG(text){
   const doc=new DOMParser().parseFromString(text,'image/svg+xml');
-  if(doc.getElementsByTagName('parsererror').length){alert('Ошибка чтения SVG-файла.');return;}
-  const host=document.getElementById('svgHost');
-  host.innerHTML='';
-  const node=document.importNode(doc.documentElement,true);
-  host.appendChild(node);
+  if(doc.getElementsByTagName('parsererror').length)return null;
+  const host=document.getElementById('svgHost');host.innerHTML='';
+  const node=document.importNode(doc.documentElement,true);host.appendChild(node);
   const shapes=Array.from(node.querySelectorAll('path,polygon,polyline,circle,ellipse,rect,line'))
     .filter(el=>typeof el.getTotalLength==='function'&&el.getTotalLength()>1);
-  const contours=[];
+  const conts=[];
   for(const el of shapes){
     let ctm=null;try{ctm=el.getCTM();}catch(e){}
-    const len=el.getTotalLength();
-    const n=clamp(Math.round(len/2),12,1200);
-    const pts=[];
+    const len=el.getTotalLength(),n=clamp(Math.round(len/2),12,1200),pts=[];
     for(let i=0;i<=n;i++){
       const p=el.getPointAtLength(len*i/n);
-      if(ctm){const q=p.matrixTransform(ctm);pts.push({u:q.x,v:q.y});}
-      else pts.push({u:p.x,v:p.y});
+      if(ctm){const q=p.matrixTransform(ctm);pts.push({u:q.x,v:q.y});}else pts.push({u:p.x,v:p.y});
     }
-    contours.push(pts);
-    if(contours.length===2)break;
+    conts.push(pts);
+    if(conts.length===2)break;
   }
+  /* масштаб: физический размер / viewBox → user unit в мм (лечит 10x и т.п.) */
+  let scale=25.4/96,note='1 ед = '+(25.4/96).toFixed(4)+' мм (px)';
+  const vb=node.viewBox&&node.viewBox.baseVal&&node.viewBox.baseVal.width>0?node.viewBox.baseVal:null;
+  const wMM=parseLenMM(node.getAttribute('width')),hMM=parseLenMM(node.getAttribute('height'));
+  if(vb&&wMM){scale=wMM/vb.width;note='1 ед = '+scale.toPrecision(4)+' мм (width/viewBox)';}
+  else if(vb&&hMM){scale=hMM/vb.height;note='1 ед = '+scale.toPrecision(4)+' мм (height/viewBox)';}
+  else if(wMM&&node.getAttribute('width')){scale=1;note='1 ед = 1 мм';}
   host.innerHTML='';
-  if(!contours.length){alert('В SVG не найдено контуров (path / polygon / circle / rect…).');return;}
+  return{conts,scale,flip:true,note};
+}
+function parseDXF(text){
+  const t=text.split(/\r?\n/),P=[];
+  for(let i=0;i+1<t.length;i+=2)P.push([parseInt(t[i],10),t[i+1].trim()]);
+  const out=[];let ent=null,poly=null,tmp=null,d={},closed=false;
+  const finish=()=>{
+    if(tmp&&poly){poly.push(tmp);tmp=null;}
+    if(poly&&poly.length>1){if(closed)poly.push({...poly[0]});out.push(poly);}
+    poly=null;closed=false;
+    if(ent==='LINE'&&d.x1!==undefined)out.push([{u:d.x1,v:d.y1},{u:d.x2,v:d.y2}]);
+    else if(ent==='CIRCLE'&&d.cx!==undefined){const c=[];for(let i=0;i<64;i++){const a=i/64*2*Math.PI;c.push({u:d.cx+Math.cos(a)*d.r,v:d.cy+Math.sin(a)*d.r});}c.push({...c[0]});out.push(c);}
+    else if(ent==='ARC'&&d.cx!==undefined){let a0=(d.a0||0)*Math.PI/180,a1=(d.a1||360)*Math.PI/180,sp=a1-a0;if(sp<0)sp+=2*Math.PI;const c=[];for(let i=0;i<=48;i++){const a=a0+sp*i/48;c.push({u:d.cx+Math.cos(a)*d.r,v:d.cy+Math.sin(a)*d.r});}out.push(c);}
+    else if(ent==='ELLIPSE'&&d.mx!==undefined){const M=Math.hypot(d.mx,d.my)||1,ux=d.mx/M,uy=d.my/M,mi=M*(d.ratio||1);const a0=d.p0||0,a1=(d.p1!==undefined?d.p1:2*Math.PI);const c=[];for(let i=0;i<=64;i++){const a=a0+(a1-a0)*i/64,ca=Math.cos(a),sa=Math.sin(a);c.push({u:d.cx+ux*ca*M-uy*sa*mi,v:d.cy+uy*ca*M+ux*sa*mi});}c.push({...c[0]});out.push(c);}
+    d={};
+  };
+  for(const[c,v]of P){
+    if(c===0){finish();ent=v;
+      if(ent==='LWPOLYLINE'||ent==='POLYLINE'||ent==='SPLINE')poly=[];
+      continue;}
+    const n=parseFloat(v);
+    if(ent==='LWPOLYLINE'){if(c===10){if(tmp)poly.push(tmp);tmp={u:n,v:0};}else if(c===20&&tmp)tmp.v=n;else if(c===70)closed=(n&1)===1;}
+    else if(ent==='POLYLINE'){if(c===70)closed=(n&1)===1;}
+    else if(ent==='VERTEX'){if(c===10){if(tmp)poly.push(tmp);tmp={u:n,v:0};}else if(c===20&&tmp)tmp.v=n;}
+    else if(ent==='SPLINE'){if(c===11){if(tmp)poly.push(tmp);tmp={u:n,v:0};}else if(c===21&&tmp)tmp.v=n;}
+    else if(ent==='LINE'){if(c===10)d.x1=n;if(c===20)d.y1=n;if(c===11)d.x2=n;if(c===21)d.y2=n;}
+    else if(ent==='CIRCLE'){if(c===10)d.cx=n;if(c===20)d.cy=n;if(c===40)d.r=n;}
+    else if(ent==='ARC'){if(c===10)d.cx=n;if(c===20)d.cy=n;if(c===40)d.r=n;if(c===50)d.a0=n;if(c===51)d.a1=n;}
+    else if(ent==='ELLIPSE'){if(c===10)d.cx=n;if(c===20)d.cy=n;if(c===11)d.mx=n;if(c===21)d.my=n;if(c===40)d.ratio=n;if(c===50)d.p0=n;if(c===51)d.p1=n;}
+  }
+  finish();
+  return{conts:out,scale:1,flip:false,note:'DXF: 1 ед = 1 мм'};
+}
+function parseEPS(text){
+  const clean=text.replace(/%[^\n]*/g,'');
+  const tok=clean.match(/-?\d*\.?\d+(?:e-?\d+)?|[a-zA-Z]+/g)||[];
+  const st=[];const out=[];let cur=null,cx=0,cy=0,sx=0,sy=0;
+  const push=()=>{if(cur&&cur.length>1)out.push(cur);cur=null;};
+  for(let i=0;i<tok.length;i++){
+    const t=tok[i];
+    if(/^-?\d/.test(t)){st.push(parseFloat(t));continue;}
+    switch(t){
+      case 'newpath':push();cur=[];break;
+      case 'moveto':{const y=st.pop(),x=st.pop();cx=x;cy=y;sx=x;sy=y;if(!cur)cur=[];cur.push({u:x,v:y});break;}
+      case 'rmoveto':{const y=st.pop(),x=st.pop();cx+=x;cy+=y;sx=cx;sy=cy;if(!cur)cur=[];cur.push({u:cx,v:cy});break;}
+      case 'lineto':{const y=st.pop(),x=st.pop();cx=x;cy=y;if(!cur)cur=[];cur.push({u:cx,v:cy});break;}
+      case 'rlineto':{const y=st.pop(),x=st.pop();cx+=x;cy+=y;if(!cur)cur=[];cur.push({u:cx,v:cy});break;}
+      case 'curveto':{const y3=st.pop(),x3=st.pop(),y2=st.pop(),x2=st.pop(),y1=st.pop(),x1=st.pop();if(!cur)cur=[];
+        for(let s2=1;s2<=16;s2++){const u=s2/16,mu=1-u;
+          cur.push({u:mu*mu*mu*cx+3*mu*mu*u*x1+3*mu*u*u*x2+u*u*u*x3,v:mu*mu*mu*cy+3*mu*mu*u*y1+3*mu*u*u*y2+u*u*u*y3});}
+        cx=x3;cy=y3;break;}
+      case 'rcurveto':{const dd=st.splice(-6);const X0=cx,Y0=cy,X1=X0+dd[0],Y1=Y0+dd[1],X2=X0+dd[2],Y2=Y0+dd[3],X3=X0+dd[4],Y3=Y0+dd[5];if(!cur)cur=[];
+        for(let s2=1;s2<=16;s2++){const u=s2/16,mu=1-u;
+          cur.push({u:mu*mu*mu*X0+3*mu*mu*u*X1+3*mu*u*u*X2+u*u*u*X3,v:mu*mu*mu*Y0+3*mu*mu*u*Y1+3*mu*u*u*Y2+u*u*u*Y3});}
+        cx=X3;cy=Y3;break;}
+      case 'closepath':if(cur&&cur.length)cur.push({...cur[0]});break;
+      case 'stroke':case 'fill':case 'fillstroke':case 'f':case 'F':case 'S':case 'showpage':push();break;
+      default:st.length=0;
+    }
+  }
+  push();
+  return{conts:out,scale:25.4/72,flip:false,note:'EPS: 1 pt = 0.3528 мм'};
+}
+function importFile(f){
+  const ext=(f.name.split('.').pop()||'').toLowerCase();
+  const rd=new FileReader();
+  rd.onload=()=>{
+    let r=null;
+    if(ext==='svg')r=parseSVG(rd.result);
+    else if(ext==='dxf')r=parseDXF(rd.result);
+    else if(ext==='eps'||ext==='ps')r=parseEPS(rd.result);
+    else{alert('Формат не поддерживается: .'+ext);return;}
+    if(!r||!r.conts.length){alert('Контуры не найдены в файле.');return;}
+    placeContours(r);
+  };
+  rd.readAsText(f);
+}
+function placeContours(r){
+  const use=r.conts.slice(0,2).map(c=>c.map(p=>({u:p.u*r.scale,v:p.v*r.scale})));
   let minX=1e9,maxX=-1e9,minV=1e9,maxV=-1e9;
-  contours.forEach(c=>c.forEach(p=>{minX=Math.min(minX,p.u);maxX=Math.max(maxX,p.u);minV=Math.min(minV,p.v);maxV=Math.max(maxV,p.v);}));
+  use.forEach(c=>c.forEach(p=>{minX=Math.min(minX,p.u);maxX=Math.max(maxX,p.u);minV=Math.min(minV,p.v);maxV=Math.max(maxV,p.v);}));
   const cx=(minX+maxX)/2,cv=(minV+maxV)/2;
-  const fr=faceRect();
-  const ty=(fr.y0+fr.y1)/2,tz=(fr.z0+fr.z1)/2;
-  const map=c=>c.map(p=>({y:(p.u-cx)+ty,z:(cv-p.v)+tz}));
-  state.left.curve=map(contours[0]);
-  if(contours[1])state.right.curve=map(contours[1]);
+  const ty=state.zone.width/2,tz=state.zone.height/2;
+  const map=c=>c.map(p=>({y:(p.u-cx)+ty,z:(r.flip?(cv-p.v):(p.v-cv))+tz}));
+  state.left.curve=map(use[0]);
+  state.right.curve=use[1]?map(use[1]):[];
   refresh();
-  alert(contours.length>=2
-    ?'Импорт SVG: контур 1 → ЛЕВАЯ плоскость, контур 2 → ПРАВАЯ.\nМасштаб 1:1 (мм), взаимное положение контуров сохранено.'
-    :'Импорт SVG: найден один контур → размещён на ЛЕВОЙ плоскости.');
+  alert('Импорт: контур 1 → ЛЕВО'+(use[1]?', контур 2 → ПРАВО':', ПРАВАЯ плоскость пуста')+'.\n'+r.note+'. Положение сохранено.');
 }
 
-/* ================= SWAP CURVES ================= */
+/* ============ SWAP ============ */
 document.getElementById('btnSwap').onclick=()=>{
   if(!confirm('Поменять кривые местами (ЛЕВО ↔ ПРАВО)?'))return;
-  const t=state.left.curve;
-  state.left.curve=state.right.curve;
-  state.right.curve=t;
+  const t=state.left.curve;state.left.curve=state.right.curve;state.right.curve=t;
   refresh();
 };
 
-/* ================= G-CODE ================= */
-const fmt=v=>(v*state.cut.scale).toFixed(state.cut.dec);
+/* ============ G-CODE ============ */
+const fmt=v=>v.toFixed(state.cut.dec);
 function generateGCode(){
+  recomputeWork();
   const tp=computeToolpath();
   if(!tp){alert('Нарисуйте кривые на обеих плоскостях (минимум 2 точки).');return;}
   state.tp=tp;
@@ -730,12 +848,11 @@ function generateGCode(){
     lines.push('G1 X'+fmt(e.s0.p0.y)+' Y'+fmt(e.s0.p0.z)+' A'+fmt(e.s0.p1.y)+' B'+fmt(e.s0.p1.z));
     lines.push('G1 X'+fmt(e.s1.p0.y)+' Y'+fmt(e.s1.p0.z)+' A'+fmt(e.s1.p1.y)+' B'+fmt(e.s1.p1.z));
   });
-  for(let i=0;i<tp.N;i++)
-    lines.push('G1 X'+fmt(tp.gXY[i].y)+' Y'+fmt(tp.gXY[i].z)+' A'+fmt(tp.gAB[i].y)+' B'+fmt(tp.gAB[i].z));
+  for(let i=0;i<tp.N;i++)lines.push('G1 X'+fmt(tp.gXY[i].y)+' Y'+fmt(tp.gXY[i].z)+' A'+fmt(tp.gAB[i].y)+' B'+fmt(tp.gAB[i].z));
   document.getElementById('gcodeFooter').value.split('\n').forEach(l=>lines.push(l));
   document.getElementById('gcodeOut').value=lines.join('\n');
   document.getElementById('glines').textContent=lines.length+' строк';
-  updateInfo();drawAll();
+  updateInfo();drawAll();scheduleSave();
 }
 function exportGCode(){
   const txt=document.getElementById('gcodeOut').value;
@@ -746,25 +863,32 @@ function exportGCode(){
   document.body.removeChild(a);URL.revokeObjectURL(a.href);
 }
 
-/* ================= SIM ================= */
-function startSim(){
-  if(!state.tp&&!computeToolpathSafe())return;
-  state.sim.running=true;
-}
-function computeToolpathSafe(){
-  const tp=computeToolpath();
-  if(!tp){alert('Нарисуйте кривые на обеих плоскостях.');return false;}
-  state.tp=tp;return true;
-}
+/* ============ SIM (1x–60x + scrub) ============ */
+const scrub=document.getElementById('scrub');
+let scrubbing=false;
+scrub.addEventListener('pointerdown',()=>scrubbing=true);
+window.addEventListener('pointerup',()=>scrubbing=false);
+scrub.addEventListener('input',()=>{state.sim.t=scrub.value/1000;drawAll();});
+let lastT=performance.now();
 setInterval(()=>{
+  const now=performance.now(),dt=(now-lastT)/1000;lastT=now;
   if(!state.sim.running||!state.tp)return;
-  state.sim.t+=state.sim.speed;
+  const mmPerSec=(state.cut.feed/60)*state.sim.speedX;
+  state.sim.t+=mmPerSec*dt/state.tp.len;
   if(state.sim.t>1)state.sim.t=0;
-  document.getElementById('simT').textContent=state.sim.t.toFixed(3);
+  if(!scrubbing)scrub.value=Math.round(state.sim.t*1000);
   drawIso();drawEditor(edL);drawEditor(edR);
 },20);
+function setRun(v){
+  if(v&&!state.tp){recomputeWork();const tp=computeToolpath();if(!tp){alert('Нарисуйте кривые на обеих плоскостях.');return;}state.tp=tp;updateInfo();drawAll();}
+  state.sim.running=v;
+  document.getElementById('btnPlay').classList.toggle('on',v);
+}
+document.getElementById('btnPlay').onclick=()=>setRun(true);
+document.getElementById('btnPause').onclick=()=>setRun(false);
+document.getElementById('btnStop').onclick=()=>{setRun(false);state.sim.t=0;scrub.value=0;drawAll();};
 
-/* ================= INFO ================= */
+/* ============ INFO ============ */
 function dirBadge(el,a){
   if(Math.abs(a)<1e-6){el.textContent='—';el.className='badge na';}
   else if(a>0){el.textContent='↺ против час.';el.className='badge ccw';}
@@ -776,33 +900,31 @@ function updateInfo(){
   dirBadge(document.getElementById('dirL'),aL);dirBadge(document.getElementById('dirR'),aR);
   dirBadge(document.getElementById('dirLB'),aL);dirBadge(document.getElementById('dirRB'),aR);
   const warns=[];
-  if(L.length<2||R.length<2)warns.push('Нарисуйте кривые на обеих плоскостях (минимум 2 точки).');
+  if(L.length<2||R.length<2)warns.push('Нарисуйте или импортируйте кривые на обеих плоскостях.');
   if(Math.abs(aL)>1e-6&&Math.abs(aR)>1e-6&&Math.sign(aL)!==Math.sign(aR))
     warns.push('⚠ Направления не совпадают — струна перекрутится. Нажмите «Выровнять направления».');
   if(state.left.starts.length!==state.right.starts.length)
-    warns.push('⚠ Стартовых линий слева: '+state.left.starts.length+', справа: '+state.right.starts.length+' — должно быть поровну.');
+    warns.push('⚠ Стартовых линий слева: '+state.left.starts.length+', справа: '+state.right.starts.length+'.');
   if(state.tp){
     const bd=state.tp.bd,Z=state.zone;
     if(bd.minY<-1||bd.maxY>Z.width+1||bd.minZ<-1||bd.maxZ>Z.height+1)
-      warns.push('⚠ Жёлтая траектория выходит за пределы рабочей зоны! Уменьшите заготовку или разнесите профили.');
+      warns.push('⚠ Жёлтая траектория выходит за пределы рабочей зоны!');
   }
-  document.getElementById('warnBox').innerHTML=warns.length
-    ?warns.map(x=>'<div class="warn">'+x+'</div>').join('')
-    :'<div class="ok">✓ Противоречий не обнаружено</div>';
+  document.getElementById('warnBox').innerHTML=warns.length?warns.map(x=>'<div class="warn">'+x+'</div>').join(''):'<div class="ok">✓ Противоречий не обнаружено</div>';
   let s='Левая: '+L.length+' т., '+polyLen(L).toFixed(0)+' мм<br>Правая: '+R.length+' т., '+polyLen(R).toFixed(0)+' мм';
+  const b=workBox();
+  s+='<br>Заготовка: '+state.work.l+'×'+state.work.w.toFixed(0)+'×'+state.work.h.toFixed(0)+(state.autoWP?' (авто)':'');
   if(state.tp){
     const bd=state.tp.bd;
-    s+='<br>Траектория G-code: '+state.tp.N+' кадров';
-    s+='<br>Вынос на плоскости: Y '+bd.minY.toFixed(0)+'…'+bd.maxY.toFixed(0)+', Z '+bd.minZ.toFixed(0)+'…'+bd.maxZ.toFixed(0);
-    const len=Math.max(polyLen(state.tp.gXY),polyLen(state.tp.gAB));
-    s+='<br>Путь ≈ '+len.toFixed(0)+' мм, время ≈ '+(len/state.cut.feed).toFixed(1)+' мин при F'+state.cut.feed;
+    s+='<br>Кадров: '+state.tp.N+' • вынос Y '+bd.minY.toFixed(0)+'…'+bd.maxY.toFixed(0)+', Z '+bd.minZ.toFixed(0)+'…'+bd.maxZ.toFixed(0);
+    s+='<br>Путь ≈ '+state.tp.len.toFixed(0)+' мм • при F'+state.cut.feed+': 1x = '+(state.tp.len/(state.cut.feed/60)/60).toFixed(1)+' мин';
   }
   document.getElementById('stats').innerHTML=s;
   document.getElementById('ptsL').textContent=L.length+' т. / '+state.left.starts.length+' ст.';
   document.getElementById('ptsR').textContent=R.length+' т. / '+state.right.starts.length+' ст.';
 }
 
-/* ================= DEMO / REFRESH ================= */
+/* ============ DEMO / REFRESH ============ */
 function demo(){
   const fr=faceRect(),cy=(fr.y0+fr.y1)/2,cz=(fr.z0+fr.z1)/2;
   const r=Math.min(fr.y1-fr.y0,fr.z1-fr.z0)/2*.75;
@@ -817,44 +939,40 @@ function demo(){
   generateGCode();
 }
 function drawAll(){drawEditor(edL);drawEditor(edR);drawIso();}
-function refresh(){state.tp=computeToolpath();updateInfo();drawAll();}
+function refresh(){recomputeWork();syncManInputs();state.tp=computeToolpath();updateInfo();drawAll();scheduleSave();}
 
-/* ================= BINDINGS ================= */
-function paintRange(el){
-  const p=(el.value-el.min)/(el.max-el.min)*100;
-  el.style.background='linear-gradient(to right,var(--blue) '+p+'%,#e9e9eb '+p+'%)';
-}
-function bindNum(id,obj,key){
-  const el=document.getElementById(id);
-  el.addEventListener('input',()=>{obj[key]=parseFloat(el.value)||0;refresh();});
-}
+/* ============ BINDINGS ============ */
+function paintRange(el){const p=(el.value-el.min)/(el.max-el.min)*100;el.style.background='linear-gradient(to right,var(--tint) '+p+'%,#e9e9eb '+p+'%)';}
+function bindNum(id,obj,key,cb){const el=document.getElementById(id);el.addEventListener('input',()=>{obj[key]=parseFloat(el.value)||0;if(cb)cb();refresh();});}
 bindNum('zoneW',state.zone,'width');bindNum('zoneL',state.zone,'length');bindNum('zoneH',state.zone,'height');
 bindNum('wpL',state.work,'l');bindNum('wpW',state.work,'w');bindNum('wpH',state.work,'h');
 bindNum('offX',state.work,'ox');bindNum('offY',state.work,'oy');bindNum('offZ',state.work,'oz');
+bindNum('alL',state.allow,'l');bindNum('alR',state.allow,'r');bindNum('alB',state.allow,'b');bindNum('alT',state.allow,'t');
 bindNum('feed',state.cut,'feed');bindNum('dec',state.cut,'dec');
-function bindRange(id,spanId,obj,key,fix){
+function bindRange(id,spanId,obj,key,fix,suf){
   const el=document.getElementById(id),sp=document.getElementById(spanId);
-  const f=()=>{obj[key]=parseFloat(el.value);sp.textContent=obj[key].toFixed(fix);paintRange(el);refresh();};
+  const f=()=>{obj[key]=parseFloat(el.value);sp.textContent=(suf||'')+obj[key].toFixed(fix);paintRange(el);refresh();};
   el.addEventListener('input',f);paintRange(el);
 }
-bindRange('ppm','ppmV',state.cut,'ppm',2);
-bindRange('offLf','offLfV',state.cut,'offL',1);
-bindRange('offRt','offRtV',state.cut,'offR',1);
-bindRange('simSpeed','simSpeedV',state.sim,'speed',3);
-document.getElementById('scaleSel').addEventListener('change',e=>{state.cut.scale=parseInt(e.target.value);refresh();});
+bindRange('ppm','ppmV',state.cut,'ppm',2,'');
+bindRange('offLf','offLfV',state.cut,'offL',1,'');
+bindRange('offRt','offRtV',state.cut,'offR',1,'');
+const spX=document.getElementById('speedX');
+spX.addEventListener('input',()=>{state.sim.speedX=parseInt(spX.value);document.getElementById('speedXV').textContent='×'+state.sim.speedX;paintRange(spX);scheduleSave();});
+document.getElementById('autoWP').addEventListener('change',e=>{state.autoWP=e.target.checked;refresh();});
+function syncManInputs(){
+  document.querySelectorAll('.man').forEach(el=>el.disabled=state.autoWP);
+}
 document.getElementById('btnGen').onclick=generateGCode;
 document.getElementById('btnExp').onclick=exportGCode;
+document.getElementById('btnCopy').onclick=()=>navigator.clipboard.writeText(document.getElementById('gcodeOut').value).then(()=>alert('G-код скопирован.'));
 document.getElementById('btnDemo').onclick=demo;
 document.getElementById('btnClr').onclick=()=>{
   if(!confirm('Удалить все кривые и стартовые линии?'))return;
   state.left.curve=[];state.left.starts=[];state.right.curve=[];state.right.starts=[];
-  state.tp=null;state.sim.t=0;document.getElementById('gcodeOut').value='';
+  state.tp=null;state.sim.t=0;scrub.value=0;document.getElementById('gcodeOut').value='';
   document.getElementById('glines').textContent='';refresh();
 };
-document.getElementById('btnSim').onclick=()=>{state.sim.running=!state.sim.running;if(state.sim.running)startSim();};
-document.getElementById('btnPlay').onclick=startSim;
-document.getElementById('btnPause').onclick=()=>state.sim.running=false;
-document.getElementById('btnReset').onclick=()=>{state.sim.running=false;state.sim.t=0;document.getElementById('simT').textContent='0.000';drawAll();};
 document.getElementById('btnAlign').onclick=()=>{
   const aL=signedArea(state.left.curve),aR=signedArea(state.right.curve);
   if(Math.abs(aL)>1e-6&&Math.abs(aR)>1e-6&&Math.sign(aL)!==Math.sign(aR)){
@@ -863,11 +981,40 @@ document.getElementById('btnAlign').onclick=()=>{
   }
   refresh();
 };
+document.getElementById('btnResetAll').onclick=()=>{
+  if(!confirm('Сбросить ВСЕ сохранённые настройки страницы?'))return;
+  localStorage.removeItem(SKEY);location.reload();
+};
+['gcodeHeader','gcodeFooter'].forEach(id=>document.getElementById(id).addEventListener('input',scheduleSave));
 
-/* ================= INIT ================= */
-layoutDefaults();
-demo();
-setTimeout(()=>{layoutApply();},60);
+/* ============ INIT ============ */
+(function init(){
+  document.getElementById('zoneW').value=state.zone.width;
+  document.getElementById('zoneL').value=state.zone.length;
+  document.getElementById('zoneH').value=state.zone.height;
+  document.getElementById('wpL').value=state.work.l;
+  document.getElementById('wpW').value=Math.round(state.work.w);
+  document.getElementById('wpH').value=Math.round(state.work.h);
+  document.getElementById('offX').value=state.work.ox;
+  document.getElementById('offY').value=Math.round(state.work.oy);
+  document.getElementById('offZ').value=Math.round(state.work.oz);
+  document.getElementById('alL').value=state.allow.l;document.getElementById('alR').value=state.allow.r;
+  document.getElementById('alB').value=state.allow.b;document.getElementById('alT').value=state.allow.t;
+  document.getElementById('autoWP').checked=state.autoWP;
+  document.getElementById('feed').value=state.cut.feed;
+  document.getElementById('dec').value=state.cut.dec;
+  document.getElementById('ppm').value=state.cut.ppm;document.getElementById('ppmV').textContent=state.cut.ppm.toFixed(2);paintRange(document.getElementById('ppm'));
+  document.getElementById('offLf').value=state.cut.offL;document.getElementById('offLfV').textContent=state.cut.offL.toFixed(1);paintRange(document.getElementById('offLf'));
+  document.getElementById('offRt').value=state.cut.offR;document.getElementById('offRtV').textContent=state.cut.offR.toFixed(1);paintRange(document.getElementById('offRt'));
+  spX.value=state.sim.speedX;document.getElementById('speedXV').textContent='×'+state.sim.speedX;paintRange(spX);
+  document.getElementById('gcodeHeader').value=state.header;
+  document.getElementById('gcodeFooter').value=state.footer;
+  syncManInputs();
+  layoutApply();
+  if(saved&&state.left.curve.length)refresh();
+  else demo();
+  setTimeout(layoutApply,60);
+})();
 </script>
 </body>
 </html>
