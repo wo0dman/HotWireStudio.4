@@ -9,7 +9,7 @@
 :root{
   --bg:#f2f2f7; --card:#fff; --hair:rgba(60,60,67,.16); --hair2:rgba(60,60,67,.3);
   --txt:#1c1c1e; --txt2:#8e8e93; --tint:#007aff; --green:#34c759; --red:#ff3b30;
-  --gold:#b28600; --grp:rgba(120,120,128,.12);
+  --gold:#b28600; --purple:#5856d6; --grp:rgba(120,120,128,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
@@ -28,7 +28,6 @@ header h1 .ic{width:20px;height:20px;color:var(--txt)}
 .nbtn.danger:hover{background:rgba(255,59,48,.1)}
 .nbtn .ic{width:17px;height:17px}
 main{display:grid;grid-template-columns:324px 1fr;height:calc(100vh - 52px);min-height:0}
-/* ---------- left ---------- */
 #settings{background:var(--bg);border-right:.5px solid var(--hair);overflow-y:auto;overflow-x:hidden;padding:10px 12px 30px}
 .card{background:var(--card);border-radius:14px;box-shadow:0 .5px 1px rgba(0,0,0,.06);padding:4px 14px;margin-bottom:12px}
 .sec-label{font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin:14px 6px 6px}
@@ -61,7 +60,6 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 #stats{font-size:12px;color:var(--txt2);line-height:1.55;padding:8px 0}
 .smallbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border:none;border-radius:10px;background:rgba(0,122,255,.12);color:var(--tint);font-size:13px;font-weight:600;cursor:pointer;margin:8px 0}
 .smallbtn.red{background:rgba(255,59,48,.1);color:var(--red)}
-/* ---------- right (flex, splitters) ---------- */
 #work{display:flex;flex-direction:column;min-height:0;min-width:0;padding:10px}
 #editorsRow,#bottomRow{display:flex;min-height:0;min-width:0}
 #editorsRow{flex:.5 1 0}
@@ -93,7 +91,6 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .acts button .ic{width:15px;height:15px}
 .acts button.txt{font-size:10px;font-weight:700;width:auto;padding:0 7px}
 canvas{display:block;width:100%;flex:1;min-height:0}
-/* gcode card */
 #gcBody{flex:1;display:grid;grid-template-columns:266px 1fr;min-height:0}
 #gcCtl{border-right:.5px solid var(--hair);padding:10px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
 #gcCtl .lbl{font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
@@ -140,6 +137,10 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
       <div class="row"><label>Отступ струны — лево</label><input type="range" id="offLf" min="-10" max="10" step="0.1" value="0"><span class="val" id="offLfV">0.0</span></div>
       <div class="row"><label>Отступ струны — право</label><input type="range" id="offRt" min="-10" max="10" step="0.1" value="0"><span class="val" id="offRtV">0.0</span></div>
       <div class="row"><label>Подача F</label><input type="number" id="feed" value="300"></div>
+    </div>
+    <div class="sec-label">Точки синхронизации</div>
+    <div class="card">
+      <div class="row" style="border:none"><label style="font-size:12px;color:var(--txt2)">Инструмент «Синхро» на плоскости: клик по кривой — добавить точку, перетаскивание — сдвиг вдоль кривой, двойной клик — удалить. №1 всегда в старте вектора. Пары номеров синхронизируют концы струны по времени.</label></div>
     </div>
     <div class="sec-label">Заготовка</div>
     <div class="card">
@@ -227,9 +228,9 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
           <span><i style="background:var(--red)"></i>профиль лево</span>
           <span><i style="background:var(--tint)"></i>профиль право</span>
           <span><i style="background:var(--gold)"></i>траектория G-code (XY / AB)</span>
+          <span><i style="background:var(--purple)"></i>пары синхронизации</span>
           <span><i style="background:var(--green)"></i>стартовые линии</span>
           <span><i style="background:var(--red);height:4px"></i>струна</span>
-          <span><i style="background:rgba(0,122,255,.4)"></i>поверхность реза</span>
         </div>
       </div>
       <div class="splitter v" id="splitIso"></div>
@@ -274,14 +275,16 @@ M30</textarea>
 /* ============ ICONS ============ */
 const IP={
  start:'<path d="M6 21V4m0 1h11l-2.5 3L17 11H6"/>',
+ sync:'<circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3"/>',
  loop:'<path d="M18 12a6 6 0 1 1-2-4.5M18 5v3h-3"/>',
  rev:'<path d="M8 7h10l-3-3M16 17H6l3 3"/>',
- clr:'<path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13h8l1-13"/>'
+ clr:'<path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13h8l1-13"/>',
+ syncclr:'<circle cx="12" cy="12" r="6.5"/><path d="m9.5 9.5 5 5m0-5-5 5"/>'
 };
 const ic=n=>'<svg class="ic" viewBox="0 0 24 24">'+IP[n]+'</svg>';
 
 /* ============ STATE + STORAGE ============ */
-const SKEY='hotwire4d.v3';
+const SKEY='hotwire4d.v4';
 const DEF={
  zone:{width:2100,length:2400,height:1300},
  work:{l:1200,w:1000,h:600,ox:0,oy:0,oz:0},
@@ -289,8 +292,8 @@ const DEF={
  autoWP:true,
  cut:{ppm:.26,offL:0,offR:0,feed:300,dec:3},
  sim:{running:false,t:0,speedX:12},
- left:{curve:[],starts:[]},
- right:{curve:[],starts:[]},
+ left:{curve:[],starts:[],sync:[0]},
+ right:{curve:[],starts:[],sync:[0]},
  layout:{edF:.5,leftF:.5,isoF:.575},
  header:'G90 G92 G80 G17\nT1M6\nG54\nM7\nM8\nF300',
  footer:'M9\nM30'
@@ -304,19 +307,28 @@ try{
     state.zone=Object.assign(state.zone,o.zone||{});state.work=Object.assign(state.work,o.work||{});
     state.allow=Object.assign(state.allow,o.allow||{});state.autoWP=!!o.autoWP;
     state.cut=Object.assign(state.cut,o.cut||{});state.sim.speedX=(o.sim&&o.sim.speedX)||12;
-    state.left=o.left||state.left;state.right=o.right||state.right;
+    state.left=Object.assign({curve:[],starts:[],sync:[0]},o.left||{});
+    state.right=Object.assign({curve:[],starts:[],sync:[0]},o.right||{});
     state.layout=Object.assign(state.layout,o.layout||{});
     state.header=o.header||state.header;state.footer=o.footer||state.footer;
     saved=true;
   }
 }catch(e){}
+function sanitizeSyncs(side){
+  let s=state[side].sync;
+  if(!Array.isArray(s)||!s.length)s=[0];
+  s=s.map(v=>clamp(v,0,.999999)).sort((a,b)=>a-b);
+  s[0]=0;
+  state[side].sync=s;
+}
+sanitizeSyncs('left');sanitizeSyncs('right');
 let saveT=null;
 function scheduleSave(){clearTimeout(saveT);saveT=setTimeout(()=>{
   try{localStorage.setItem(SKEY,JSON.stringify({zone:state.zone,work:state.work,allow:state.allow,autoWP:state.autoWP,cut:state.cut,sim:{speedX:state.sim.speedX},left:state.left,right:state.right,layout:state.layout,header:document.getElementById('gcodeHeader').value,footer:document.getElementById('gcodeFooter').value}));}catch(e){}
 },300);}
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 
-/* ============ LAYOUT (flex fractions — page never breaks) ============ */
+/* ============ LAYOUT ============ */
 const editorsRow=document.getElementById('editorsRow'),bottomRow=document.getElementById('bottomRow');
 const panelL=document.getElementById('panelL'),panelR=document.getElementById('panelR');
 const panelIso=document.getElementById('panelIso'),panelGc=document.getElementById('panelGc');
@@ -336,11 +348,7 @@ function dragSplit(el,get,set,vertical){
     e.preventDefault();
     const cont=vertical?el.parentElement.clientWidth:el.parentElement.clientHeight;
     const f0=get(),p0=vertical?e.clientX:e.clientY;
-    const move=ev=>{
-      const d=(vertical?ev.clientX:ev.clientY)-p0;
-      set(clamp(f0+d/cont,.12,.88));
-      layoutApply();
-    };
+    const move=ev=>{set(clamp(f0+((vertical?ev.clientX:ev.clientY)-p0)/cont,.12,.88));layoutApply();};
     const up=()=>{window.removeEventListener('mousemove',move);window.removeEventListener('mouseup',up);scheduleSave();};
     window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
   });
@@ -362,16 +370,6 @@ function workBox(){
 function faceRect(){const b=workBox();return{y0:b.y0,y1:b.y1,z0:b.z0,z1:b.z1};}
 function polyLen(p){let l=0;for(let i=1;i<p.length;i++)l+=Math.hypot(p[i].y-p[i-1].y,p[i].z-p[i-1].z);return l;}
 function signedArea(p){if(p.length<3)return 0;let a=0;for(let i=0;i<p.length;i++){const q=p[i],r=p[(i+1)%p.length];a+=q.y*r.z-r.y*q.z;}return a/2;}
-function resample(p,n){
-  if(p.length<2)return[];
-  const cum=[0];for(let i=1;i<p.length;i++)cum.push(cum[i-1]+Math.hypot(p[i].y-p[i-1].y,p[i].z-p[i-1].z));
-  const tot=cum[cum.length-1];if(tot<1e-9)return[p[0]];
-  const out=[];let s=0;
-  for(let i=0;i<n;i++){const tg=tot*i/(n-1);while(s<p.length-2&&cum[s+1]<tg)s++;
-    const sp=(cum[s+1]-cum[s])||1,t=clamp((tg-cum[s])/sp,0,1);
-    out.push({y:p[s].y+(p[s+1].y-p[s].y)*t,z:p[s].z+(p[s+1].z-p[s].z)*t});}
-  return out;
-}
 function offsetCurve2D(p,d){
   if(Math.abs(d)<1e-9||p.length<2)return p.map(q=>({y:q.y,z:q.z}));
   const out=[];
@@ -386,6 +384,34 @@ function extendChord(pL,pR,x0,x1){
   const dx=pR.x-pL.x,t0=(x0-pL.x)/dx,t1=(x1-pL.x)/dx;
   return{p0:{y:pL.y+t0*(pR.y-pL.y),z:pL.z+t0*(pR.z-pL.z)},p1:{y:pL.y+t1*(pR.y-pL.y),z:pL.z+t1*(pR.z-pL.z)}};
 }
+/* --- arc / sync math --- */
+function arcData(pts){
+  const cum=[0];
+  for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i].y-pts[i-1].y,pts[i].z-pts[i-1].z));
+  const total=cum[cum.length-1]||0;
+  const closed=pts.length>2&&Math.hypot(pts[0].y-pts[pts.length-1].y,pts[0].z-pts[pts.length-1].z)<1e-6;
+  return{pts,cum,total,closed};
+}
+function evalArc(arc,s){
+  const{pts,cum,total}=arc;
+  if(total<=0)return{...(pts[0]||{y:0,z:0})};
+  if(arc.closed)s=((s%total)+total)%total;else s=clamp(s,0,total);
+  let i=1;while(i<cum.length-1&&cum[i]<s)i++;
+  const span=(cum[i]-cum[i-1])||1,t=(s-cum[i-1])/span;
+  return{y:pts[i-1].y+(pts[i].y-pts[i-1].y)*t,z:pts[i-1].z+(pts[i].z-pts[i-1].z)*t};
+}
+function segmentsFromSyncs(arc,sSync){
+  const segs=[],n=sSync.length,T=arc.total;
+  if(n<=1||T<=0)return[{s0:0,s1:T,len:T}];
+  for(let k=0;k<n-1;k++)segs.push({s0:sSync[k],s1:sSync[k+1],len:sSync[k+1]-sSync[k]});
+  if(arc.closed)segs.push({s0:sSync[n-1],s1:sSync[0]+T,len:sSync[0]+T-sSync[n-1]});
+  else segs.push({s0:sSync[n-1],s1:T,len:T-sSync[n-1]});
+  return segs.filter(s=>s.len>1e-9);
+}
+function syncMismatch(){
+  if(state.left.curve.length<2||state.right.curve.length<2)return false;
+  return state.left.sync.length!==state.right.sync.length;
+}
 function recomputeWork(){
   if(!state.autoWP)return;
   const pts=offsetCurve2D(state.left.curve,state.cut.offL).concat(offsetCurve2D(state.right.curve,state.cut.offR));
@@ -398,28 +424,47 @@ function recomputeWork(){
   state.work.oy=(y0+y1)/2-state.zone.width/2;
   state.work.oz=(z0+z1)/2-state.zone.height/2;
 }
-/* кривые следуют за заготовкой */
 function shiftCurves(dy,dz){
   ['left','right'].forEach(sd=>{
     state[sd].curve.forEach(p=>{p.y+=dy;p.z+=dz;});
     state[sd].starts.forEach(s=>{s.p1.y+=dy;s.p1.z+=dz;s.p2.y+=dy;s.p2.z+=dz;});
   });
 }
+/* --- toolpath: piecewise-sync resampling --- */
 function computeToolpath(){
   const lc=state.left.curve,rc=state.right.curve;
   if(lc.length<2||rc.length<2)return null;
+  if(syncMismatch())return null;
   const b=workBox();
   if(Math.abs(b.x1-b.x0)<1e-6)return null;
   const ol=offsetCurve2D(lc,state.cut.offL),or_=offsetCurve2D(rc,state.cut.offR);
-  const N=clamp(Math.round(Math.max(polyLen(ol),polyLen(or_))*state.cut.ppm),2,4000);
-  const L=resample(ol,N),R=resample(or_,N);
+  const arcL=arcData(ol),arcR=arcData(or_);
+  if(arcL.total<=0||arcR.total<=0)return null;
+  const sL=state.left.sync.map(u=>clamp(u,0,1)*arcL.total);
+  const sR=state.right.sync.map(u=>clamp(u,0,1)*arcR.total);
+  const segL=segmentsFromSyncs(arcL,sL),segR=segmentsFromSyncs(arcR,sR);
+  if(segL.length!==segR.length)return null;
+  const ppm=state.cut.ppm;
+  const FL=[],FR=[];
+  for(let k=0;k<segL.length;k++){
+    const Lk=segL[k].len,Rk=segR[k].len;
+    const n=Math.max(2,Math.round(Math.max(Lk,Rk)*ppm));
+    for(let i=0;i<n;i++){
+      const tau=i/n;
+      FL.push(evalArc(arcL,segL[k].s0+tau*Lk));
+      FR.push(evalArc(arcR,segR[k].s0+tau*Rk));
+    }
+  }
+  FL.push(evalArc(arcL,segL[segL.length-1].s1));
+  FR.push(evalArc(arcR,segR[segR.length-1].s1));
+  const N=FL.length;
   const gXY=[],gAB=[],bd={minY:1e9,maxY:-1e9,minZ:1e9,maxZ:-1e9};
   for(let i=0;i<N;i++){
-    const e=extendChord({x:b.x0,y:L[i].y,z:L[i].z},{x:b.x1,y:R[i].y,z:R[i].z},0,state.zone.length);
+    const e=extendChord({x:b.x0,y:FL[i].y,z:FL[i].z},{x:b.x1,y:FR[i].y,z:FR[i].z},0,state.zone.length);
     gXY.push(e.p0);gAB.push(e.p1);
     for(const p of[e.p0,e.p1]){bd.minY=Math.min(bd.minY,p.y);bd.maxY=Math.max(bd.maxY,p.y);bd.minZ=Math.min(bd.minZ,p.z);bd.maxZ=Math.max(bd.maxZ,p.z);}
   }
-  return{N,profL:L,profR:R,gXY,gAB,bd,len:Math.max(polyLen(gXY),polyLen(gAB))||1};
+  return{N,profL:FL,profR:FR,gXY,gAB,bd,len:Math.max(polyLen(gXY),polyLen(gAB))||1,segs:segL.length};
 }
 function extStarts(){
   const b=workBox(),n=Math.min(state.left.starts.length,state.right.starts.length),out=[];
@@ -440,18 +485,66 @@ function fitCanvas(cv){
   return{w:r.width,h:r.height};
 }
 
+/* ============ SYNC POINT OPS ============ */
+function addSync(side,u){
+  const arc=arcData(state[side].curve);
+  if(arc.total<4)return;
+  let s=u*arc.total;
+  if(arc.closed)s=((s%arc.total)+arc.total)%arc.total;
+  if(s<2||s>arc.total-2)return;
+  for(const u2 of state[side].sync){
+    const s2=u2*arc.total;let d=Math.abs(s-s2);if(arc.closed)d=Math.min(d,arc.total-d);
+    if(d<2)return;
+  }
+  state[side].sync.push(s/arc.total);
+  state[side].sync.sort((a,b)=>a-b);
+}
+function nearestOnCurve(ed,curve,m){
+  const t=ed.t,cum=arcData(curve).cum,total=cum[cum.length-1]||1;
+  let best={d:1e9,u:0};
+  for(let i=1;i<curve.length;i++){
+    const a={x:t.ox+curve[i-1].y*t.s,y:t.h-(t.oy+curve[i-1].z*t.s)};
+    const b={x:t.ox+curve[i].y*t.s,y:t.h-(t.oy+curve[i].z*t.s)};
+    const dx=b.x-a.x,dy=b.y-a.y,L2=dx*dx+dy*dy||1;
+    const q=clamp(((m.x-a.x)*dx+(m.y-a.y)*dy)/L2,0,1);
+    const px=a.x+dx*q,py=a.y+dy*q,d=Math.hypot(px-m.x,py-m.y);
+    if(d<best.d)best={d,u:(cum[i-1]+(cum[i]-cum[i-1])*q)/total};
+  }
+  return best;
+}
+function syncScreenPts(ed,side){
+  const t=ed.t,arc=arcData(state[side].curve);
+  return state[side].sync.map(u=>{
+    const p=evalArc(arc,u*arc.total);
+    return{x:t.ox+p.y*t.s,y:t.h-(t.oy+p.z*t.s)};
+  });
+}
+function syncHit(ed,side,m){
+  const pts=syncScreenPts(ed,side);
+  for(let i=0;i<pts.length;i++)if(Math.hypot(pts[i].x-m.x,pts[i].y-m.y)<10)return i;
+  return -1;
+}
+function remapSyncsReverse(side){
+  let ns=state[side].sync.map(u=>{let v=1-u;if(v<0)v+=1;return v;});
+  ns=ns.filter(v=>v>1e-9&&v<1-1e-9);
+  ns.push(0);
+  ns.sort((a,b)=>a-b);
+  state[side].sync=ns;
+}
+
 /* ============ EDITORS ============ */
-const TOOLS=[{t:'start',n:'Старт',i:'start'}];
-const ACTIONS=[{i:'loop',tip:'Замкнуть кривую',fn:'close'},{i:'rev',tip:'Реверс направления',fn:'reverse'},{i:'clr',tip:'Очистить плоскость',fn:'clear'}];
+const TOOLS=[{t:'sync',n:'Синхро',i:'sync'},{t:'start',n:'Старт',i:'start'}];
+const ACTIONS=[{i:'loop',tip:'Замкнуть кривую',fn:'close'},{i:'rev',tip:'Реверс направления',fn:'reverse'},{i:'syncclr',tip:'Сбросить точки синхронизации (оставить №1)',fn:'syncclr'},{i:'clr',tip:'Очистить плоскость',fn:'clear'}];
 const actions={
  close(side){const c=state[side].curve;if(c.length>2&&Math.hypot(c[0].y-c[c.length-1].y,c[0].z-c[c.length-1].z)>1e-6)c.push({...c[0]});refresh();},
- reverse(side){state[side].curve.reverse();refresh();},
- clear(side){if(!confirm('Очистить плоскость?'))return;state[side].curve=[];state[side].starts=[];refresh();}
+ reverse(side){state[side].curve.reverse();remapSyncsReverse(side);refresh();},
+ syncclr(side){state[side].sync=[0];refresh();},
+ clear(side){if(!confirm('Очистить плоскость?'))return;state[side].curve=[];state[side].starts=[];state[side].sync=[0];refresh();}
 };
 function resetEdViews(){[edL,edR].forEach(ed=>{if(ed)ed.view=null;});}
 function makeEditor(cvId,segId,actId,side){
   const cv=document.getElementById(cvId);
-  const ed={canvas:cv,ctx:cv.getContext('2d'),side,tool:'start',tempStart:null,tempEnd:null,pan:null,w:0,h:0,t:null,view:null,btns:{}};
+  const ed={canvas:cv,ctx:cv.getContext('2d'),side,tool:'sync',tempStart:null,tempEnd:null,pan:null,dragSyncVal:null,w:0,h:0,t:null,view:null,btns:{}};
   const seg=document.getElementById(segId);
   TOOLS.forEach(t=>{const b=document.createElement('button');b.innerHTML=ic(t.i)+t.n;b.onclick=()=>setTool(ed,t.t);seg.appendChild(b);ed.btns[t.t]=b;});
   const act=document.getElementById(actId);
@@ -470,12 +563,27 @@ function makeEditor(cvId,segId,actId,side){
     if(e.button===2){ed.tempStart=null;ed.tempEnd=null;drawAll();return;}
     if(e.button===1||e.altKey){ed.pan={x:e.clientX,y:e.clientY,ox:ed.view?ed.view.ox:0,oy:ed.view?ed.view.oy:0};e.preventDefault();return;}
     if(!ed.t)return;
-    const w=toWorld(mpos(e));
-    ed.tempStart=snapPt(w);ed.tempEnd=snapPt(w);
+    const m=mpos(e),w=toWorld(m);
+    if(ed.tool==='start'){ed.tempStart=snapPt(w);ed.tempEnd=snapPt(w);}
+    else if(ed.tool==='sync'){
+      const curve=state[side].curve;
+      if(curve.length<2)return;
+      const hi=syncHit(ed,side,m);
+      if(hi>0)ed.dragSyncVal=state[side].sync[hi];
+      else if(hi===0){/* №1 зафиксирована */}
+      else{const nr=nearestOnCurve(ed,curve,m);if(nr.d<14){addSync(side,nr.u);refresh();}}
+    }
     drawAll();
   });
   cv.addEventListener('contextmenu',e=>e.preventDefault());
-  cv.addEventListener('dblclick',()=>{ed.view=null;drawAll();});
+  cv.addEventListener('dblclick',e=>{
+    const m=mpos(e);
+    if(ed.tool==='sync'){
+      const hi=syncHit(ed,side,m);
+      if(hi>0){state[side].sync.splice(hi,1);refresh();return;}
+    }
+    ed.view=null;drawAll();
+  });
   cv.addEventListener('wheel',e=>{
     e.preventDefault();
     if(!ed.t)return;
@@ -492,18 +600,31 @@ function makeEditor(cvId,segId,actId,side){
       ed.view.ox=ed.pan.ox+(e.clientX-ed.pan.x);ed.view.oy=ed.pan.oy+(e.clientY-ed.pan.y);
       drawAll();return;
     }
+    if(ed.dragSyncVal!==null){
+      const m=mpos(e),curve=state[side].curve,arc=arcData(curve);
+      const nr=nearestOnCurve(ed,curve,m);
+      if(nr.d>30)return;
+      let s=nr.u*arc.total;
+      s=clamp(s,2,Math.max(2,arc.total-2));
+      const u=s/arc.total;
+      const syncs=state[side].sync;
+      const i=syncs.indexOf(ed.dragSyncVal);
+      if(i>0){syncs[i]=u;syncs.sort((a,b)=>a-b);ed.dragSyncVal=u;drawAll();}
+      return;
+    }
     if(!ed.tempStart)return;
     ed.tempEnd=snapPt(toWorld(mpos(e)));
     drawAll();
   });
   window.addEventListener('mouseup',()=>{
     if(ed.pan){ed.pan=null;return;}
+    if(ed.dragSyncVal!==null){ed.dragSyncVal=null;refresh();return;}
     if(ed.tempStart&&ed.tempEnd&&Math.hypot(ed.tempEnd.y-ed.tempStart.y,ed.tempEnd.z-ed.tempStart.z)>1e-6)
       state[side].starts.push({p1:ed.tempStart,p2:ed.tempEnd});
     if(ed.tempStart)refresh();
     ed.tempStart=null;ed.tempEnd=null;
   });
-  setTool(ed,'start');
+  setTool(ed,'sync');
   return ed;
 }
 function setTool(ed,t){ed.tool=t;TOOLS.forEach(x=>ed.btns[x.t].classList.toggle('active',x.t===t));ed.canvas.style.cursor='crosshair';}
@@ -581,8 +702,19 @@ function drawEditor(ed){
     ctx.strokeStyle=col;ctx.lineWidth=2.2;ctx.lineJoin='round';
     ctx.beginPath();curve.forEach((p,i)=>i?ctx.lineTo(SX(p.y),SY(p.z)):ctx.moveTo(SX(p.y),SY(p.z)));ctx.stroke();
     if(curve.length<=300){ctx.fillStyle=col;curve.forEach(p=>{ctx.beginPath();ctx.arc(SX(p.y),SY(p.z),2.4,0,Math.PI*2);ctx.fill();});}
-    ctx.fillStyle='#fff';ctx.strokeStyle=col;ctx.lineWidth=2;
-    ctx.beginPath();ctx.arc(SX(curve[0].y),SY(curve[0].z),4.5,0,Math.PI*2);ctx.fill();ctx.stroke();
+    /* точки синхронизации */
+    const arc=arcData(curve);
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    state[ed.side].sync.forEach((u,i)=>{
+      const p=evalArc(arc,u*arc.total);
+      const sx=SX(p.y),sy=SY(p.z);
+      ctx.beginPath();ctx.arc(sx,sy,8,0,Math.PI*2);
+      if(i===0){ctx.fillStyle=col;ctx.fill();ctx.fillStyle='#fff';}
+      else{ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=col;}
+      ctx.font='700 9px -apple-system,sans-serif';
+      ctx.fillText(String(i+1),sx,sy+.5);
+    });
+    ctx.textAlign='start';ctx.textBaseline='alphabetic';
     if(curve.length>2){const i=Math.floor(curve.length*.6);
       arrow(ctx,{x:SX(curve[i-1].y),y:SY(curve[i-1].z)},{x:SX(curve[i].y),y:SY(curve[i].z)},11,col);}
   }
@@ -656,6 +788,17 @@ function drawIso(){
   }
   path3D(state.left.curve,b.x0,'#ff3b30',2.2);
   path3D(state.right.curve,b.x1,'#007aff',2.2);
+  /* линии пар синхронизации */
+  if(state.left.curve.length>1&&state.right.curve.length>1&&state.left.sync.length===state.right.sync.length){
+    const arcL=arcData(state.left.curve),arcR=arcData(state.right.curve);
+    ctx.strokeStyle='rgba(88,86,214,.6)';ctx.lineWidth=1.2;ctx.setLineDash([4,3]);
+    state.left.sync.forEach(u=>{
+      const pL=evalArc(arcL,u*arcL.total),pR=evalArc(arcR,u*arcR.total);
+      const a=project({x:b.x0,y:pL.y,z:pL.z}),c=project({x:b.x1,y:pR.y,z:pR.z});
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(c.x,c.y);ctx.stroke();
+    });
+    ctx.setLineDash([]);
+  }
   if(state.tp){
     path3D(state.tp.gXY,0,'#b28600',2);
     path3D(state.tp.gAB,Z.length,'#b28600',2);
@@ -705,7 +848,7 @@ document.querySelectorAll('.seg button[data-v]').forEach(btn=>{
   };
 });
 
-/* ============ IMPORT: SVG / DXF / EPS ============ */
+/* ============ IMPORT ============ */
 const fileImp=document.getElementById('fileImp');
 document.getElementById('btnImport').onclick=()=>fileImp.click();
 fileImp.onchange=()=>{const f=fileImp.files[0];if(f)importFile(f);fileImp.value='';};
@@ -825,16 +968,19 @@ function placeContours(r){
   const cx=(minX+maxX)/2,cv=(minV+maxV)/2;
   const ty=state.zone.width/2,tz=state.zone.height/2;
   const map=c=>c.map(p=>({y:(p.u-cx)+ty,z:(r.flip?(cv-p.v):(p.v-cv))+tz}));
-  state.left.curve=map(use[0]);
-  state.right.curve=use[1]?map(use[1]):[];
+  state.left.curve=map(use[0]);state.left.sync=[0];
+  if(use[1]){state.right.curve=map(use[1]);state.right.sync=[0];}
+  else state.right.curve=[];
+  sanitizeSyncs('left');sanitizeSyncs('right');
   refresh();
-  alert('Импорт: контур 1 → ЛЕВО'+(use[1]?', контур 2 → ПРАВО':', ПРАВАЯ плоскость пуста')+'.\n'+r.note+'. Положение сохранено.');
+  alert('Импорт: контур 1 → ЛЕВО'+(use[1]?', контур 2 → ПРАВО':', ПРАВАЯ плоскость пуста')+'.\n'+r.note+'. Точки синхронизации сброшены до №1.');
 }
 
 /* ============ SWAP ============ */
 document.getElementById('btnSwap').onclick=()=>{
   if(!confirm('Поменять кривые местами (ЛЕВО ↔ ПРАВО)?'))return;
   const t=state.left.curve;state.left.curve=state.right.curve;state.right.curve=t;
+  const s=state.left.sync;state.left.sync=state.right.sync;state.right.sync=s;
   refresh();
 };
 
@@ -842,6 +988,10 @@ document.getElementById('btnSwap').onclick=()=>{
 const fmt=v=>v.toFixed(state.cut.dec);
 function generateGCode(){
   recomputeWork();
+  if(state.left.curve.length>1&&state.right.curve.length>1&&syncMismatch()){
+    alert('⚠ Точек синхронизации: слева '+state.left.sync.length+', справа '+state.right.sync.length+'.\nПары не совпадают — генерация заблокирована.');
+    return;
+  }
   const tp=computeToolpath();
   if(!tp){alert('Нарисуйте кривые на обеих плоскостях (минимум 2 точки).');return;}
   state.tp=tp;
@@ -869,7 +1019,7 @@ function exportGCode(){
   document.body.removeChild(a);URL.revokeObjectURL(a.href);
 }
 
-/* ============ SIM (1x–60x + scrub) ============ */
+/* ============ SIM ============ */
 const scrub=document.getElementById('scrub');
 let scrubbing=false;
 scrub.addEventListener('pointerdown',()=>scrubbing=true);
@@ -886,7 +1036,13 @@ setInterval(()=>{
   drawIso();drawEditor(edL);drawEditor(edR);
 },20);
 function setRun(v){
-  if(v&&!state.tp){recomputeWork();const tp=computeToolpath();if(!tp){alert('Нарисуйте кривые на обеих плоскостях.');return;}state.tp=tp;updateInfo();drawAll();}
+  if(v&&!state.tp){
+    recomputeWork();
+    if(syncMismatch()){alert('⚠ Пары синхронизации не совпадают — симуляция заблокирована.');return;}
+    const tp=computeToolpath();
+    if(!tp){alert('Нарисуйте кривые на обеих плоскостях.');return;}
+    state.tp=tp;updateInfo();drawAll();
+  }
   state.sim.running=v;
   document.getElementById('btnPlay').classList.toggle('on',v);
 }
@@ -907,6 +1063,7 @@ function updateInfo(){
   dirBadge(document.getElementById('dirLB'),aL);dirBadge(document.getElementById('dirRB'),aR);
   const warns=[];
   if(L.length<2||R.length<2)warns.push('Нарисуйте или импортируйте кривые на обеих плоскостях.');
+  if(syncMismatch())warns.push('⚠ Точек синхронизации: слева '+state.left.sync.length+', справа '+state.right.sync.length+' — генерация заблокирована.');
   if(Math.abs(aL)>1e-6&&Math.abs(aR)>1e-6&&Math.sign(aL)!==Math.sign(aR))
     warns.push('⚠ Направления не совпадают — струна перекрутится. Нажмите «Выровнять направления».');
   if(state.left.starts.length!==state.right.starts.length)
@@ -918,15 +1075,17 @@ function updateInfo(){
   }
   document.getElementById('warnBox').innerHTML=warns.length?warns.map(x=>'<div class="warn">'+x+'</div>').join(''):'<div class="ok">✓ Противоречий не обнаружено</div>';
   let s='Левая: '+L.length+' т., '+polyLen(L).toFixed(0)+' мм<br>Правая: '+R.length+' т., '+polyLen(R).toFixed(0)+' мм';
+  s+='<br>Синхро-пар: '+Math.min(state.left.sync.length,state.right.sync.length)+' (лево '+state.left.sync.length+' / право '+state.right.sync.length+')';
   s+='<br>Заготовка: '+state.work.l+'×'+state.work.w.toFixed(0)+'×'+state.work.h.toFixed(0)+(state.autoWP?' (авто)':'');
   if(state.tp){
     const bd=state.tp.bd;
-    s+='<br>Кадров: '+state.tp.N+' • вынос Y '+bd.minY.toFixed(0)+'…'+bd.maxY.toFixed(0)+', Z '+bd.minZ.toFixed(0)+'…'+bd.maxZ.toFixed(0);
-    s+='<br>Путь ≈ '+state.tp.len.toFixed(0)+' мм • при F'+state.cut.feed+': 1x = '+(state.tp.len/(state.cut.feed/60)/60).toFixed(1)+' мин';
+    s+='<br>Кадров: '+state.tp.N+' • сегментов: '+state.tp.segs;
+    s+='<br>Вынос Y '+bd.minY.toFixed(0)+'…'+bd.maxY.toFixed(0)+', Z '+bd.minZ.toFixed(0)+'…'+bd.maxZ.toFixed(0);
+    s+='<br>Путь ≈ '+state.tp.len.toFixed(0)+' мм • 1x = '+(state.tp.len/(state.cut.feed/60)/60).toFixed(1)+' мин';
   }
   document.getElementById('stats').innerHTML=s;
-  document.getElementById('ptsL').textContent=L.length+' т. / '+state.left.starts.length+' ст.';
-  document.getElementById('ptsR').textContent=R.length+' т. / '+state.right.starts.length+' ст.';
+  document.getElementById('ptsL').textContent=L.length+' т. · '+state.left.sync.length+' синхро';
+  document.getElementById('ptsR').textContent=R.length+' т. · '+state.right.sync.length+' синхро';
 }
 
 /* ============ DEMO / REFRESH ============ */
@@ -934,11 +1093,12 @@ function demo(){
   const fr=faceRect(),cy=(fr.y0+fr.y1)/2,cz=(fr.z0+fr.z1)/2;
   const r=Math.min(fr.y1-fr.y0,fr.z1-fr.z0)/2*.75;
   const circ=[];
-  for(let i=0;i<64;i++){const th=Math.PI/2+i/64*Math.PI*2;circ.push({y:cy+Math.cos(th)*r,z:cz+Math.sin(th)*r});}
+  for(let i=0;i<64;i++){const th=Math.PI/2+i/64*2*Math.PI;circ.push({y:cy+Math.cos(th)*r,z:cz+Math.sin(th)*r});}
   circ.push({...circ[0]});
-  state.left.curve=circ;
+  state.left.curve=circ;state.left.sync=[0,.25,.5,.75];
   const s=Math.min(fr.y1-fr.y0,fr.z1-fr.z0)*.75/2;
   state.right.curve=[{y:cy-s,z:cz+s},{y:cy-s,z:cz-s},{y:cy+s,z:cz-s},{y:cy+s,z:cz+s},{y:cy-s,z:cz+s}];
+  state.right.sync=[0,.25,.5,.75];
   state.left.starts=[{p1:{y:fr.y0,z:fr.z1},p2:{...circ[0]}}];
   state.right.starts=[{p1:{y:fr.y0,z:fr.z1},p2:{...state.right.curve[0]}}];
   generateGCode();
@@ -954,7 +1114,6 @@ bindNum('wpL',state.work,'l');bindNum('wpW',state.work,'w');bindNum('wpH',state.
 bindNum('offX',state.work,'ox');
 bindNum('alL',state.allow,'l');bindNum('alR',state.allow,'r');bindNum('alB',state.allow,'b');bindNum('alT',state.allow,'t');
 bindNum('feed',state.cut,'feed');bindNum('dec',state.cut,'dec');
-/* смещение заготовки тянет кривые за собой */
 function bindOffset(id,key,axis){
   const el=document.getElementById(id);
   el.addEventListener('input',()=>{
@@ -974,7 +1133,6 @@ function bindRange(id,spanId,obj,key,fix,suf){
 bindRange('ppm','ppmV',state.cut,'ppm',2,'');
 bindRange('offLf','offLfV',state.cut,'offL',1,'');
 bindRange('offRt','offRtV',state.cut,'offR',1,'');
-/* дискретность: select <-> slider */
 const discSel=document.getElementById('discSel'),ppmEl=document.getElementById('ppm');
 discSel.addEventListener('change',()=>{
   state.cut.ppm=parseFloat(discSel.value);
@@ -989,16 +1147,15 @@ ppmEl.addEventListener('input',()=>{
 const spX=document.getElementById('speedX');
 spX.addEventListener('input',()=>{state.sim.speedX=parseInt(spX.value);document.getElementById('speedXV').textContent='×'+state.sim.speedX;paintRange(spX);scheduleSave();});
 document.getElementById('autoWP').addEventListener('change',e=>{state.autoWP=e.target.checked;refresh();});
-function syncManInputs(){
-  document.querySelectorAll('.man').forEach(el=>el.disabled=state.autoWP);
-}
+function syncManInputs(){document.querySelectorAll('.man').forEach(el=>el.disabled=state.autoWP);}
 document.getElementById('btnGen').onclick=generateGCode;
 document.getElementById('btnExp').onclick=exportGCode;
 document.getElementById('btnCopy').onclick=()=>navigator.clipboard.writeText(document.getElementById('gcodeOut').value).then(()=>alert('G-код скопирован.'));
 document.getElementById('btnDemo').onclick=demo;
 document.getElementById('btnClr').onclick=()=>{
-  if(!confirm('Удалить все кривые и стартовые линии?'))return;
-  state.left.curve=[];state.left.starts=[];state.right.curve=[];state.right.starts=[];
+  if(!confirm('Удалить все кривые, стартовые линии и точки синхронизации?'))return;
+  state.left.curve=[];state.left.starts=[];state.left.sync=[0];
+  state.right.curve=[];state.right.starts=[];state.right.sync=[0];
   state.tp=null;state.sim.t=0;scrub.value=0;document.getElementById('gcodeOut').value='';
   document.getElementById('glines').textContent='';refresh();
 };
@@ -1006,6 +1163,7 @@ document.getElementById('btnAlign').onclick=()=>{
   const aL=signedArea(state.left.curve),aR=signedArea(state.right.curve);
   if(Math.abs(aL)>1e-6&&Math.abs(aR)>1e-6&&Math.sign(aL)!==Math.sign(aR)){
     state.right.curve.reverse();
+    remapSyncsReverse('right');
     state.right.starts.forEach(sg=>{const t=sg.p1;sg.p1=sg.p2;sg.p2=t;});
   }
   refresh();
