@@ -24,7 +24,6 @@ header h1 .ic{width:20px;height:20px;color:var(--txt)}
 .nbtn:hover{background:rgba(0,122,255,.1)}
 .nbtn:active{transform:scale(.97)}
 .nbtn.primary{background:var(--tint);color:#fff}
-.nbtn.primary:hover{filter:brightness(1.06)}
 .nbtn.danger{color:var(--red)}
 .nbtn.danger:hover{background:rgba(255,59,48,.1)}
 .nbtn .ic{width:17px;height:17px}
@@ -40,6 +39,7 @@ main{display:grid;grid-template-columns:324px 1fr;height:calc(100vh - 52px);min-
 input[type=number]{border:.5px solid var(--hair2);border-radius:8px;padding:5px 8px;font-size:13px;color:var(--txt);background:#fff;width:76px;text-align:right;outline:none}
 input[type=number]:focus{border-color:var(--tint);box-shadow:0 0 0 3px rgba(0,122,255,.15)}
 input[type=number]:disabled{opacity:.4}
+select{border:.5px solid var(--hair2);border-radius:8px;padding:5px 6px;font-size:12px;background:#fff;color:var(--txt)}
 input[type=range]{-webkit-appearance:none;appearance:none;width:118px;height:4px;border-radius:2px;background:linear-gradient(to right,var(--tint) 50%,#e9e9eb 50%);outline:none}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.28),0 0 0 .5px rgba(0,0,0,.04);cursor:pointer}
 input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.28);border:none;cursor:pointer}
@@ -61,16 +61,22 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 #stats{font-size:12px;color:var(--txt2);line-height:1.55;padding:8px 0}
 .smallbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border:none;border-radius:10px;background:rgba(0,122,255,.12);color:var(--tint);font-size:13px;font-weight:600;cursor:pointer;margin:8px 0}
 .smallbtn.red{background:rgba(255,59,48,.1);color:var(--red)}
-/* ---------- right ---------- */
-#work{display:grid;grid-template-rows:minmax(220px,1fr) 10px minmax(240px,1fr);height:100%;padding:10px;min-width:0;gap:0}
-#editorsRow{display:grid;grid-template-columns:minmax(300px,1fr) 10px minmax(300px,1fr);min-height:0;gap:0}
-#bottomRow{display:grid;grid-template-columns:minmax(320px,1.3fr) 10px minmax(380px,1fr);min-height:0;gap:0}
-.splitter{position:relative;user-select:none}
+/* ---------- right (flex, splitters) ---------- */
+#work{display:flex;flex-direction:column;min-height:0;min-width:0;padding:10px}
+#editorsRow,#bottomRow{display:flex;min-height:0;min-width:0}
+#editorsRow{flex:.5 1 0}
+#bottomRow{flex:.5 1 0}
+.splitter{flex:0 0 10px;position:relative;user-select:none}
 .splitter::after{content:'';position:absolute;inset:0;margin:auto;background:rgba(60,60,67,.16);border-radius:3px}
 .splitter:hover::after{background:var(--tint)}
-.splitter.v{width:10px;cursor:col-resize}.splitter.v::after{width:4px;height:44px}
-.splitter.h{height:10px;cursor:row-resize}.splitter.h::after{height:4px;width:44px}
-.panel{background:var(--card);border-radius:14px;box-shadow:0 .5px 1px rgba(0,0,0,.06);display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+.splitter.v{cursor:col-resize}
+.splitter.v::after{width:4px;height:44px}
+.splitter.h{cursor:row-resize}
+.splitter.h::after{height:4px;width:44px}
+.panel{background:var(--card);border-radius:14px;box-shadow:0 .5px 1px rgba(0,0,0,.06);display:flex;flex-direction:column;min-height:0;min-width:0;flex:1 1 0;overflow:hidden}
+#editorsRow .panel{min-width:250px}
+#bottomRow .panel{min-width:280px}
+#editorsRow,#bottomRow{min-height:170px}
 .p-head{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:.5px solid var(--hair);flex-wrap:wrap}
 .p-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .p-title .ic{width:14px;height:14px;color:var(--txt2)}
@@ -121,11 +127,19 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
   <div id="settings">
     <div class="sec-label">Параметры резки</div>
     <div class="card">
+      <div class="row"><label>Точность дискретизации</label>
+        <select id="discSel">
+          <option value="0.05">Грубо (0.05 т/мм)</option>
+          <option value="0.1">Низкая (0.10 т/мм)</option>
+          <option value="0.26" selected>Средняя (0.26 т/мм)</option>
+          <option value="0.5">Высокая (0.50 т/мм)</option>
+          <option value="1">Максимум (1.0 т/мм)</option>
+        </select>
+      </div>
       <div class="row"><label>Точек на мм</label><input type="range" id="ppm" min="0.01" max="1" step="0.01" value="0.26"><span class="val" id="ppmV">0.26</span></div>
       <div class="row"><label>Отступ струны — лево</label><input type="range" id="offLf" min="-10" max="10" step="0.1" value="0"><span class="val" id="offLfV">0.0</span></div>
       <div class="row"><label>Отступ струны — право</label><input type="range" id="offRt" min="-10" max="10" step="0.1" value="0"><span class="val" id="offRtV">0.0</span></div>
       <div class="row"><label>Подача F</label><input type="number" id="feed" value="300"></div>
-      <div class="row"><label>Знаков после точки</label><input type="number" id="dec" value="3" style="width:56px"></div>
     </div>
     <div class="sec-label">Заготовка</div>
     <div class="card">
@@ -146,6 +160,7 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
         <div>смещ. Z<input type="number" id="offZ" value="0" class="man"></div>
         <div></div>
       </div>
+      <div class="row" style="border:none"><label style="font-size:11px;color:var(--txt2)">Кривые перемещаются вместе с заготовкой (смещ. Y/Z).</label></div>
     </div>
     <div class="sec-label">Направление обхода</div>
     <div class="card">
@@ -171,7 +186,7 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
 
   <div id="work">
     <div id="editorsRow">
-      <div class="panel">
+      <div class="panel" id="panelL">
         <div class="p-head">
           <span class="p-title"><span class="dot red"></span>ЛЕВАЯ ПЛОСКОСТЬ</span>
           <span class="badge na" id="dirL">—</span>
@@ -184,7 +199,7 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
         <canvas id="cvL"></canvas>
       </div>
       <div class="splitter v" id="splitL"></div>
-      <div class="panel">
+      <div class="panel" id="panelR">
         <div class="p-head">
           <span class="p-title"><span class="dot blue"></span>ПРАВАЯ ПЛОСКОСТЬ</span>
           <span class="badge na" id="dirR">—</span>
@@ -199,7 +214,7 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
     </div>
     <div class="splitter h" id="splitH"></div>
     <div id="bottomRow">
-      <div class="panel">
+      <div class="panel" id="panelIso">
         <div class="p-head">
           <span class="p-title"><span class="dot gold"></span>ИЗОМЕТРИЯ — визуальный контроль</span>
           <div class="seg" style="margin-left:auto">
@@ -218,7 +233,7 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
         </div>
       </div>
       <div class="splitter v" id="splitIso"></div>
-      <div class="panel">
+      <div class="panel" id="panelGc">
         <div class="p-head">
           <span class="p-title"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/></svg>G-CODE / СИМУЛЯЦИЯ</span>
           <span class="p-info" id="glines"></span>
@@ -232,7 +247,8 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
               <button id="btnStop"><svg class="ic" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" stroke="none"/></svg>Стоп</button>
             </div>
             <div class="row" style="padding:7px 0"><label>Скорость</label><input type="range" id="speedX" min="1" max="60" step="1" value="12"><span class="val" id="speedXV">×12</span></div>
-            <div class="row" style="padding:7px 0;border:none"><label>Траектория ↔</label><input type="range" id="scrub" min="0" max="1000" step="1" value="0" style="width:150px"></div>
+            <div class="row" style="padding:7px 0"><label>Траектория ↔</label><input type="range" id="scrub" min="0" max="1000" step="1" value="0" style="width:140px"></div>
+            <div class="row" style="padding:7px 0;border:none"><label>Знаков после точки</label><input type="number" id="dec" value="3" style="width:56px"></div>
             <div class="lbl">Заголовок программы</div>
             <textarea class="hdr" id="gcodeHeader" rows="6">G90 G92 G80 G17
 T1M6
@@ -257,10 +273,7 @@ M30</textarea>
 <script>
 /* ============ ICONS ============ */
 const IP={
- move:'<path d="M12 3v18M3 12h18M12 3l-2 2m2-2 2 2M12 21l-2-2m2 2 2-2M3 12l2-2m-2 2 2 2M21 12l-2-2m2 2-2 2"/>',
- erase:'<path d="m7 17 8-8 4 4-8 8H7zM7 17l-3-3 8-8 3 3M7 21h13"/>',
  start:'<path d="M6 21V4m0 1h11l-2.5 3L17 11H6"/>',
- smooth:'<path d="M3 14c3-6 6-6 9 0s6 6 9 0"/>',
  loop:'<path d="M18 12a6 6 0 1 1-2-4.5M18 5v3h-3"/>',
  rev:'<path d="M8 7h10l-3-3M16 17H6l3 3"/>',
  clr:'<path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13h8l1-13"/>'
@@ -268,7 +281,7 @@ const IP={
 const ic=n=>'<svg class="ic" viewBox="0 0 24 24">'+IP[n]+'</svg>';
 
 /* ============ STATE + STORAGE ============ */
-const SKEY='hotwire4d.v2';
+const SKEY='hotwire4d.v3';
 const DEF={
  zone:{width:2100,length:2400,height:1300},
  work:{l:1200,w:1000,h:600,ox:0,oy:0,oz:0},
@@ -290,7 +303,7 @@ try{
   if(raw){const o=JSON.parse(raw);
     state.zone=Object.assign(state.zone,o.zone||{});state.work=Object.assign(state.work,o.work||{});
     state.allow=Object.assign(state.allow,o.allow||{});state.autoWP=!!o.autoWP;
-    state.cut=Object.assign(state.cut,o.cut||{});state.sim.speedX=o.sim&&o.sim.speedX||12;
+    state.cut=Object.assign(state.cut,o.cut||{});state.sim.speedX=(o.sim&&o.sim.speedX)||12;
     state.left=o.left||state.left;state.right=o.right||state.right;
     state.layout=Object.assign(state.layout,o.layout||{});
     state.header=o.header||state.header;state.footer=o.footer||state.footer;
@@ -303,32 +316,40 @@ function scheduleSave(){clearTimeout(saveT);saveT=setTimeout(()=>{
 },300);}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
-/* ============ LAYOUT ============ */
-const workEl=document.getElementById('work'),editorsRow=document.getElementById('editorsRow'),bottomRow=document.getElementById('bottomRow');
+/* ============ LAYOUT (flex fractions — page never breaks) ============ */
+const editorsRow=document.getElementById('editorsRow'),bottomRow=document.getElementById('bottomRow');
+const panelL=document.getElementById('panelL'),panelR=document.getElementById('panelR');
+const panelIso=document.getElementById('panelIso'),panelGc=document.getElementById('panelGc');
 function layoutApply(){
-  const vh=workEl.clientHeight||600,ww=workEl.clientWidth||900;
-  const minEd=220,minBt=240;
-  let edH=clamp(Math.round((vh-10)*state.layout.edF),minEd,Math.max(minEd,vh-10-minBt));
-  let leftW=clamp(Math.round((ww-10)*state.layout.leftF),300,Math.max(320,ww-320));
-  let isoW=clamp(Math.round((ww-10)*state.layout.isoF),320,Math.max(340,ww-340));
-  workEl.style.gridTemplateRows=edH+'px 10px minmax(240px,1fr)';
-  editorsRow.style.gridTemplateColumns=leftW+'px 10px minmax(300px,1fr)';
-  bottomRow.style.gridTemplateColumns=isoW+'px 10px minmax(380px,1fr)';
+  const L=state.layout;
+  L.edF=clamp(L.edF,.12,.88);L.leftF=clamp(L.leftF,.15,.85);L.isoF=clamp(L.isoF,.2,.8);
+  editorsRow.style.flexGrow=L.edF;
+  bottomRow.style.flexGrow=1-L.edF;
+  panelL.style.flexGrow=L.leftF;
+  panelR.style.flexGrow=1-L.leftF;
+  panelIso.style.flexGrow=L.isoF;
+  panelGc.style.flexGrow=1-L.isoF;
   drawAll();
 }
-function makeSplitter(el,fn){
+function dragSplit(el,get,set,vertical){
   el.addEventListener('mousedown',e=>{
     e.preventDefault();
-    const sx=e.clientX,sy=e.clientY,s={...state.layout};
-    const mv=ev=>fn(s,ev.clientX-sx,ev.clientY-sy);
-    const up=()=>{window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);scheduleSave();};
-    window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);
+    const cont=vertical?el.parentElement.clientWidth:el.parentElement.clientHeight;
+    const f0=get(),p0=vertical?e.clientX:e.clientY;
+    const move=ev=>{
+      const d=(vertical?ev.clientX:ev.clientY)-p0;
+      set(clamp(f0+d/cont,.12,.88));
+      layoutApply();
+    };
+    const up=()=>{window.removeEventListener('mousemove',move);window.removeEventListener('mouseup',up);scheduleSave();};
+    window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
   });
 }
-makeSplitter(document.getElementById('splitH'),(s,dx,dy)=>{state.layout.edF=clamp(s.edF+dy/((workEl.clientHeight||600)-10),.2,.8);layoutApply();});
-makeSplitter(document.getElementById('splitL'),(s,dx)=>{state.layout.leftF=clamp(s.leftF+dx/((workEl.clientWidth||900)-10),.25,.75);layoutApply();});
-makeSplitter(document.getElementById('splitIso'),(s,dx)=>{state.layout.isoF=clamp(s.isoF+dx/((workEl.clientWidth||900)-10),.3,.75);layoutApply();});
-window.addEventListener('resize',()=>{resetEdViews();layoutApply();});
+dragSplit(document.getElementById('splitH'),()=>state.layout.edF,f=>state.layout.edF=f,false);
+dragSplit(document.getElementById('splitL'),()=>state.layout.leftF,f=>state.layout.leftF=f,true);
+dragSplit(document.getElementById('splitIso'),()=>state.layout.isoF,f=>state.layout.isoF=f,true);
+let rzT=null;
+window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{resetEdViews();drawAll();},80);});
 
 /* ============ GEOMETRY ============ */
 function workBox(){
@@ -377,6 +398,13 @@ function recomputeWork(){
   state.work.oy=(y0+y1)/2-state.zone.width/2;
   state.work.oz=(z0+z1)/2-state.zone.height/2;
 }
+/* кривые следуют за заготовкой */
+function shiftCurves(dy,dz){
+  ['left','right'].forEach(sd=>{
+    state[sd].curve.forEach(p=>{p.y+=dy;p.z+=dz;});
+    state[sd].starts.forEach(s=>{s.p1.y+=dy;s.p1.z+=dz;s.p2.y+=dy;s.p2.z+=dz;});
+  });
+}
 function computeToolpath(){
   const lc=state.left.curve,rc=state.right.curve;
   if(lc.length<2||rc.length<2)return null;
@@ -413,11 +441,9 @@ function fitCanvas(cv){
 }
 
 /* ============ EDITORS ============ */
-const TOOLS=[{t:'move',n:'Точки',i:'move'},{t:'erase',n:'Ластик',i:'erase'},{t:'start',n:'Старт',i:'start'}];
-const ACTIONS=[{i:'smooth',tip:'Сгладить',fn:'smooth'},{i:'loop',tip:'Замкнуть',fn:'close'},{i:'rev',tip:'Реверс направления',fn:'reverse'},{i:'clr',tip:'Очистить плоскость',fn:'clear'}];
+const TOOLS=[{t:'start',n:'Старт',i:'start'}];
+const ACTIONS=[{i:'loop',tip:'Замкнуть кривую',fn:'close'},{i:'rev',tip:'Реверс направления',fn:'reverse'},{i:'clr',tip:'Очистить плоскость',fn:'clear'}];
 const actions={
- smooth(side){let c=state[side].curve;if(c.length<3)return;
-  for(let k=0;k<2;k++){const nc=[c[0]];for(let i=1;i<c.length-1;i++)nc.push({y:c[i-1].y*.25+c[i].y*.5+c[i+1].y*.25,z:c[i-1].z*.25+c[i].z*.5+c[i+1].z*.25});nc.push(c[c.length-1]);c=nc;state[side].curve=nc;}refresh();},
  close(side){const c=state[side].curve;if(c.length>2&&Math.hypot(c[0].y-c[c.length-1].y,c[0].z-c[c.length-1].z)>1e-6)c.push({...c[0]});refresh();},
  reverse(side){state[side].curve.reverse();refresh();},
  clear(side){if(!confirm('Очистить плоскость?'))return;state[side].curve=[];state[side].starts=[];refresh();}
@@ -425,7 +451,7 @@ const actions={
 function resetEdViews(){[edL,edR].forEach(ed=>{if(ed)ed.view=null;});}
 function makeEditor(cvId,segId,actId,side){
   const cv=document.getElementById(cvId);
-  const ed={canvas:cv,ctx:cv.getContext('2d'),side,tool:'move',drag:null,tempStart:null,tempEnd:null,pan:null,w:0,h:0,t:null,view:null,btns:{}};
+  const ed={canvas:cv,ctx:cv.getContext('2d'),side,tool:'start',tempStart:null,tempEnd:null,pan:null,w:0,h:0,t:null,view:null,btns:{}};
   const seg=document.getElementById(segId);
   TOOLS.forEach(t=>{const b=document.createElement('button');b.innerHTML=ic(t.i)+t.n;b.onclick=()=>setTool(ed,t.t);seg.appendChild(b);ed.btns[t.t]=b;});
   const act=document.getElementById(actId);
@@ -440,25 +466,12 @@ function makeEditor(cvId,segId,actId,side){
     state[ed.side].curve.forEach(p=>{const q=scrOf(p),d=Math.hypot(q.x-m.x,q.y-m.y);if(d<Math.min(best.d,12))best={p:{...p},d};});
     return best.p;
   }
-  function hitTest(m){
-    const c=state[ed.side].curve;
-    for(let i=0;i<c.length;i++){const q=scrOf(c[i]);if(Math.hypot(q.x-m.x,q.y-m.y)<10)return{type:'curve',idx:i};}
-    const st=state[ed.side].starts;
-    for(let i=0;i<st.length;i++){
-      for(const k of['p1','p2']){const q=scrOf(st[i][k]);if(Math.hypot(q.x-m.x,q.y-m.y)<10)return{type:'start',idx:i,k};}
-      const mid={y:(st[i].p1.y+st[i].p2.y)/2,z:(st[i].p1.z+st[i].p2.z)/2},qm=scrOf(mid);
-      if(Math.hypot(qm.x-m.x,qm.y-m.y)<10)return{type:'startSeg',idx:i};
-    }
-    return null;
-  }
   cv.addEventListener('mousedown',e=>{
     if(e.button===2){ed.tempStart=null;ed.tempEnd=null;drawAll();return;}
     if(e.button===1||e.altKey){ed.pan={x:e.clientX,y:e.clientY,ox:ed.view?ed.view.ox:0,oy:ed.view?ed.view.oy:0};e.preventDefault();return;}
     if(!ed.t)return;
-    const m=mpos(e),w=toWorld(m);
-    if(ed.tool==='move')ed.drag=hitTest(m);
-    else if(ed.tool==='erase'){const h=hitTest(m);if(h){if(h.type==='curve')state[side].curve.splice(h.idx,1);else state[side].starts.splice(h.idx,1);refresh();}}
-    else if(ed.tool==='start'){ed.tempStart=snapPt(w);ed.tempEnd=snapPt(w);}
+    const w=toWorld(mpos(e));
+    ed.tempStart=snapPt(w);ed.tempEnd=snapPt(w);
     drawAll();
   });
   cv.addEventListener('contextmenu',e=>e.preventDefault());
@@ -469,8 +482,7 @@ function makeEditor(cvId,segId,actId,side){
     const m=mpos(e),w0=toWorld(m);
     const k0=ed.view?ed.view.k:1;
     const k=clamp(k0*(e.deltaY<0?1.15:1/1.15),.2,40);
-    const s0=ed.t.s/ k0;
-    const s=s0*k;
+    const s0=ed.t.s/k0,s=s0*k;
     ed.view={k,ox:m.x-w0.y*s,oy:(ed.h-m.y)-w0.z*s};
     drawAll();
   },{passive:false});
@@ -480,25 +492,21 @@ function makeEditor(cvId,segId,actId,side){
       ed.view.ox=ed.pan.ox+(e.clientX-ed.pan.x);ed.view.oy=ed.pan.oy+(e.clientY-ed.pan.y);
       drawAll();return;
     }
-    if(!ed.drag&&!ed.tempStart)return;
-    const m=mpos(e),w=toWorld(m);
-    if(ed.drag){
-      if(ed.drag.type==='curve')state[side].curve[ed.drag.idx]=w;
-      else if(ed.drag.type==='start')state[side].starts[ed.drag.idx][ed.drag.k]=w;
-      drawAll();
-    }else if(ed.tempStart){ed.tempEnd=snapPt(w);drawAll();}
+    if(!ed.tempStart)return;
+    ed.tempEnd=snapPt(toWorld(mpos(e)));
+    drawAll();
   });
   window.addEventListener('mouseup',()=>{
     if(ed.pan){ed.pan=null;return;}
     if(ed.tempStart&&ed.tempEnd&&Math.hypot(ed.tempEnd.y-ed.tempStart.y,ed.tempEnd.z-ed.tempStart.z)>1e-6)
       state[side].starts.push({p1:ed.tempStart,p2:ed.tempEnd});
-    if(ed.drag||ed.tempStart)refresh();
-    ed.tempStart=null;ed.tempEnd=null;ed.drag=null;
+    if(ed.tempStart)refresh();
+    ed.tempStart=null;ed.tempEnd=null;
   });
-  setTool(ed,'move');
+  setTool(ed,'start');
   return ed;
 }
-function setTool(ed,t){ed.tool=t;TOOLS.forEach(x=>ed.btns[x.t].classList.toggle('active',x.t===t));ed.canvas.style.cursor=t==='move'?'grab':(t==='erase'?'pointer':'crosshair');}
+function setTool(ed,t){ed.tool=t;TOOLS.forEach(x=>ed.btns[x.t].classList.toggle('active',x.t===t));ed.canvas.style.cursor='crosshair';}
 const edL=makeEditor('cvL','segL','actL','left');
 const edR=makeEditor('cvR','segR','actR','right');
 
@@ -545,7 +553,6 @@ function drawEditor(ed){
   const col=ed.side==='left'?'#ff3b30':'#007aff';
   const off=ed.side==='left'?state.cut.offL:state.cut.offR;
   const curve=state[ed.side].curve;
-  /* фантомный отступ струны */
   if(curve.length>1&&Math.abs(off)>1e-9){
     const ph=offsetCurve2D(curve,off);
     ctx.strokeStyle=col;ctx.globalAlpha=.4;ctx.lineWidth=1.4;ctx.setLineDash([4,4]);
@@ -727,7 +734,6 @@ function parseSVG(text){
     conts.push(pts);
     if(conts.length===2)break;
   }
-  /* масштаб: физический размер / viewBox → user unit в мм (лечит 10x и т.п.) */
   let scale=25.4/96,note='1 ед = '+(25.4/96).toFixed(4)+' мм (px)';
   const vb=node.viewBox&&node.viewBox.baseVal&&node.viewBox.baseVal.width>0?node.viewBox.baseVal:null;
   const wMM=parseLenMM(node.getAttribute('width')),hMM=parseLenMM(node.getAttribute('height'));
@@ -771,15 +777,15 @@ function parseDXF(text){
 function parseEPS(text){
   const clean=text.replace(/%[^\n]*/g,'');
   const tok=clean.match(/-?\d*\.?\d+(?:e-?\d+)?|[a-zA-Z]+/g)||[];
-  const st=[];const out=[];let cur=null,cx=0,cy=0,sx=0,sy=0;
+  const st=[];const out=[];let cur=null,cx=0,cy=0;
   const push=()=>{if(cur&&cur.length>1)out.push(cur);cur=null;};
   for(let i=0;i<tok.length;i++){
     const t=tok[i];
     if(/^-?\d/.test(t)){st.push(parseFloat(t));continue;}
     switch(t){
       case 'newpath':push();cur=[];break;
-      case 'moveto':{const y=st.pop(),x=st.pop();cx=x;cy=y;sx=x;sy=y;if(!cur)cur=[];cur.push({u:x,v:y});break;}
-      case 'rmoveto':{const y=st.pop(),x=st.pop();cx+=x;cy+=y;sx=cx;sy=cy;if(!cur)cur=[];cur.push({u:cx,v:cy});break;}
+      case 'moveto':{const y=st.pop(),x=st.pop();cx=x;cy=y;if(!cur)cur=[];cur.push({u:x,v:y});break;}
+      case 'rmoveto':{const y=st.pop(),x=st.pop();cx+=x;cy+=y;if(!cur)cur=[];cur.push({u:cx,v:cy});break;}
       case 'lineto':{const y=st.pop(),x=st.pop();cx=x;cy=y;if(!cur)cur=[];cur.push({u:cx,v:cy});break;}
       case 'rlineto':{const y=st.pop(),x=st.pop();cx+=x;cy+=y;if(!cur)cur=[];cur.push({u:cx,v:cy});break;}
       case 'curveto':{const y3=st.pop(),x3=st.pop(),y2=st.pop(),x2=st.pop(),y1=st.pop(),x1=st.pop();if(!cur)cur=[];
@@ -912,7 +918,6 @@ function updateInfo(){
   }
   document.getElementById('warnBox').innerHTML=warns.length?warns.map(x=>'<div class="warn">'+x+'</div>').join(''):'<div class="ok">✓ Противоречий не обнаружено</div>';
   let s='Левая: '+L.length+' т., '+polyLen(L).toFixed(0)+' мм<br>Правая: '+R.length+' т., '+polyLen(R).toFixed(0)+' мм';
-  const b=workBox();
   s+='<br>Заготовка: '+state.work.l+'×'+state.work.w.toFixed(0)+'×'+state.work.h.toFixed(0)+(state.autoWP?' (авто)':'');
   if(state.tp){
     const bd=state.tp.bd;
@@ -943,12 +948,24 @@ function refresh(){recomputeWork();syncManInputs();state.tp=computeToolpath();up
 
 /* ============ BINDINGS ============ */
 function paintRange(el){const p=(el.value-el.min)/(el.max-el.min)*100;el.style.background='linear-gradient(to right,var(--tint) '+p+'%,#e9e9eb '+p+'%)';}
-function bindNum(id,obj,key,cb){const el=document.getElementById(id);el.addEventListener('input',()=>{obj[key]=parseFloat(el.value)||0;if(cb)cb();refresh();});}
+function bindNum(id,obj,key){const el=document.getElementById(id);el.addEventListener('input',()=>{obj[key]=parseFloat(el.value)||0;refresh();});}
 bindNum('zoneW',state.zone,'width');bindNum('zoneL',state.zone,'length');bindNum('zoneH',state.zone,'height');
 bindNum('wpL',state.work,'l');bindNum('wpW',state.work,'w');bindNum('wpH',state.work,'h');
-bindNum('offX',state.work,'ox');bindNum('offY',state.work,'oy');bindNum('offZ',state.work,'oz');
+bindNum('offX',state.work,'ox');
 bindNum('alL',state.allow,'l');bindNum('alR',state.allow,'r');bindNum('alB',state.allow,'b');bindNum('alT',state.allow,'t');
 bindNum('feed',state.cut,'feed');bindNum('dec',state.cut,'dec');
+/* смещение заготовки тянет кривые за собой */
+function bindOffset(id,key,axis){
+  const el=document.getElementById(id);
+  el.addEventListener('input',()=>{
+    const nv=parseFloat(el.value)||0,old=state.work[key],d=nv-old;
+    state.work[key]=nv;
+    if(d)shiftCurves(axis==='y'?d:0,axis==='z'?d:0);
+    refresh();
+  });
+}
+bindOffset('offY','oy','y');
+bindOffset('offZ','oz','z');
 function bindRange(id,spanId,obj,key,fix,suf){
   const el=document.getElementById(id),sp=document.getElementById(spanId);
   const f=()=>{obj[key]=parseFloat(el.value);sp.textContent=(suf||'')+obj[key].toFixed(fix);paintRange(el);refresh();};
@@ -957,6 +974,18 @@ function bindRange(id,spanId,obj,key,fix,suf){
 bindRange('ppm','ppmV',state.cut,'ppm',2,'');
 bindRange('offLf','offLfV',state.cut,'offL',1,'');
 bindRange('offRt','offRtV',state.cut,'offR',1,'');
+/* дискретность: select <-> slider */
+const discSel=document.getElementById('discSel'),ppmEl=document.getElementById('ppm');
+discSel.addEventListener('change',()=>{
+  state.cut.ppm=parseFloat(discSel.value);
+  ppmEl.value=state.cut.ppm;document.getElementById('ppmV').textContent=state.cut.ppm.toFixed(2);
+  paintRange(ppmEl);refresh();
+});
+ppmEl.addEventListener('input',()=>{
+  const v=parseFloat(ppmEl.value);
+  const opt=Array.from(discSel.options).find(o=>Math.abs(parseFloat(o.value)-v)<1e-9);
+  if(opt)discSel.value=opt.value;
+});
 const spX=document.getElementById('speedX');
 spX.addEventListener('input',()=>{state.sim.speedX=parseInt(spX.value);document.getElementById('speedXV').textContent='×'+state.sim.speedX;paintRange(spX);scheduleSave();});
 document.getElementById('autoWP').addEventListener('change',e=>{state.autoWP=e.target.checked;refresh();});
@@ -1003,7 +1032,9 @@ document.getElementById('btnResetAll').onclick=()=>{
   document.getElementById('autoWP').checked=state.autoWP;
   document.getElementById('feed').value=state.cut.feed;
   document.getElementById('dec').value=state.cut.dec;
-  document.getElementById('ppm').value=state.cut.ppm;document.getElementById('ppmV').textContent=state.cut.ppm.toFixed(2);paintRange(document.getElementById('ppm'));
+  ppmEl.value=state.cut.ppm;document.getElementById('ppmV').textContent=state.cut.ppm.toFixed(2);paintRange(ppmEl);
+  const opt=Array.from(discSel.options).find(o=>Math.abs(parseFloat(o.value)-state.cut.ppm)<1e-9);
+  if(opt)discSel.value=opt.value;
   document.getElementById('offLf').value=state.cut.offL;document.getElementById('offLfV').textContent=state.cut.offL.toFixed(1);paintRange(document.getElementById('offLf'));
   document.getElementById('offRt').value=state.cut.offR;document.getElementById('offRtV').textContent=state.cut.offR.toFixed(1);paintRange(document.getElementById('offRt'));
   spX.value=state.sim.speedX;document.getElementById('speedXV').textContent='×'+state.sim.speedX;paintRange(spX);
@@ -1013,7 +1044,7 @@ document.getElementById('btnResetAll').onclick=()=>{
   layoutApply();
   if(saved&&state.left.curve.length)refresh();
   else demo();
-  setTimeout(layoutApply,60);
+  setTimeout(()=>{layoutApply();},60);
 })();
 </script>
 </body>
