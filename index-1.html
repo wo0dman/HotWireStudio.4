@@ -341,7 +341,7 @@ function cvs(){
     bg:'#1c1c1e', grid:'#2a2a2c', frame:'#48484a', label:'#98989d',
     faceFill:'rgba(255,214,10,.07)', faceStroke:'#b9a880', handle:'#b9a880',
     curveL:'#ff453a', curveR:'#0a84ff',
-    gcode:'#ffd60a', sync:'#5e5ce6', start:'#30d158',
+    gcode:'#ffd60a', sync:'#30d158', start:'#30d158',
     startTxt:'#30d158',
     syncInner:'#1c1c1e', syncOuter:'#fff',
     boxPlaneEdge:'rgba(180,180,185,.45)',
@@ -352,7 +352,7 @@ function cvs(){
     bg:'#fbfbfd', grid:'#ededf2', frame:'#d1d1d6', label:'#aeaeb2',
     faceFill:'rgba(255,204,128,.12)', faceStroke:'#d6c08f', handle:'#b9a880',
     curveL:'#ff3b30', curveR:'#007aff',
-    gcode:'#b28600', sync:'#5856d6', start:'#34c759',
+    gcode:'#b28600', sync:'#34c759', start:'#34c759',
     startTxt:'#248a3d',
     syncInner:'#ffffff', syncOuter:'#fff',
     boxPlaneEdge:'rgba(60,60,67,.35)',
@@ -382,8 +382,8 @@ const DEF={
  autoWP:true,
  cut:{ppm:.26,offL:0,offR:0,feed:300,dec:3},
  sim:{running:false,t:0,speedX:12},
- left:{curve:[],starts:[],sync:[0]},
- right:{curve:[],starts:[],sync:[0]},
+ left:{curve:[],start:null,sync:[0]},
+ right:{curve:[],start:null,sync:[0]},
  layout:{edF:.5,leftF:.5,isoF:.575},
  header:'G90 G92 G80 G17\nT1M6\nG54\nM7\nM8\nF300',
  footer:'M9\nM30'
@@ -397,8 +397,18 @@ try{
     state.zone=Object.assign(state.zone,o.zone||{});state.work=Object.assign(state.work,o.work||{});
     state.allow=Object.assign(state.allow,o.allow||{});state.autoWP=!!o.autoWP;
     state.cut=Object.assign(state.cut,o.cut||{});state.sim.speedX=(o.sim&&o.sim.speedX)||12;
-    state.left=Object.assign({curve:[],starts:[],sync:[0]},o.left||{});
-    state.right=Object.assign({curve:[],starts:[],sync:[0]},o.right||{});
+    function migrateSide(o){
+      const s={curve:[],start:null,sync:[0]};
+      if(o){
+        if(Array.isArray(o.curve))s.curve=o.curve;
+        if(Array.isArray(o.sync))s.sync=o.sync;
+        if(o.start&&o.start.p1&&o.start.p2)s.start=o.start;
+        else if(Array.isArray(o.starts)&&o.starts.length)s.start=o.starts[0];
+      }
+      return s;
+    }
+    state.left=migrateSide(o.left);
+    state.right=migrateSide(o.right);
     state.layout=Object.assign(state.layout,o.layout||{});
     state.header=o.header||state.header;state.footer=o.footer||state.footer;
     saved=true;
@@ -516,7 +526,8 @@ function recomputeWork(){
 function shiftCurves(dy,dz){
   ['left','right'].forEach(sd=>{
     state[sd].curve.forEach(p=>{p.y+=dy;p.z+=dz;});
-    state[sd].starts.forEach(s=>{s.p1.y+=dy;s.p1.z+=dz;s.p2.y+=dy;s.p2.z+=dz;});
+    const st=state[sd].start;
+    if(st){st.p1.y+=dy;st.p1.z+=dz;st.p2.y+=dy;st.p2.z+=dz;}
   });
 }
 function computeToolpath(){
@@ -554,14 +565,14 @@ function computeToolpath(){
   }
   return{N,profL:FL,profR:FR,gXY,gAB,bd,len:Math.max(polyLen(gXY),polyLen(gAB))||1,segs:segL.length};
 }
-function extStarts(){
-  const b=workBox(),n=Math.min(state.left.starts.length,state.right.starts.length),out=[];
-  for(let i=0;i<n;i++){
-    const a=state.left.starts[i],c=state.right.starts[i];
-    out.push({s0:extendChord({x:b.x0,y:a.p1.y,z:a.p1.z},{x:b.x1,y:c.p1.y,z:c.p1.z},0,state.zone.length),
-              s1:extendChord({x:b.x0,y:a.p2.y,z:a.p2.z},{x:b.x1,y:c.p2.y,z:c.p2.z},0,state.zone.length)});
-  }
-  return out;
+function extStart(){
+  const b=workBox();
+  const a=state.left.start,c=state.right.start;
+  if(!a||!c)return null;
+  return{
+    outside:extendChord({x:b.x0,y:a.p1.y,z:a.p1.z},{x:b.x1,y:c.p1.y,z:c.p1.z},0,state.zone.length),
+    entry:extendChord({x:b.x0,y:a.p2.y,z:a.p2.z},{x:b.x1,y:c.p2.y,z:c.p2.z},0,state.zone.length)
+  };
 }
 
 /* ============ CANVAS ============ */
@@ -627,7 +638,7 @@ const actions={
  close(side){const c=state[side].curve;if(c.length>2&&Math.hypot(c[0].y-c[c.length-1].y,c[0].z-c[c.length-1].z)>1e-6)c.push({...c[0]});refresh();},
  reverse(side){state[side].curve.reverse();remapSyncsReverse(side);refresh();},
  syncclr(side){state[side].sync=[0];refresh();},
- clear(side){if(!confirm('Очистить плоскость?'))return;state[side].curve=[];state[side].starts=[];state[side].sync=[0];refresh();}
+ clear(side){if(!confirm('Очистить плоскость?'))return;state[side].curve=[];state[side].start=null;state[side].sync=[0];refresh();}
 };
 function resetEdViews(){[edL,edR].forEach(ed=>{if(ed)ed.view=null;});}
 function makeEditor(cvId,segId,actId,side){
@@ -708,7 +719,7 @@ function makeEditor(cvId,segId,actId,side){
     if(ed.pan){ed.pan=null;return;}
     if(ed.dragSyncVal!==null){ed.dragSyncVal=null;refresh();return;}
     if(ed.tempStart&&ed.tempEnd&&Math.hypot(ed.tempEnd.y-ed.tempStart.y,ed.tempEnd.z-ed.tempStart.z)>1e-6)
-      state[side].starts.push({p1:ed.tempStart,p2:ed.tempEnd});
+      state[side].start={p1:ed.tempStart,p2:ed.tempEnd};
     if(ed.tempStart)refresh();
     ed.tempStart=null;ed.tempEnd=null;
   });
@@ -748,14 +759,16 @@ function drawEditor(ed){
   ctx.setLineDash([]);
   ctx.fillStyle=C.handle;
   [[fr.y0,fr.z0],[fr.y1,fr.z0],[fr.y1,fr.z1],[fr.y0,fr.z1]].forEach(c=>ctx.fillRect(SX(c[0])-3,SY(c[1])-3,6,6));
-  state[ed.side].starts.forEach((sg,i)=>{
-    const a={x:SX(sg.p1.y),y:SY(sg.p1.z)},b={x:SX(sg.p2.y),y:SY(sg.p2.z)};
-    ctx.strokeStyle=C.start;ctx.lineWidth=1.6;ctx.setLineDash([5,4]);
+  const stLine=state[ed.side].start;
+  if(stLine){
+    const a={x:SX(stLine.p1.y),y:SY(stLine.p1.z)},b={x:SX(stLine.p2.y),y:SY(stLine.p2.z)};
+    ctx.strokeStyle=C.start;ctx.lineWidth=1.8;ctx.setLineDash([5,4]);
     ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);
     arrow(ctx,a,b,8,C.start);
+    ctx.fillStyle=C.start;ctx.beginPath();ctx.arc(a.x,a.y,4,0,Math.PI*2);ctx.fill();
     ctx.fillStyle=C.startTxt;ctx.font='600 10px -apple-system,sans-serif';
-    ctx.fillText('старт '+(i+1),(a.x+b.x)/2+6,(a.y+b.y)/2-6);
-  });
+    ctx.fillText('старт',(a.x+b.x)/2+6,(a.y+b.y)/2-6);
+  }
   if(ed.tempStart&&ed.tempEnd){
     ctx.strokeStyle=C.start;ctx.globalAlpha=.7;ctx.setLineDash([3,3]);ctx.lineWidth=1.4;
     ctx.beginPath();ctx.moveTo(SX(ed.tempStart.y),SY(ed.tempStart.z));ctx.lineTo(SX(ed.tempEnd.y),SY(ed.tempEnd.z));ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
@@ -890,10 +903,7 @@ function drawIso(){
   if(state.tp){
     path3D(state.tp.gXY,0,C.gcode,2);
     path3D(state.tp.gAB,Z.length,C.gcode,2);
-    extStarts().forEach(e=>{
-      path3D([e.s0.p0,e.s1.p0],0,C.start,1.6,[6,4]);
-      path3D([e.s0.p1,e.s1.p1],Z.length,C.start,1.6,[6,4]);
-    });
+
     const idx=clamp(Math.round(state.sim.t*(state.tp.N-1)),0,state.tp.N-1);
     const p1=project({x:0,y:state.tp.gXY[idx].y,z:state.tp.gXY[idx].z});
     const p2=project({x:Z.length,y:state.tp.gAB[idx].y,z:state.tp.gAB[idx].z});
@@ -1071,6 +1081,7 @@ document.getElementById('btnSwap').onclick=()=>{
   if(!confirm('Поменять кривые местами (ЛЕВО ↔ ПРАВО)?'))return;
   const t=state.left.curve;state.left.curve=state.right.curve;state.right.curve=t;
   const s=state.left.sync;state.left.sync=state.right.sync;state.right.sync=s;
+  const st=state.left.start;state.left.start=state.right.start;state.right.start=st;
   refresh();
 };
 
@@ -1090,11 +1101,17 @@ function generateGCode(){
   header=header.map(l=>{if(/F\d/.test(l)){hasF=true;return l.replace(/F[\d.]+/,'F'+state.cut.feed);}return l;});
   if(!hasF)header.push('F'+state.cut.feed);
   lines.push(...header);
-  extStarts().forEach(e=>{
-    lines.push('G1 X'+fmt(e.s0.p0.y)+' Y'+fmt(e.s0.p0.z)+' A'+fmt(e.s0.p1.y)+' B'+fmt(e.s0.p1.z));
-    lines.push('G1 X'+fmt(e.s1.p0.y)+' Y'+fmt(e.s1.p0.z)+' A'+fmt(e.s1.p1.y)+' B'+fmt(e.s1.p1.z));
-  });
+  const st=extStart();
+  if(st){
+    lines.push('; --- Стартовая линия: вход в заготовку ---');
+    lines.push('G1 X'+fmt(st.outside.p0.y)+' Y'+fmt(st.outside.p0.z)+' A'+fmt(st.outside.p1.y)+' B'+fmt(st.outside.p1.z));
+    lines.push('G1 X'+fmt(st.entry.p0.y)+' Y'+fmt(st.entry.p0.z)+' A'+fmt(st.entry.p1.y)+' B'+fmt(st.entry.p1.z));
+  }
   for(let i=0;i<tp.N;i++)lines.push('G1 X'+fmt(tp.gXY[i].y)+' Y'+fmt(tp.gXY[i].z)+' A'+fmt(tp.gAB[i].y)+' B'+fmt(tp.gAB[i].z));
+  if(st){
+    lines.push('; --- Стартовая линия: выход из заготовки ---');
+    lines.push('G1 X'+fmt(st.outside.p0.y)+' Y'+fmt(st.outside.p0.z)+' A'+fmt(st.outside.p1.y)+' B'+fmt(st.outside.p1.z));
+  }
   document.getElementById('gcodeFooter').value.split('\n').forEach(l=>lines.push(l));
   document.getElementById('gcodeOut').value=lines.join('\n');
   document.getElementById('glines').textContent=lines.length+' строк';
@@ -1156,8 +1173,9 @@ function updateInfo(){
   if(syncMismatch())warns.push('⚠ Точек синхронизации: слева '+state.left.sync.length+', справа '+state.right.sync.length+' — генерация заблокирована.');
   if(Math.abs(aL)>1e-6&&Math.abs(aR)>1e-6&&Math.sign(aL)!==Math.sign(aR))
     warns.push('⚠ Направления не совпадают — струна перекрутится. Нажмите «Выровнять направления».');
-  if(state.left.starts.length!==state.right.starts.length)
-    warns.push('⚠ Стартовых линий слева: '+state.left.starts.length+', справа: '+state.right.starts.length+'.');
+  const hasStartL=!!state.left.start,hasStartR=!!state.right.start;
+  if(hasStartL!==hasStartR)
+    warns.push('⚠ Стартовая линия задана не на обеих плоскостях (лево: '+(hasStartL?'да':'нет')+', право: '+(hasStartR?'да':'нет')+').');
   if(state.tp){
     const bd=state.tp.bd,Z=state.zone;
     if(bd.minY<-1||bd.maxY>Z.width+1||bd.minZ<-1||bd.maxZ>Z.height+1)
@@ -1189,8 +1207,8 @@ function demo(){
   const s=Math.min(fr.y1-fr.y0,fr.z1-fr.z0)*.75/2;
   state.right.curve=[{y:cy-s,z:cz+s},{y:cy-s,z:cz-s},{y:cy+s,z:cz-s},{y:cy+s,z:cz+s},{y:cy-s,z:cz+s}];
   state.right.sync=[0,.25,.5,.75];
-  state.left.starts=[{p1:{y:fr.y0,z:fr.z1},p2:{...circ[0]}}];
-  state.right.starts=[{p1:{y:fr.y0,z:fr.z1},p2:{...state.right.curve[0]}}];
+  state.left.start={p1:{y:fr.y0,z:fr.z1},p2:{...circ[0]}};
+  state.right.start={p1:{y:fr.y0,z:fr.z1},p2:{...state.right.curve[0]}};
   generateGCode();
 }
 function drawAll(){drawEditor(edL);drawEditor(edR);drawIso();}
@@ -1239,8 +1257,8 @@ document.getElementById('btnCopy').onclick=()=>navigator.clipboard.writeText(doc
 document.getElementById('btnDemo').onclick=demo;
 document.getElementById('btnClr').onclick=()=>{
   if(!confirm('Удалить все кривые, стартовые линии и точки синхронизации?'))return;
-  state.left.curve=[];state.left.starts=[];state.left.sync=[0];
-  state.right.curve=[];state.right.starts=[];state.right.sync=[0];
+  state.left.curve=[];state.left.start=null;state.left.sync=[0];
+  state.right.curve=[];state.right.start=null;state.right.sync=[0];
   state.tp=null;state.sim.t=0;scrub.value=0;document.getElementById('gcodeOut').value='';
   document.getElementById('glines').textContent='';refresh();
 };
@@ -1249,7 +1267,7 @@ document.getElementById('btnAlign').onclick=()=>{
   if(Math.abs(aL)>1e-6&&Math.abs(aR)>1e-6&&Math.sign(aL)!==Math.sign(aR)){
     state.right.curve.reverse();
     remapSyncsReverse('right');
-    state.right.starts.forEach(sg=>{const t=sg.p1;sg.p1=sg.p2;sg.p2=t;});
+    if(state.right.start){const t=state.right.start.p1;state.right.start.p1=state.right.start.p2;state.right.start.p2=t;}
   }
   refresh();
 };
