@@ -166,15 +166,7 @@ textarea.hdr{width:100%;border:.5px solid var(--hair2);border-radius:8px;padding
   <div id="settings">
     <div class="sec-label">Параметры резки</div>
     <div class="card">
-      <div class="row"><label>Точность дискретизации</label>
-        <select id="discSel">
-          <option value="0.05">Грубо (0.05 т/мм)</option>
-          <option value="0.1">Низкая (0.10 т/мм)</option>
-          <option value="0.26" selected>Средняя (0.26 т/мм)</option>
-          <option value="0.5">Высокая (0.50 т/мм)</option>
-          <option value="1">Максимум (1.0 т/мм)</option>
-        </select>
-      </div>
+
       <div class="row"><label>Точек на мм</label><input type="range" id="ppm" min="0.01" max="1" step="0.01" value="0.26"><span class="val" id="ppmV">0.26</span></div>
       <div class="row"><label>Отступ струны — лево</label><input type="range" id="offLf" min="-10" max="10" step="0.1" value="0"><span class="val" id="offLfV">0.0</span></div>
       <div class="row"><label>Отступ струны — право</label><input type="range" id="offRt" min="-10" max="10" step="0.1" value="0"><span class="val" id="offRtV">0.0</span></div>
@@ -1235,17 +1227,8 @@ function bindRange(id,spanId,obj,key,fix,suf){
 bindRange('ppm','ppmV',state.cut,'ppm',2,'');
 bindRange('offLf','offLfV',state.cut,'offL',1,'');
 bindRange('offRt','offRtV',state.cut,'offR',1,'');
-const discSel=document.getElementById('discSel'),ppmEl=document.getElementById('ppm');
-discSel.addEventListener('change',()=>{
-  state.cut.ppm=parseFloat(discSel.value);
-  ppmEl.value=state.cut.ppm;document.getElementById('ppmV').textContent=state.cut.ppm.toFixed(2);
-  paintRange(ppmEl);refresh();
-});
-ppmEl.addEventListener('input',()=>{
-  const v=parseFloat(ppmEl.value);
-  const opt=Array.from(discSel.options).find(o=>Math.abs(parseFloat(o.value)-v)<1e-9);
-  if(opt)discSel.value=opt.value;
-});
+const ppmEl=document.getElementById('ppm');
+
 const spX=document.getElementById('speedX');
 spX.addEventListener('input',()=>{state.sim.speedX=parseInt(spX.value);document.getElementById('speedXV').textContent='×'+state.sim.speedX;paintRange(spX);scheduleSave();});
 document.getElementById('autoWP').addEventListener('change',e=>{state.autoWP=e.target.checked;refresh();});
@@ -1294,8 +1277,7 @@ document.getElementById('btnResetAll').onclick=()=>{
   document.getElementById('feed').value=state.cut.feed;
   document.getElementById('dec').value=state.cut.dec;
   ppmEl.value=state.cut.ppm;document.getElementById('ppmV').textContent=state.cut.ppm.toFixed(2);paintRange(ppmEl);
-  const opt=Array.from(discSel.options).find(o=>Math.abs(parseFloat(o.value)-state.cut.ppm)<1e-9);
-  if(opt)discSel.value=opt.value;
+  
   document.getElementById('offLf').value=state.cut.offL;document.getElementById('offLfV').textContent=state.cut.offL.toFixed(1);paintRange(document.getElementById('offLf'));
   document.getElementById('offRt').value=state.cut.offR;document.getElementById('offRtV').textContent=state.cut.offR.toFixed(1);paintRange(document.getElementById('offRt'));
   spX.value=state.sim.speedX;document.getElementById('speedXV').textContent='×'+state.sim.speedX;paintRange(spX);
