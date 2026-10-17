@@ -1,0 +1,3427 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HotWireStudio — векторный CAM - Rotary A</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%230a84ff'/><stop offset='1' stop-color='%235856d6'/></linearGradient></defs><rect width='64' height='64' rx='14' fill='url(%23g)'/><g fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'><path d='M14 50h36'/><path d='M20 50V22l12-8 12 8v28'/><path d='M28 50V40h8v10'/></g><circle cx='32' cy='32' r='3.2' fill='%23ff9f0a'/><path d='M20 32h24' stroke='%23ff9f0a' stroke-width='2'/></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/700.css">
+<style>
+/* ======================= iOS / macOS tokens ======================= */
+:root{
+--bg:#f2f2f7; --card:#fff; --card2:#f7f7fa; --pane:#f5f5f8;
+--label:#000; --label2:rgba(60,60,67,.62); --label3:rgba(60,60,67,.34);
+--sep:rgba(60,60,67,.15); --sep2:rgba(60,60,67,.28);
+--fill1:rgba(120,120,128,.20); --fill2:rgba(120,120,128,.13); --fill3:rgba(118,118,128,.09);
+--blue:#007aff; --green:#34c759; --orange:#ff9500; --red:#ff3b30; --gray:#8e8e93;
+--indigo:#5856d6; --teal:#30b0c7; --purple:#af52de; --pink:#ff2d55; --mint:#00c7be; --yellow:#ffcc00;
+--bar:rgba(248,248,250,.86); --hud:rgba(252,252,254,.80); --pop:rgba(250,250,252,.94);
+--segthumb:#fff; --shadow:0 1px 2px rgba(0,0,0,.05),0 8px 22px rgba(0,0,0,.07);
+--sceneA:#eef0f5; --sceneB:#dcdfe8;
+--code:#1d1d1f; --codebg:#fafafc; --tintf:rgba(0,122,255,.12);
+--wl:330px; --wr:356px; --hb:186px;
+}
+html[data-theme="dark"]{
+--bg:#000; --card:#1c1c1e; --card2:#232326; --pane:#141416;
+--label:#fff; --label2:rgba(235,235,245,.60); --label3:rgba(235,235,245,.30);
+--sep:rgba(84,84,88,.55); --sep2:rgba(84,84,88,.85);
+--fill1:rgba(120,120,128,.34); --fill2:rgba(120,120,128,.24); --fill3:rgba(118,118,128,.17);
+--blue:#0a84ff; --green:#30d158; --orange:#ff9f0a; --red:#ff453a; --gray:#8e8e93;
+--indigo:#5e5ce6; --teal:#40c8e0; --purple:#bf5af2; --pink:#ff375f; --mint:#63e6e2; --yellow:#ffd60a;
+--bar:rgba(28,28,31,.82); --hud:rgba(32,32,36,.74); --pop:rgba(38,38,42,.94);
+--segthumb:#48484a; --shadow:0 1px 2px rgba(0,0,0,.6),0 10px 28px rgba(0,0,0,.5);
+--sceneA:#16161a; --sceneB:#0a0a0c;
+--code:#f2f2f7; --codebg:#17171a; --tintf:rgba(10,132,255,.20);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden}
+body{
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter",system-ui,sans-serif;
+background:var(--bg);color:var(--label);font-size:13px;line-height:1.35;-webkit-font-smoothing:antialiased;
+transition:background .25s,color .25s;user-select:none}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--fill1);border-radius:10px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:var(--sep2);background-clip:content-box;border:3px solid transparent}
+::-webkit-scrollbar-track{background:transparent}
+.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+#app{display:flex;flex-direction:column;height:100dvh;min-width:1024px}
+.menubar{flex:0 0 30px;display:flex;align-items:center;gap:1px;padding:0 8px;background:var(--bar);
+backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);
+border-bottom:.5px solid var(--sep);z-index:60;font-size:13px}
+.menubar .logo{display:flex;align-items:center;gap:7px;padding:0 10px 0 4px;font-weight:700;letter-spacing:-.2px}
+.menubar .logo i{width:17px;height:17px;border-radius:5px;background:linear-gradient(150deg,var(--blue),var(--indigo));
+display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,122,255,.45)}
+.menubar .logo i svg{width:11px;height:11px;fill:none;stroke:#fff;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.mb-item{padding:3px 10px;border-radius:6px;cursor:default;font-weight:500;color:var(--label)}
+.mb-item:hover,.mb-item.open{background:var(--blue);color:#fff}
+.menubar .sp{flex:1}
+.mb-state{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--label2);padding-right:6px}
+.mpop{position:fixed;z-index:200;min-width:246px;padding:5px;background:var(--pop);
+backdrop-filter:blur(38px) saturate(180%);-webkit-backdrop-filter:blur(38px) saturate(180%);
+border-radius:10px;border:.5px solid var(--sep);box-shadow:0 20px 50px rgba(0,0,0,.28);
+animation:pop .16s cubic-bezier(.3,1.3,.6,1)}
+@keyframes pop{from{opacity:0;transform:translateY(-5px) scale(.98)}to{opacity:1;transform:none}}
+.mpop[hidden]{display:none}
+.mi{display:flex;align-items:center;gap:9px;padding:5px 9px;border-radius:6px;cursor:default;font-size:13px;white-space:nowrap}
+.mi:hover{background:var(--blue);color:#fff}
+.mi:hover .k,.mi:hover .ck{color:#fff}
+.mi .k{margin-left:auto;color:var(--label3);font-size:11.5px;padding-left:22px}
+.mi .ck{width:14px;margin-left:-2px;color:var(--blue);font-weight:700;flex:0 0 14px}
+.msep{height:.5px;background:var(--sep);margin:5px 8px}
+.toolbar{flex:0 0 46px;display:flex;align-items:center;gap:7px;padding:0 12px;background:var(--bar);
+backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);
+border-bottom:.5px solid var(--sep);z-index:50}
+.tsep{width:.5px;height:24px;background:var(--sep);margin:0 4px;flex:0 0 auto}
+.tbtn{height:30px;min-width:30px;padding:0 9px;border:0;border-radius:8px;background:transparent;cursor:pointer;
+display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--label);flex:0 0 auto;
+transition:background .16s,transform .12s cubic-bezier(.34,1.56,.64,1)}
+.tbtn:hover{background:var(--fill2)}
+.tbtn:active{transform:scale(.94)}
+.tbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.tbtn.pri{background:var(--blue);color:#fff;box-shadow:0 1px 4px rgba(0,122,255,.35)}
+.tbtn.pri:hover{filter:brightness(1.08);background:var(--blue)}
+.tbtn.on{background:var(--tintf);color:var(--blue)}
+.tb-sp{flex:1 1 auto}
+.workspace{flex:1 1 auto;display:flex;min-height:0}
+.pane{background:var(--pane);display:flex;flex-direction:column;min-width:230px;overflow:hidden}
+.pane-l{width:var(--wl);flex:0 0 var(--wl);border-right:.5px solid var(--sep)}
+.pane-r{width:var(--wr);flex:0 0 var(--wr);border-left:.5px solid var(--sep)}
+.pane-tabs{flex:0 0 38px;display:flex;align-items:center;gap:2px;padding:0 8px;border-bottom:.5px solid var(--sep);
+background:var(--bar);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.ptab{flex:1;height:26px;border:0;border-radius:7px;background:transparent;cursor:pointer;font-size:12px;font-weight:600;
+color:var(--label2);display:flex;align-items:center;justify-content:center;gap:5px;transition:background .18s,color .18s;min-width:0}
+.ptab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptab svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.ptab:hover{background:var(--fill2)}
+.ptab.active{background:var(--card);color:var(--blue);box-shadow:0 .5px 2px rgba(0,0,0,.09)}
+.pane-body{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;padding-bottom:26px;scrollbar-width:thin}
+.splitter{flex:0 0 5px;cursor:col-resize;background:transparent;position:relative;z-index:20;margin:0 -2.5px}
+.splitter::after{content:"";position:absolute;inset:0 2px;background:transparent;transition:background .18s}
+.splitter:hover::after,.splitter.drag::after{background:var(--blue);opacity:.5;border-radius:2px}
+.hsplit{flex:0 0 5px;cursor:row-resize;margin:-2.5px 0;position:relative;z-index:20}
+.hsplit::after{content:"";position:absolute;inset:2px 0;background:transparent;transition:background .18s}
+.hsplit:hover::after,.hsplit.drag::after{background:var(--blue);opacity:.5}
+.stage{flex:1 1 auto;min-width:0;position:relative;overflow:hidden;
+background:radial-gradient(125% 95% at 50% -5%,var(--sceneA),var(--sceneB))}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage.drag-over::after{content:"Отпустите STL-файл";position:absolute;inset:8px;border:2.5px dashed var(--blue);
+border-radius:14px;background:rgba(0,122,255,.10);backdrop-filter:blur(3px);display:grid;place-items:center;
+font-size:17px;font-weight:700;color:var(--blue);z-index:40}
+.bottom{flex:0 0 var(--hb);height:var(--hb);display:flex;flex-direction:column;background:var(--pane);
+border-top:.5px solid var(--sep);overflow:hidden}
+.bottom .pane-tabs{border-bottom:.5px solid var(--sep);border-top:0}
+.bottom-body{flex:1;min-height:0;position:relative}
+.bottom-body>[data-btab]{position:absolute;inset:0;overflow:hidden}
+.bottom-body>[data-btab][hidden]{display:none}
+.statusbar{flex:0 0 26px;display:flex;align-items:center;gap:16px;padding:0 12px;font-size:11.5px;color:var(--label2);
+background:var(--bar);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+border-top:.5px solid var(--sep);white-space:nowrap;overflow:hidden;z-index:50}
+.statusbar b{color:var(--label);font-weight:600}
+.statusbar .sp{flex:1}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--gray);display:inline-block;margin-right:5px;vertical-align:-0.5px}
+.sdot.hot{background:var(--orange);animation:pls 1.1s infinite}
+.sdot.run{background:var(--green);animation:pls 1.4s infinite}
+@keyframes pls{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
+.group{margin:12px 10px 0}
+.group:first-child{margin-top:10px}
+.group-title{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--label2);
+padding:0 8px 5px;display:flex;align-items:center;gap:6px}
+.card{background:var(--card);border-radius:9px;overflow:hidden;box-shadow:0 .5px 1.5px rgba(0,0,0,.045)}
+html[data-theme="dark"] .card{box-shadow:none;border:.5px solid rgba(255,255,255,.055)}
+.row{position:relative;min-height:34px;padding:6px 10px;display:flex;align-items:center;gap:8px}
+.row::after{content:"";position:absolute;left:10px;right:0;top:0;height:.5px;background:var(--sep)}
+.row:first-child::after,.row.nosep::after{display:none}
+.row .rt{flex:1 1 auto;min-width:0;font-size:12.5px;letter-spacing:-.1px}
+.row .rv{font-size:12px;color:var(--label2);text-align:right;flex:0 0 auto;max-width:58%;
+overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+.row .rv.ok{color:var(--green);font-weight:600}.row .rv.bad{color:var(--red);font-weight:600}
+.row .rv.warn{color:var(--orange);font-weight:600}
+.row.stack{flex-direction:column;align-items:stretch;gap:2px;padding-bottom:9px}
+.row.stack .head{display:flex;align-items:baseline;gap:8px}
+.row.tap{cursor:pointer;transition:background .14s}
+.row.tap:hover{background:var(--fill3)}
+.row.tap:active{background:var(--fill2)}
+.sub{font-size:11px;color:var(--label2);line-height:1.35;margin-top:1px}
+.group-foot{font-size:11px;color:var(--label2);padding:6px 9px 0;line-height:1.4}
+.rowbtns{display:flex;gap:6px;padding:8px 10px}
+.rowbtns .btn{flex:1}
+.ico-sq{width:22px;height:22px;border-radius:6px;background:var(--tintf);display:grid;place-items:center;flex:0 0 auto}
+.ico-sq svg{width:13px;height:13px;fill:none;stroke:var(--blue);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.btn{border:0;border-radius:7px;padding:6px 11px;font-weight:600;font-size:12.5px;cursor:pointer;letter-spacing:-.1px;
+transition:transform .12s cubic-bezier(.34,1.56,.64,1),filter .18s,background .18s;
+display:inline-flex;align-items:center;gap:5px;justify-content:center}
+.btn:active{transform:scale(.96)}
+.btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{filter:brightness(1.07)}
+.btn-tint{background:var(--tintf);color:var(--blue)}.btn-tint:hover{background:rgba(0,122,255,.2)}
+.btn-gray{background:var(--fill2);color:var(--label)}.btn-gray:hover{background:var(--fill1)}
+.switch{width:42px;height:25px;border-radius:13px;background:var(--fill1);position:relative;border:0;padding:0;cursor:pointer;
+flex:0 0 auto;transition:background .28s cubic-bezier(.4,0,.2,1)}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;
+box-shadow:0 2px 6px rgba(0,0,0,.18),0 .5px 1px rgba(0,0,0,.15);transition:transform .3s cubic-bezier(.34,1.4,.64,1)}
+.switch.on{background:var(--green)}
+.switch.on::after{transform:translateX(17px)}
+.sl{width:100%;height:22px;-webkit-appearance:none;appearance:none;background:transparent;margin:0;display:block;cursor:pointer}
+.sl:focus{outline:none}
+.sl::-webkit-slider-runnable-track{height:4px;border-radius:2px;
+background:linear-gradient(to right,var(--tintc,var(--blue)) 0 var(--p,50%),var(--fill1) var(--p,50%) 100%)}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;background:#fff;margin-top:-7.5px;
+box-shadow:0 1.5px 4px rgba(0,0,0,.22),0 0 0 .5px rgba(0,0,0,.05);transition:transform .15s cubic-bezier(.34,1.56,.64,1)}
+.sl:hover::-webkit-slider-thumb{transform:scale(1.08)}
+.sl:active::-webkit-slider-thumb{transform:scale(1.16)}
+.sl::-moz-range-track{height:4px;border-radius:2px;background:var(--fill1)}
+.sl::-moz-range-progress{height:4px;border-radius:2px;background:var(--tintc,var(--blue))}
+.sl::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:#fff;box-shadow:0 1.5px 4px rgba(0,0,0,.22)}
+/* ============ iOS: числовое поле + степпер (UIStepper) ============ */
+.numrow{min-height:38px;padding:5px 10px;gap:8px}
+.numrow .rt{font-size:12.5px;line-height:1.25;padding-right:2px;letter-spacing:-.15px}
+.numctl{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin-left:auto;transition:opacity .2s}
+.numfield{width:74px;height:28px;flex:0 0 auto;background:var(--fill3);border:.5px solid var(--sep);
+border-radius:7px;padding:0 8px;text-align:right;outline:none;
+font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
+font-size:12.5px;font-weight:600;letter-spacing:-.3px;color:var(--label);user-select:text;
+transition:border-color .18s,background .18s,box-shadow .18s,color .18s}
+.numfield:hover{background:var(--fill2)}
+.numfield:focus{background:var(--card);border-color:var(--tintc,var(--blue));
+box-shadow:0 0 0 3px color-mix(in srgb,var(--tintc,var(--blue)) 22%,transparent)}
+.numfield.bad{border-color:var(--red);color:var(--red)}
+.numfield:disabled{opacity:.6;cursor:not-allowed}
+html[data-theme="dark"] .numfield{background:rgba(120,120,128,.22)}
+html[data-theme="dark"] .numfield:focus{background:#2c2c2e}
+.numunit{flex:0 0 auto;min-width:9px;font-size:11px;font-weight:600;color:var(--label2);
+letter-spacing:-.1px;text-align:left;white-space:nowrap}
+.stepper{display:flex;flex:0 0 auto;height:28px;border-radius:8px;background:var(--fill2);
+border:.5px solid var(--sep);overflow:hidden}
+html[data-theme="dark"] .stepper{background:rgba(120,120,128,.26)}
+.stepper button{width:27px;height:100%;border:0;background:transparent;cursor:pointer;padding:0;margin:0;
+display:grid;place-items:center;color:var(--label);
+transition:background .13s,color .13s}
+.stepper button+button{border-left:.5px solid var(--sep)}
+.stepper button svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round}
+.stepper button:hover{background:var(--fill1)}
+.stepper button.press,.stepper button:active{background:var(--tintf);color:var(--blue)}
+.stepper button:disabled{opacity:.24;cursor:default;background:transparent;color:var(--label)}
+.seg{display:flex;position:relative;background:var(--fill2);border-radius:7px;padding:2px;width:100%}
+.seg .thumb{position:absolute;top:2px;bottom:2px;left:0;width:0;border-radius:5.5px;background:var(--segthumb);
+box-shadow:0 1px 2.5px rgba(0,0,0,.14);transition:transform .28s cubic-bezier(.32,1.3,.5,1),width .28s cubic-bezier(.32,1.3,.5,1)}
+.seg button{flex:1 1 0;position:relative;z-index:1;border:0;background:none;padding:4px 5px;font-weight:600;font-size:11.5px;
+color:var(--label2);cursor:pointer;border-radius:5.5px;transition:color .2s;white-space:nowrap;letter-spacing:-.15px;min-width:0}
+.seg button.active{color:var(--label)}
+.seg.sm button{font-size:11px;padding:3px 4px}
+.tf{flex:1 1 auto;min-width:0;background:var(--fill3);border:.5px solid transparent;border-radius:6px;padding:5px 8px;
+font-size:12.5px;outline:none;transition:border-color .18s,background .18s;user-select:text}
+.tf:focus{border-color:var(--blue);background:var(--card)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;background:var(--fill2);
+font-size:10.5px;font-weight:700;color:var(--label2);letter-spacing:-.1px;flex:0 0 auto}
+.chip.blue{background:var(--tintf);color:var(--blue)}
+.chip.green{background:rgba(52,199,89,.16);color:var(--green)}
+.vp{position:absolute;z-index:12}
+.hud{background:var(--hud);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+border-radius:11px;box-shadow:var(--shadow);border:.5px solid var(--sep)}
+.dro{top:11px;left:11px;padding:8px 4px;display:flex}
+.dro .ax{padding:0 13px;border-right:.5px solid var(--sep);min-width:96px}
+.dro .ax:last-child{border:0}
+.dro .ax span{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--label3);display:block}
+.dro .ax b{font-size:19px;font-weight:600;letter-spacing:-.6px;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.dro .ax.x b{color:var(--red)}.dro .ax.y b{color:var(--green)}.dro .ax.a b{color:var(--blue)}
+.dro .ax i{font-style:normal;font-size:11px;color:var(--label3);margin-left:3px}
+.vp-tools{top:11px;right:11px;display:flex;flex-direction:column;gap:7px;align-items:flex-end}
+.toolrow{display:flex;gap:6px}
+.rbtn{width:30px;height:30px;border-radius:9px;border:.5px solid var(--sep);background:var(--hud);
+backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);display:grid;place-items:center;cursor:pointer;
+transition:transform .14s cubic-bezier(.34,1.56,.64,1),background .18s}
+.rbtn:hover{background:var(--card)}
+.rbtn:active{transform:scale(.9)}
+.rbtn svg{width:16px;height:16px;fill:none;stroke:var(--label);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.rbtn.act{background:var(--blue);border-color:transparent}
+.rbtn.act svg{stroke:#fff}
+.vpseg{width:268px;padding:3px}
+#gizmo{position:absolute;top:104px;right:14px;width:104px;height:104px;z-index:13;cursor:pointer}
+.pop{position:absolute;width:262px;z-index:70;padding:5px 0;background:var(--pop);
+backdrop-filter:blur(36px) saturate(180%);-webkit-backdrop-filter:blur(36px) saturate(180%);
+border-radius:11px;box-shadow:0 18px 46px rgba(0,0,0,.28);border:.5px solid var(--sep);
+animation:pop .18s cubic-bezier(.3,1.3,.6,1);max-height:72vh;overflow:auto}
+.pop[hidden]{display:none}
+.pop .row{min-height:31px;padding:4px 11px}
+.pop .gt{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--label3);padding:7px 12px 3px}
+.legend{bottom:11px;left:11px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;font-size:10.5px;font-weight:600;color:var(--label2)}
+.legend div{display:flex;align-items:center;gap:7px;cursor:pointer}
+.legend div:hover{color:var(--label)}
+.legend i{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+.legend div.off{opacity:.38;text-decoration:line-through}
+.transport{left:50%;bottom:12px;transform:translateX(-50%);width:min(880px,calc(100% - 24px));padding:8px 10px;
+display:flex;align-items:center;gap:12px}
+.tp-ctrl{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.tp-btn{width:36px;height:36px;border-radius:50%;border:0;background:transparent;cursor:pointer;
+display:grid;place-items:center;color:var(--blue);flex:0 0 auto;
+transition:background .16s,transform .12s cubic-bezier(.34,1.56,.64,1)}
+.tp-btn:hover{background:var(--tintf)}
+.tp-btn:active{transform:scale(.88);background:rgba(0,122,255,.22)}
+.tp-btn svg{width:20px;height:20px;fill:currentColor;stroke:none}
+.tp-spd{width:132px;flex:0 0 auto;display:flex;align-items:center;gap:5px}
+.playbtn{width:44px;height:44px;border-radius:50%;border:0;background:var(--blue);color:#fff;
+display:grid;place-items:center;cursor:pointer;flex:0 0 auto;
+box-shadow:0 1px 5px rgba(0,122,255,.38);
+transition:transform .15s cubic-bezier(.34,1.56,.64,1),filter .18s}
+.playbtn:hover{filter:brightness(1.08)}.playbtn:active{transform:scale(.9)}
+.playbtn svg{width:15px;height:15px;fill:currentColor;stroke:none}
+.trk{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.trk .meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--label2);font-weight:600;
+font-variant-numeric:tabular-nums;gap:10px}
+.trk .meta span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.busy{position:absolute;inset:0;z-index:80;display:none;place-items:center;background:rgba(0,0,0,.10);backdrop-filter:blur(2px)}
+.busy.on{display:grid}
+.busy .box{background:var(--hud);backdrop-filter:blur(22px);border-radius:12px;padding:14px 20px;text-align:center;
+box-shadow:var(--shadow);font-size:12.5px;font-weight:600}
+.spinner{width:22px;height:22px;margin:0 auto 8px;border-radius:50%;border:2.5px solid var(--fill1);border-top-color:var(--blue);animation:sp .75s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#boot{position:absolute;inset:0;z-index:90;display:grid;place-items:center;background:var(--bg);text-align:center;padding:30px}
+#boot div{max-width:470px;font-size:13px;color:var(--label2);line-height:1.5}
+#boot b{display:block;font-size:16px;color:var(--label);margin-bottom:8px}
+.codebox{background:var(--codebg);font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;line-height:1.6;
+overflow:auto;user-select:text;padding:6px 0}
+.codebox div{display:flex;padding:0 10px;white-space:pre}
+.codebox div:nth-child(odd){background:rgba(127,127,140,.045)}
+.codebox .ln{color:var(--label3);width:40px;flex:0 0 40px;text-align:right;padding-right:10px;user-select:none}
+.codebox .cd{color:var(--label2)}.codebox .g{color:var(--blue);font-weight:600}
+.codebox .m{color:var(--orange);font-weight:600}.codebox .ax{color:var(--purple);font-weight:600}
+#unroll{position:absolute;inset:0;width:100%;height:100%;display:block}
+.logbox{position:absolute;inset:0;overflow:auto;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;
+line-height:1.65;padding:6px 0;user-select:text}
+.logbox .li{display:flex;gap:9px;padding:1px 12px}
+.logbox .li:hover{background:var(--fill3)}
+.logbox .t{color:var(--label3);flex:0 0 62px}
+.logbox .k{flex:0 0 46px;font-weight:700}
+.logbox .k.i{color:var(--blue)}.logbox .k.w{color:var(--orange)}.logbox .k.e{color:var(--red)}.logbox .k.s{color:var(--green)}
+.logbox .m{color:var(--label);flex:1;white-space:pre-wrap;word-break:break-word}
+.bars{padding:9px 10px 11px}
+.bar{height:22px;border-radius:6px;overflow:hidden;display:flex;background:var(--fill2);margin-bottom:8px}
+.bar i{display:block;height:100%;transition:width .5s cubic-bezier(.3,1,.4,1)}
+.blg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--label2)}
+.blg span{display:flex;align-items:center;gap:5px}
+.blg i{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px 10px}
+.kpi div{background:var(--card2);border-radius:8px;padding:7px 9px}
+.kpi b{display:block;font-size:16px;font-weight:700;letter-spacing:-.4px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:10px;color:var(--label2);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.seq{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;align-items:center}
+.seq b{background:var(--fill2);border-radius:6px;padding:3px 7px;font-size:10.5px;font-weight:600;color:var(--label2)}
+.seq b.hot{background:rgba(255,149,0,.18);color:var(--orange)}
+.seq i{color:var(--label3);font-style:normal}
+/* ======================= Справка (модальное окно) ======================= */
+.helpbox{width:min(720px,94vw);max-height:88vh;background:var(--pop);
+backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);
+border-radius:14px;border:.5px solid var(--sep);
+box-shadow:0 26px 64px rgba(0,0,0,.36);display:flex;flex-direction:column;overflow:hidden;
+animation:al .3s cubic-bezier(.3,1.5,.6,1)}
+.help-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+padding:14px 18px 12px;border-bottom:.5px solid var(--sep)}
+.help-head h2{margin:0;font-size:15.5px;font-weight:700;letter-spacing:-.2px}
+.help-close{width:26px;height:26px;border:0;background:var(--fill2);border-radius:50%;cursor:pointer;
+font-size:16px;line-height:1;display:grid;place-items:center;color:var(--label2);transition:background .15s,color .15s}
+.help-close:hover{background:var(--fill1);color:var(--label)}
+.help-body{flex:1 1 auto;overflow-y:auto;padding:16px 20px 20px;font-size:13px;line-height:1.55;
+color:var(--label);user-select:text;scrollbar-width:thin}
+.help-foot{flex:0 0 auto;display:flex;justify-content:flex-end;padding:12px 18px;
+border-top:.5px solid var(--sep);background:var(--pop)}
+.help-foot button{border:0;background:var(--blue);color:#fff;padding:8px 20px;border-radius:8px;
+font-size:13.5px;font-weight:600;cursor:pointer;transition:filter .15s}
+.help-foot button:hover{filter:brightness(1.08)}
+.help-body h3{font-size:13.5px;font-weight:700;margin:18px 0 6px;color:var(--label);letter-spacing:-.1px}
+.help-body h3:first-child{margin-top:0}
+.help-body p{margin:6px 0}
+.help-body ul,.help-body ol{margin:6px 0;padding-left:20px}
+.help-body li{margin:3px 0}
+.help-body code,.help-body kbd{background:var(--fill2);border-radius:5px;padding:1px 6px;
+font-family:ui-monospace,Menlo,monospace;font-size:11.5px;font-weight:600;color:var(--label)}
+.help-body b{font-weight:700}
+.help-body .tip{background:var(--tintf);border-radius:8px;padding:10px 13px;margin:10px 0;
+font-size:12.5px;color:var(--label);border-left:3px solid var(--blue)}
+.help-body .warn{background:rgba(255,149,0,.14);border-radius:8px;padding:10px 13px;margin:10px 0;
+font-size:12.5px;border-left:3px solid var(--orange)}
+.help-body table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px}
+.help-body table th,.help-body table td{padding:6px 8px;text-align:left;
+border-bottom:.5px solid var(--sep);vertical-align:top}
+.help-body table th{font-weight:700;font-size:11px;text-transform:uppercase;
+letter-spacing:.03em;color:var(--label2);background:var(--fill3)}
+.help-body table tr:last-child td{border-bottom:0}
+.scrim{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.28);backdrop-filter:blur(3px);display:grid;place-items:center;animation:fi .18s}
+.scrim[hidden]{display:none}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.alert{width:min(440px,88vw);background:var(--pop);backdrop-filter:blur(40px) saturate(180%);border-radius:14px;overflow:hidden;
+box-shadow:0 26px 64px rgba(0,0,0,.36);text-align:center;animation:al .3s cubic-bezier(.3,1.5,.6,1)}
+@keyframes al{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+.alert .bd{padding:20px 22px 16px}
+.alert h3{margin:0 0 6px;font-size:16.5px;font-weight:700;letter-spacing:-.3px}
+.alert p{margin:0;font-size:13px;color:var(--label2);line-height:1.45;user-select:text}
+.alert .ac{display:flex;border-top:.5px solid var(--sep)}
+.alert .ac button{flex:1;border:0;background:none;padding:11px;font-size:15px;font-weight:600;color:var(--blue);cursor:pointer}
+.alert .ac button:hover{background:var(--fill3)}
+.palette{position:fixed;top:12vh;left:50%;transform:translateX(-50%);width:min(600px,90vw);z-index:310;
+background:var(--pop);backdrop-filter:blur(40px) saturate(180%);border-radius:14px;border:.5px solid var(--sep);
+box-shadow:0 30px 80px rgba(0,0,0,.4);overflow:hidden;animation:al .22s cubic-bezier(.3,1.4,.6,1)}
+.palette input{width:100%;border:0;background:transparent;padding:15px 18px;font-size:17px;outline:none;letter-spacing:-.2px;user-select:text}
+.palette .res{max-height:min(420px,52vh);overflow-y:auto;border-top:.5px solid var(--sep);padding:5px}
+.pr{display:flex;align-items:center;gap:10px;padding:7px 11px;border-radius:8px;cursor:pointer;font-size:13.5px}
+.pr:hover,.pr.sel{background:var(--blue);color:#fff}
+.pr:hover .pk,.pr.sel .pk{color:#fff}
+.pr .pi{width:20px;height:20px;flex:0 0 auto;display:grid;place-items:center;opacity:.85}
+.pr .pi svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pr .pk{margin-left:auto;font-size:11px;color:var(--label3);font-weight:600}
+.toast{position:fixed;left:50%;bottom:60px;transform:translateX(-50%) translateY(14px);z-index:320;
+background:rgba(38,38,42,.94);color:#fff;padding:9px 17px;border-radius:12px;font-size:13px;font-weight:600;
+backdrop-filter:blur(20px);box-shadow:0 12px 34px rgba(0,0,0,.34);opacity:0;pointer-events:none;
+transition:opacity .25s,transform .35s cubic-bezier(.3,1.4,.5,1);display:flex;align-items:center;gap:8px;max-width:80vw}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast svg{width:16px;height:16px;fill:none;stroke:var(--green);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;text-align:left;font-size:12.5px;user-select:text;margin-top:4px}
+.keys kbd{background:var(--fill2);border-radius:5px;padding:2px 7px;font-family:ui-monospace,Menlo,monospace;font-size:11px;
+font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inline-block;min-width:22px;text-align:center}
+.keys span{color:var(--label2)}
+.keys .hd{grid-column:1/-1;color:var(--label);font-weight:600;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="menubar" id="menubar">
+<div class="logo"><i><svg viewBox="0 0 24 24"><path d="M3 19h18M6 19V9l6-4 6 4v10M9.5 19v-5h5v5"/></svg></i>HotWireStudio</div>
+<div class="mb-item" data-menu="file">Файл</div>
+<div class="mb-item" data-menu="edit">Правка</div>
+<div class="mb-item" data-menu="view">Вид</div>
+<div class="mb-item" data-menu="tools">Инструменты</div>
+<div class="mb-item" data-menu="help">Справка</div>
+<div class="sp"></div>
+<div class="mb-state"><span id="mbFile">—</span></div>
+</div>
+<div class="toolbar">
+<button class="tbtn pri" id="tbCalc" title="Пересчитать (R)"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 10-2.3 6M20 5v6h-6"/></svg>Пересчитать</button>
+<div class="tsep"></div>
+<button class="tbtn" id="tbOpen" title="Открыть STL (⌘O)"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>STL…</button>
+<button class="tbtn" id="tbDemo" title="Демо-модель"><svg viewBox="0 0 24 24"><path d="M12 2.6l8 4.6v9.6l-8 4.6-8-4.6V7.2l8-4.6zM12 12l8-4.6M12 12v9.4M12 12L4 7.2"/></svg>Демо</button>
+<button class="tbtn" id="tbSave" title="Экспорт G-code (⌘S)"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 18v1.5A1.5 1.5 0 005.5 21h13a1.5 1.5 0 001.5-1.5V18"/></svg>G-code</button>
+<div class="tb-sp"></div>
+<button class="tbtn" id="tbPal" title="Палитра команд (⌘K)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg></button>
+<button class="tbtn" id="tbTheme" title="Тема (T)"></button>
+</div>
+<div class="workspace">
+<aside class="pane pane-l" id="paneL">
+<div class="pane-tabs" id="tabsL"></div>
+<div class="pane-body" id="bodyL"></div>
+</aside>
+<div class="splitter" data-sp="l"></div>
+<main class="stage" id="stage">
+<canvas id="scene"></canvas>
+<div id="boot"><div><b>Загрузка HotWireStudio…</b>
+Инициализация 3D-сцены и расчётного ядра. Если сообщение не исчезает — проверьте доступ к CDN (three.js) и поддержку WebGL.</div></div>
+<div class="vp hud dro">
+<div class="ax x"><span id="droXLabel">X · мм</span><b id="droX">0.000</b></div>
+<div class="ax y"><span id="droYLabel">Y · мм</span><b id="droY">0.000</b></div>
+<div class="ax a"><span id="droALabel">A · град</span><b id="droA">0.00</b><i id="droDir"></i></div>
+</div>
+<div class="vp vp-tools">
+<div class="toolrow">
+<button class="rbtn" id="btnFit" title="Показать всё (F)"></button>
+<button class="rbtn" id="btnShot" title="Снимок вида (PNG)"></button>
+<button class="rbtn" id="btnFull" title="На весь экран"></button>
+</div>
+<div class="hud vpseg" id="vpSeg"></div>
+</div>
+<canvas id="gizmo" width="208" height="208"></canvas>
+<div class="vp hud legend" id="legend"></div>
+<div class="vp hud transport">
+<div class="tp-ctrl">
+<button class="tp-btn" id="btnStart" title="В начало (Home)"><svg viewBox="0 0 24 24"><path d="M6 6h2.2v12H6zM19 6v12L9 12l10-6z"/></svg></button>
+<button class="playbtn" id="btnPlay" title="Пуск / пауза (Space)"></button>
+<button class="tp-btn" id="btnStep" title="Следующий проход (→)"><svg viewBox="0 0 24 24"><path d="M5 6v12l7-6-7-6zM13 6v12l7-6-7-6z"/></svg></button>
+<button class="tp-btn" id="btnEnd" title="В конец (End)"><svg viewBox="0 0 24 24"><path d="M5 6v12l9-6-9-6zM17 6h2.2v12H17z"/></svg></button>
+</div>
+<div class="trk">
+<input type="range" class="sl" id="simRange" min="0" max="1000" value="1000" step="1">
+<div class="meta"><span id="simPass">Готово</span><span id="simTime">00:00 / 00:00</span></div>
+</div>
+<div class="tp-spd" id="tpSpeed"></div>
+</div>
+<div class="busy" id="busy"><div class="box"><div class="spinner"></div><span id="busyText">Расчёт…</span></div></div>
+</main>
+<div class="splitter" data-sp="r"></div>
+<aside class="pane pane-r" id="paneR">
+<div class="pane-tabs" id="tabsR"></div>
+<div class="pane-body" id="bodyR"></div>
+</aside>
+</div>
+<div class="hsplit" data-sp="b"></div>
+<div class="bottom" id="bottom">
+<div class="pane-tabs" id="tabsB"></div>
+<div class="bottom-body">
+<div data-btab="unroll"><canvas id="unroll"></canvas></div>
+<div data-btab="log"><div class="logbox" id="logbox"></div></div>
+<div data-btab="code"><div class="codebox" id="codeFull" style="position:absolute;inset:0"></div></div>
+</div>
+</div>
+<footer class="statusbar">
+<span><span class="sdot" id="stDot"></span><b id="stState">Готов</b></span>
+<span>Операция <b id="stPass">—</b></span>
+<span>Струна <b id="stWire">выкл</b></span>
+<span>Рез <b id="stLen">0</b> мм</span>
+<span class="sp"></span>
+<span id="stInfo">—</span>
+</footer>
+</div>
+<div class="scrim" id="scrim" hidden><div class="alert">
+<div class="bd"><h3 id="alTitle">—</h3><p id="alText">—</p><div id="alExtra" style="margin-top:12px"></div></div>
+<div class="ac"><button id="alOk">OK</button></div>
+</div></div>
+<div class="scrim" id="pscrim" hidden><div class="palette">
+<input id="palInput" placeholder="Команды, параметры, действия…" spellcheck="false" autocomplete="off">
+<div class="res" id="palRes"></div>
+</div></div>
+<div class="scrim" id="axisScrim" hidden><div class="alert" style="text-align:left;width:min(420px,90vw)">
+<div class="bd">
+<h3 style="text-align:center">Буквы осей станка</h3>
+<p style="text-align:center">Используются в DRO и G-code. Стандартные: X, Y, A.<br>
+Одна заглавная латинская буква (A–Z), буквы не должны повторяться.</p>
+<div class="row nosep" style="padding:0;min-height:auto;margin-top:14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+<div class="rt" style="flex:1">Использовать свои буквы осей</div>
+<button class="switch" id="axEnableSw" type="button"></button>
+</div>
+<div id="axInputs" style="display:flex;flex-direction:column;gap:8px">
+<div class="row nosep" style="padding:0;min-height:auto">
+<div class="rt" style="flex:0 0 130px">Линейная ось X</div>
+<input class="tf mono" id="axXInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700">
+</div>
+<div class="row nosep" style="padding:0;min-height:auto">
+<div class="rt" style="flex:0 0 130px">Линейная ось Y</div>
+<input class="tf mono" id="axYInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700">
+</div>
+<div class="row nosep" style="padding:0;min-height:auto">
+<div class="rt" style="flex:0 0 130px">Поворотная ось</div>
+<input class="tf mono" id="axAInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700">
+</div>
+</div>
+<div id="axisErr" style="color:var(--red);font-size:12px;min-height:16px;margin-top:10px;text-align:center"></div>
+</div>
+<div class="ac" style="border-top:.5px solid var(--sep)">
+<button id="axisReset" style="color:var(--gray);flex:0 0 auto;padding:11px 14px;border-right:.5px solid var(--sep)">Сброс</button>
+<button id="axisCancel" style="color:var(--red);border-right:.5px solid var(--sep)">Отмена</button>
+<button id="axisOk" style="font-weight:700">Сохранить</button>
+</div>
+</div></div>
+<div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span id="toastText"></span></div>
+<div class="scrim" id="helpScrim" hidden><div class="helpbox">
+<div class="help-head">
+<h2>Метод резки горячей струной</h2>
+<button class="help-close" id="helpClose" title="Закрыть (Esc)">×</button>
+</div>
+<div class="help-body">
+<p>Станок режет пенопласт <b>горячей струной</b>, натянутой вертикально между двумя конусами. Струна нагревается электрическим током и плавит материал, образуя рез без стружки. Программа строит траекторию движения струны и поворотов стола, а затем экспортирует её в G-code для контроллера.</p>
+<h3>Кинематика станка</h3>
+<ul>
+<li><b>Ось X</b> — горизонтальное перемещение струны вдоль передней стенки станка.</li>
+<li><b>Ось Y</b> — вертикальное перемещение струны (вверх-вниз).</li>
+<li><b>Ось A</b> — поворотный стол, вращающийся вокруг вертикальной оси Y.</li>
+<li><b>Струна всегда вертикальна</b> и перемещается в плоскости XZ. Наклона струны нет — это станок 2+1 оси.</li>
+</ul>
+<h3>Как формируется деталь</h3>
+<p>Струна, двигаясь по замкнутому контуру, «вырезает» призму — тело, у которого каждое горизонтальное сечение повторяет силуэт контура. За N проходов стол поворачивается на общий угол <b>180°</b> (или <b>360°</b> в режиме «точка ↔ ось»), и материал, оставшийся после всех проходов, представляет собой <b>пересечение N силуэтных призм</b>. Чем больше проходов — тем ближе эта форма к настоящей 3D-модели.</p>
+<div class="tip">
+<b>Геометрическое правило:</b> горизонтальное сечение детали всегда является пересечением выпуклых оболочек срезов под разными углами. Именно поэтому внутренние полости и поднутрения не вырезаются — струна «не видит» их.
+</div>
+<h3>Начало координат XY (парковка струны)</h3>
+<p>Струна начинает программу из точки <b>парковки</b> и возвращается в неё после завершения. Позиция задаётся во вкладке «Резание» → блок «Начало координат XY»:</p>
+<ul>
+<li><b>Автоматическое положение</b> — X и Y вычисляются от края и верха заготовки на расстоянии «отступ за заготовку».</li>
+<li><b>Вручную</b> — значения X и Y задаются вручную в полях.</li>
+</ul>
+<p>Между проходами струна паркуется там, где закончила предыдущий рез — возврат в home не выполняется (экономит время). После последнего прохода струна возвращается в home и выключается.</p>
+<h3>Цикл одного прохода</h3>
+<ol style="margin:6px 0 6px 20px;padding:0">
+<li>Струна выключена, стоит в home (или в точке окончания предыдущего прохода).</li>
+<li>Струна подходит к точке старта за пределами заготовки.</li>
+<li>Опускается на рабочую высоту Y.</li>
+<li>Прогрев (пауза) — струна набирает температуру.</li>
+<li>Включается (<code>M3</code>).</li>
+<li>Режет по силуэту текущего угла A — обходит контур по контуру.</li>
+<li>Выходит за пределы заготовки и ждёт.</li>
+<li>Выключается (<code>M5</code>).</li>
+<li>Стол поворачивается на заданный шаг A.</li>
+<li>Цикл повторяется в обратном направлении (зиг-заг) или продолжается в ту же сторону.</li>
+</ol>
+<p>После последнего прохода струна возвращается в home и выключается.</p>
+<h3>Режимы движения струны</h3>
+<table>
+<tr><th>Режим</th><th>Как работает</th><th>Оборот стола</th></tr>
+<tr><td><b>Точка ↔ точка</b></td>
+<td>Струна режет полный силуэт — правый борт, верх, левый борт — и останавливается слева. Затем обратно справа налево.</td>
+<td>180°</td></tr>
+<tr><td><b>Точка ↔ ось</b></td>
+<td>Струна режет только правый борт, доходит до оси A, уходит вертикально вверх и ждёт. Обратный рез — тем же маршрутом.</td>
+<td>360°</td></tr>
+</table>
+<p>Первый режим быстрее и подходит для симметричных моделей. Второй даёт больше контроля над поднутрениями, но занимает вдвое больше времени.</p>
+<h3>Подрезка основания</h3>
+<p>Чтобы деталь держалась на столе во время резки, нижняя часть заготовки (высотой «высота основания») остаётся нетронутой. После всех проходов струна отделяет деталь одним из трёх способов:</p>
+<table>
+<tr><th>Режим</th><th>Что происходит</th></tr>
+<tr><td><b>Не подрезать</b></td>
+<td>Деталь остаётся соединённой с основанием. Используйте, если будете отрезать вручную или если нужен «козырёк».</td></tr>
+<tr><td><b>На всю ширину</b></td>
+<td>Один горизонтальный рез от края до края на заданной высоте. Деталь полностью освобождается и падает на стол.</td></tr>
+<tr><td><b>С перемычкой</b></td>
+<td>Струна режет с одной стороны до центральной «перемычки», возвращается, стол поворачивается на <b>180°</b> или <b>90°</b> (2 или 4 подреза), и режет с другой стороны. Деталь остаётся на тонком «мостике», который легко отломить.</td></tr>
+</table>
+<h3>Параметры и их влияние</h3>
+<table>
+<tr><th>Параметр</th><th>Что влияет</th></tr>
+<tr><td>Число проходов</td><td>Больше — точнее форма, но дольше рез. 24–48 для типовой задачи, 72+ для моделей с плавными изгибами.</td></tr>
+<tr><td>Срезы по высоте</td><td>Сколько горизонтальных сечений берётся из STL. 150 по умолчанию, 300+ для высоких моделей.</td></tr>
+<tr><td>Допуск упрощения</td><td>Максимальное отклонение ломаной от исходного контура. Меньше — точнее, но длиннее G-code. 0.12 мм по умолчанию.</td></tr>
+<tr><td>Радиус струны</td><td>Реальная толщина нихрома (0.2–0.5 мм). Учитывается в опорной функции — компенсирует пропил.</td></tr>
+<tr><td>Отступ за заготовку</td><td>Насколько парковочная позиция струны удалена от края и верха заготовки (в авто-режиме).</td></tr>
+<tr><td>Выход за заготовку</td><td>Насколько струна выезжает за радиус заготовки, чтобы гарантированно выйти из материала перед поворотом.</td></tr>
+<tr><td>Безопасный отступ</td><td>На сколько струна поднимается над верхом заготовки при переходах между проходами.</td></tr>
+<tr><td>Подача</td><td>Скорость реза (мм/мин). Зависит от плотности пенопласта и мощности нагрева.</td></tr>
+<tr><td>Прогрев струны</td><td>Пауза после включения перед началом движения. Даёт струне набрать температуру.</td></tr>
+<tr><td>Зиг-заг</td><td>Струна идёт вперёд и обратно, стол всегда поворачивается в одну сторону. Экономит время на реверсах.</td></tr>
+<tr><td>Компенсация люфта</td><td>Дополнительный перелёт по A с возвратом. Убирает ошибки от люфта червячной передачи.</td></tr>
+</table>
+<div class="tip">
+<b>Ввод значений:</b> все числовые параметры задаются в полях со степпером <b>⊖ / ⊕</b> — как в настройках iOS. Значение можно вбить с клавиатуры (Enter — применить, Esc — отменить), стрелки <b>↑ ↓</b> меняют его на шаг, с <b>Shift</b> — на 10 шагов. Удержание кнопки степпера ускоряет изменение.
+</div>
+<h3>Что метод не может сделать</h3>
+<ul>
+<li><b>Внутренние полости.</b> Отверстия в детали (например, «рот» буквы R) не вырезаются — струна обходит только внешний контур.</li>
+<li><b>Поднутрения.</b> Вогнутости на боковой поверхности (средний изгиб S, C-образные профили) срезаются как выпуклая оболочка.</li>
+<li><b>4-осевые поверхности.</b> Винты, спирали, конические отверстия со сложной геометрией требуют наклоняемой струны (U/V оси).</li>
+</ul>
+<div class="warn">
+<b>Важно:</b> если модель имеет вогнутости, деталь получится полнее, чем STL — «залитая» выпуклой оболочкой. Программа покажет прогноз зелёным цветом: он уже учитывает это упрощение.
+</div>
+<h3>Типичные проблемы</h3>
+<table>
+<tr><th>Симптом</th><th>Решение</th></tr>
+<tr><td>Ступеньки на плавных изгибах</td><td>Увеличить число проходов (24 → 48 или 72).</td></tr>
+<tr><td>Деталь держится на тонком «волоске»</td><td>Уменьшить «рез ниже низа модели» или увеличить перемычку.</td></tr>
+<tr><td>Рез идёт слишком долго</td><td>Уменьшить срезы или увеличить допуск упрощения.</td></tr>
+<tr><td>Деталь отваливается в середине цикла</td><td>Увеличить высоту основания или отключить подрезку до конца.</td></tr>
+<tr><td>Ошибка модели «не вписывается в заготовку»</td><td>Увеличить диаметр или высоту заготовки, либо уменьшить масштаб модели.</td></tr>
+<tr><td>Струна режет по воздуху (не касается заготовки)</td><td>Уменьшить диаметр заготовки или передвинуть модель к центру.</td></tr>
+<tr><td>Струна задевает оснастку в home</td><td>Увеличить отступ за заготовку или задать X и Y вручную.</td></tr>
+</table>
+<h3>С чего начать</h3>
+<ol style="margin:6px 0 6px 20px;padding:0">
+<li>Откройте демо-модель кнопкой «Демо» — ваза идеально подходит для знакомства.</li>
+<li>Запустите симуляцию (Space) — посмотрите, как ходит струна, как поворачивается стол.</li>
+<li>Посмотрите развёртку траектории внизу — там видно, как меняется силуэт от прохода к проходу.</li>
+<li>Нажмите «G-code» — изучите постпроцессор. Проверьте, что ось A на вашем контроллере называется так же (в LinuxCNC это A).</li>
+<li>Загрузите свою STL-модель, настройте ориентацию (поворот Z-up → Y-up часто нужен для файлов из CAD).</li>
+<li>Установите заготовку реального размера, запустите «Подобрать по модели», затем «Вписать модель в заготовку».</li>
+<li>Проверьте симуляцию целиком. Убедитесь, что струна нигде не «прорубает» воздух и не задевает станок.</li>
+<li>Экспортируйте G-code, прогоните в симуляторе вашего контроллера (LinuxCNC/Axiom/Mach3).</li>
+<li>Запускайте на реальном станке.</li>
+</ol>
+<div class="tip">
+<b>Совет:</b> начните с <b>числа проходов 24–36</b> и небольшой модели. Если деталь устраивает — не увеличивайте. Каждый дополнительный проход увеличивает время реза линейно.
+</div>
+<h3>Горячие клавиши</h3>
+<p>Полный список — по клавише <kbd>?</kbd>. Основные: <kbd>Space</kbd> — пуск/пауза, <kbd>R</kbd> — пересчёт, <kbd>F</kbd> — показать всё, <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> — виды, <kbd>⌘K</kbd> — палитра команд, <kbd>T</kbd> — тема.</p>
+</div>
+<div class="help-foot">
+<button id="helpOk">Понятно</button>
+</div>
+</div></div>
+<input type="file" id="file" accept=".stl,model/stl" hidden>
+<script type="importmap">
+{"imports":{
+"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+}}
+</script>
+<script>
+/* Обработчик ошибок в обычном (не module) скрипте — сработает даже если CDN недоступен */
+window.addEventListener('error',function(e){
+var b=document.getElementById('boot');
+if(b){b.style.display='grid';
+b.innerHTML='<div><b>Ошибка инициализации</b>'+String((e&&e.message)||e)+
+'<br><br>Проверьте подключение к CDN three.js и поддержку WebGL.</div>';}
+});
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+/* ==================================================================
+0 · УТИЛИТЫ
+================================================================== */
+const $=s=>document.querySelector(s);
+const $$=s=>Array.prototype.slice.call(document.querySelectorAll(s));
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const D2R=Math.PI/180;
+const nf=(v,d)=>{d=d||0;return (+v||0).toLocaleString('ru-RU',{maximumFractionDigits:d,minimumFractionDigits:d});};
+function fmt(v,d){d=(d===undefined)?3:d;const x=Math.abs(v)<5e-7?0:v;let s=x.toFixed(d);
+if(s.indexOf('.')>=0)s=s.replace(/0+$/,'').replace(/\.$/,'');return (s==='-0')?'0':s;}
+function hms(s){s=Math.max(0,Math.round(s||0));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;
+return (h?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');}
+function trimActive(){return S.trimMode&&S.trimMode!=='none';}
+function trimLabel(){
+if(!trimActive())return 'нет';
+if(S.trimMode==='full')return 'на всю ширину, '+nf(S.trimBelow,1)+' мм ниже модели';
+const cnt=S.trimCount||2;
+return 'с перемычкой '+nf(S.bridge,0)+' мм ('+cnt+' подрезов, шаг '+(360/cnt)+'°), '+
+nf(S.trimBelow,1)+' мм ниже модели';
+}
+function trimModeName(){return ({none:'не подрезать',full:'на всю ширину',bridge:'с перемычкой'})[S.trimMode]||'выкл';}
+function toast(msg,ok){const t=$('#toast');if(!t)return;$('#toastText').textContent=msg;
+t.querySelector('svg').style.display=(ok===false)?'none':'';t.classList.add('on');
+clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2100);}
+function alert_(title,text,extraHTML){$('#alTitle').textContent=title;$('#alText').textContent=text||'';
+$('#alExtra').innerHTML=extraHTML||'';$('#scrim').hidden=false;}
+$('#alOk').onclick=function(){$('#scrim').hidden=true;};
+$('#scrim').onclick=function(e){if(e.target.id==='scrim')$('#scrim').hidden=true;};
+function busy(on,txt){$('#busy').classList.toggle('on',!!on);if(txt)$('#busyText').textContent=txt;}
+const LOGS=[];
+function log(msg,kind){
+const d=new Date();
+const t=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+LOGS.push({t:t,k:kind||'i',m:String(msg)});
+if(LOGS.length>500)LOGS.shift();
+renderLog();
+}
+function renderLog(){
+const b=$('#logbox');if(!b)return;
+const atEnd=b.scrollHeight-b.scrollTop-b.clientHeight<50;
+const names={i:'ИНФО',w:'ВНИМ',e:'ОШБК',s:'ОК'};
+b.innerHTML=LOGS.map(function(l){
+return '<div class="li"><span class="t">'+l.t+'</span><span class="k '+l.k+'">'+(names[l.k]||'ИНФО')+
+'</span><span class="m">'+l.m.replace(/</g,'&lt;')+'</span></div>';}).join('');
+if(atEnd)b.scrollTop=b.scrollHeight;
+}
+const IC={
+cube:'<svg viewBox="0 0 24 24"><path d="M12 2.6l8 4.6v9.6l-8 4.6-8-4.6V7.2l8-4.6zM12 12l8-4.6M12 12v9.4M12 12L4 7.2"/></svg>',
+cyl:'<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7.5" ry="3.2"/><path d="M4.5 6v12c0 1.8 3.4 3.2 7.5 3.2s7.5-1.4 7.5-3.2V6"/></svg>',
+layers:'<svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5M3 17.5l9 5 9-5"/></svg>',
+sliders:'<svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>',
+base:'<svg viewBox="0 0 24 24"><path d="M3 17h18M5 17V9l7-4 7 4v8M9 17v-4h6v4"/></svg>',
+code:'<svg viewBox="0 0 24 24"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg>',
+chart:'<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+wave:'<svg viewBox="0 0 24 24"><path d="M2 12c2.5-6 5-6 7.5 0s5 6 7.5 0 3.5-4 5-2"/></svg>',
+list:'<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>',
+fit:'<svg viewBox="0 0 24 24"><path d="M4 9V5.5A1.5 1.5 0 015.5 4H9M15 4h3.5A1.5 1.5 0 0120 5.5V9M20 15v3.5a1.5 1.5 0 01-1.5 1.5H15M9 20H5.5A1.5 1.5 0 014 18.5V15"/></svg>',
+cam:'<svg viewBox="0 0 24 24"><path d="M3 8.5A1.5 1.5 0 014.5 7h2L8 5h8l1.5 2h2A1.5 1.5 0 0121 8.5v9A1.5 1.5 0 0119.5 19h-15A1.5 1.5 0 013 17.5v-9z"/><circle cx="12" cy="12.5" r="3.2"/></svg>',
+moon:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/></svg>',
+sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>',
+play:'<svg viewBox="0 0 24 24"><path d="M7 4.8v14.4L20 12 7 4.8z" fill="currentColor" stroke="none"/></svg>',
+pause:'<svg viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>',
+wand:'<svg viewBox="0 0 24 24"><path d="M5 19L18 6M14 4l1 2.5L17.5 8 15 9l-1 2.5L13 9l-2.5-1L13 6.5 14 4z"/></svg>',
+home:'<svg viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5v8a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19v-8z"/></svg>',
+warn:'<svg viewBox="0 0 24 24"><path d="M12 4.5l8.5 15h-17l8.5-15zM12 10v4M12 16.6v.1"/></svg>',
+copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.2"/><path d="M5 15H4a1 1 0 01-1-1V4a1 1 0 011-1h10a1 1 0 011 1v1"/></svg>',
+dl:'<svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 18v1.5A1.5 1.5 0 005.5 21h13a1.5 1.5 0 001.5-1.5V18"/></svg>',
+rot:'<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0113.7-5.6M20 12a8 8 0 01-13.7 5.6M18 3v4h-4M6 21v-4h4"/></svg>',
+wire:'<svg viewBox="0 0 24 24"><path d="M3 8l4 4-4 4M21 8l-4 4 4 4M7 12h10"/></svg>',
+expand:'<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+collapse:'<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>'
+};
+/* ==================================================================
+1 · СОСТОЯНИЕ
+================================================================== */
+const S={
+theme:localStorage.getItem('pr-theme')||'auto',
+/* ориентация и размещение модели */
+scale:100, rotX:0, rotY:0, rotZ:0, orient:'asis',
+offX:0, offY:16, offZ:0,
+/* заготовка */
+stockD:150, stockH:215, stockX:0, stockZ:0,
+/* парковочная позиция струны (начало и конец программы) */
+homeAuto:true, homeX:170, homeY:230, homeOffset:15,
+/* модель станка */
+machineGrid:620, machineTableD:260, machineTableH:20,
+/* проходы */
+motionMode:'shuttle2',
+angleMode:'passes', passes:24, angleStep:15, startAngle:0,
+halvingLevels:4,
+feed:280, rapid:1400, aFeed:1080, wireR:0.35, safeGap:10, dwell:0.7,
+exitLen:12, waitRot:0.6,
+zigzag:true, compBacklash:false, backlash:0.6,
+/* точность */
+slices:150, tol:0.12, smooth:false,
+/* основание */
+keepBase:true, baseH:16, baseW:100, trimMode:'bridge', trimCount:2, trimBelow:2, bridge:16,
+/* G-code */
+post:'linuxcnc', wireOn:'M3 S255', wireOff:'M5', wireKeepOn:false, gComments:true, commentStyle:'paren', gDec:3, gExt:'nc', fileName:'penorez_model',
+/* буквы осей станка для DRO и G-code */
+axisX:'X', axisY:'Y', axisA:'A', axisCustom:false,
+layers:{stock:true,model:true,result:true,base:true,path:true,contours:false,
+wire:true,table:true,grid:true},
+view:'iso', simSpeed:20, tabL:'model', tabR:'cut', tabB:'unroll'
+};
+/* ---------- Сохранение / восстановление состояния ---------- */
+const STATE_KEY='pr-state';
+const STATE_SKIP={theme:1};
+let saveStateTimer=null;
+function saveState(now){
+if(saveStateTimer){clearTimeout(saveStateTimer);saveStateTimer=null;}
+const write=function(){
+try{
+const out={};
+Object.keys(S).forEach(function(k){
+if(STATE_SKIP[k])return;
+out[k]=S[k];
+});
+localStorage.setItem(STATE_KEY,JSON.stringify(out));
+}catch(e){}
+};
+if(now)write();else saveStateTimer=setTimeout(write,400);
+}
+function loadState(){
+try{
+const raw=localStorage.getItem(STATE_KEY);
+if(!raw)return false;
+const saved=JSON.parse(raw);
+if(!saved||typeof saved!=='object')return false;
+Object.keys(saved).forEach(function(k){
+if(STATE_SKIP[k])return;
+if(!(k in S))return;
+const v=saved[k];
+if(k==='layers'&&v&&typeof v==='object'){
+Object.keys(v).forEach(function(lk){if(lk in S.layers)S.layers[lk]=!!v[lk];});
+return;
+}
+const cur=S[k];
+if(typeof cur==='number'){
+const n=parseFloat(v);if(isFinite(n))S[k]=n;
+return;
+}
+if(typeof cur==='boolean'){S[k]=!!v;return;}
+if(typeof cur==='string'){S[k]=String(v);return;}
+S[k]=v;
+});
+return true;
+}catch(e){return false;}
+}
+function clearState(){try{localStorage.removeItem(STATE_KEY);}catch(e){}}
+const LNAMES={stock:'Заготовка (цилиндр)',model:'STL-модель',result:'Деталь (прогноз)',
+base:'Основание (технолог.)',path:'Текущий контур',contours:'Все силуэты',
+wire:'Горячая струна',table:'Стол оси A',grid:'Сетка'};
+const LCOL={stock:'#8e8e93',model:'#0a84ff',result:'#30d158',base:'#ff9f0a',path:'#ff453a',
+contours:'#af52de',wire:'#ff9f0a',table:'#6b6f76',grid:'#9aa0aa'};
+const ORIENTS=[{t:'Как в файле',v:'asis',rx:0,ry:0,rz:0},
+{t:'Z-up → Y-up',v:'zup',rx:-90,ry:0,rz:0},
+{t:'На боку',v:'side',rx:0,ry:0,rz:90},
+{t:'Вверх ногами',v:'flip',rx:180,ry:0,rz:0}];
+let RAW=null,SLICES=null,SLICES_KEY='',ORIENT=null,ORIENT_KEY='',
+PLACED=null,PASSES=[],NPASS=0,RESULT=null,GCODE='';
+let STATS={lines:0,bytes:0,cutLen:0,airLen:0,rotDeg:0,pts:0,time:0,tCut:0,tAir:0,tRot:0,tDwell:0,
+safeX:60,xMin:0,xMax:0,volR:0,volM:0,excess:0,maxDev:0};
+/* ==================================================================
+2 · КОНСТРУКТОР UI
+================================================================== */
+function el(tag,attrs,kids){
+const n=document.createElement(tag);attrs=attrs||{};
+for(const k in attrs){const v=attrs[k];
+if(k==='html')n.innerHTML=v;
+else if(k==='cls')n.className=v;
+else if(k.indexOf('on')===0&&typeof v==='function')n.addEventListener(k.slice(2),v);
+else n.setAttribute(k,v);}
+(kids||[]).forEach(function(c){if(c===null||c===undefined||c===false)return;
+n.appendChild(c.nodeType?c:document.createTextNode(String(c)));});
+return n;
+}
+/* ✅ FIX #6: group() валидирует kids (приводит к массиву) */
+function group(title,kids,foot){
+const g=el('div',{cls:'group'});
+if(title)g.appendChild(el('div',{cls:'group-title'},[title]));
+const c=el('div',{cls:'card'});
+if(!Array.isArray(kids))kids=(kids===null||kids===undefined)?[]:[kids];
+kids.forEach(function(k){if(k)c.appendChild(k);});
+g.appendChild(c);
+if(foot)g.appendChild(el('div',{cls:'group-foot',html:foot}));
+return g;
+}
+function groupCollapsible(title,kids,foot,open){
+const g=el('div',{cls:'group'});
+const arrow=el('span',{style:'font-size:8px;margin-right:2px;opacity:.7;display:inline-block;transition:transform .2s',
+html:open?'▼':'▶'});
+const titleEl=el('div',{cls:'group-title',style:'cursor:pointer;user-select:none'},
+[arrow,title]);
+const wrap=el('div');
+const c=el('div',{cls:'card'});
+if(!Array.isArray(kids))kids=(kids===null||kids===undefined)?[]:[kids];
+kids.forEach(function(k){if(k)c.appendChild(k);});
+wrap.appendChild(c);
+if(foot)wrap.appendChild(el('div',{cls:'group-foot',html:foot}));
+g.appendChild(titleEl);
+g.appendChild(wrap);
+if(!open)wrap.style.display='none';
+let isOpen=open;
+titleEl.onclick=function(){
+isOpen=!isOpen;
+wrap.style.display=isOpen?'':'none';
+arrow.innerHTML=isOpen?'▼':'▶';
+};
+return g;
+}
+const V={},SEGS={},LBTN={},NUMREG={};
+function repaintKey(key){(NUMREG[key]||[]).forEach(function(f){try{f();}catch(e){}});}
+function info(label,val,id,cls){const v=el('div',{cls:'rv '+(cls||'')},[val]);if(id)V[id]=v;
+return el('div',{cls:'row'},[el('div',{cls:'rt'},[label]),v]);}
+function tap(label,icon,fn){return el('div',{cls:'row tap',onclick:fn},
+[el('div',{cls:'ico-sq',html:icon}),el('div',{cls:'rt'},[label])]);}
+function toggle(label,key,sub,cb){
+const b=el('button',{cls:'switch'+(S[key]?' on':'')});
+b.onclick=function(){S[key]=!S[key];b.classList.toggle('on',S[key]);(cb||scheduleRebuild)();};
+V['sw_'+key]=b;
+return el('div',{cls:'row'},[el('div',{style:'flex:1;min-width:0'},[
+el('div',{cls:'rt'},[label]),sub?el('div',{cls:'sub'},[sub]):null]),b]);
+}
+function layerToggle(k){
+const b=el('button',{cls:'switch'+(S.layers[k]?' on':'')});
+b.onclick=function(e){if(e)e.stopPropagation();
+S.layers[k]=!S.layers[k];syncLayerBtns(k);applyLayers();drawLegend();saveState();};
+(LBTN[k]=LBTN[k]||[]).push(b);
+return el('div',{cls:'row'},[el('i',{style:'width:9px;height:9px;border-radius:3px;background:'+LCOL[k]+';flex:0 0 auto'}),
+el('div',{cls:'rt'},[LNAMES[k]]),b]);
+}
+function syncLayerBtns(k){(LBTN[k]||[]).forEach(function(b){b.classList.toggle('on',S.layers[k]);});}
+function paintSlider(inp){
+if(!inp)return;
+const min=parseFloat(inp.min),max=parseFloat(inp.max);
+const v=parseFloat(inp.value);
+if(!isFinite(min)||!isFinite(max)||max<=min)return;
+inp.style.setProperty('--p',clamp((v-min)/(max-min)*100,0,100)+'%');
+}
+function slider(label,key,unit,min,max,step,cb,tint){
+const v=el('div',{cls:'rv'},[S[key]+(unit?' '+unit:'')]);
+const inp=el('input',{cls:'sl',type:'range',min:min,max:max,step:step,value:S[key]});
+inp.style.setProperty('--tintc',tint||'var(--blue)');
+const paint=function(){inp.style.setProperty('--p',((inp.value-min)/(max-min)*100)+'%');};
+paint();
+inp.addEventListener('input',function(){S[key]=parseFloat(inp.value);paint();
+v.textContent=(Math.round(S[key]*1000)/1000)+(unit?' '+unit:'');(cb||scheduleRebuild)();});
+V['sl_'+key]={inp:inp,v:v,paint:paint,unit:unit};
+return el('div',{cls:'row stack'},[el('div',{cls:'head'},[el('div',{cls:'rt'},[label]),v]),inp]);
+}
+/* ---------- iOS-числовое поле со степпером (замена слайдера) ---------- */
+function decOf(stp){const s=String(stp);const i=s.indexOf('.');
+return i<0?0:Math.min(4,s.length-i-1);}
+function numStr(v,d){if(!isFinite(v))v=0;let s=(+v).toFixed(d);
+if(parseFloat(s)===0)s=(0).toFixed(d);return s;}
+function numbox(label,key,unit,min,max,step,cb,tint){
+const mn=parseFloat(min),mx=parseFloat(max),sp=parseFloat(step);
+const st=(isFinite(sp)&&sp>0)?sp:1;
+const dec=decOf(st);
+const lo=isFinite(mn)?mn:-1e12,hi=isFinite(mx)?mx:1e12;
+const inp=el('input',{cls:'numfield',type:'text',inputmode:'decimal',
+autocomplete:'off',spellcheck:'false','aria-label':label});
+inp.value=numStr(+S[key]||0,dec);
+const uni=unit?el('span',{cls:'numunit'},[unit]):null;
+const bD=el('button',{type:'button',tabindex:'-1',title:'Уменьшить (удерживайте для повтора)',
+html:'<svg viewBox="0 0 24 24"><path d="M5.5 12h13"/></svg>'});
+const bI=el('button',{type:'button',tabindex:'-1',title:'Увеличить (удерживайте для повтора)',
+html:'<svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>'});
+const stpW=el('div',{cls:'stepper'},[bD,bI]);
+const wrap=el('div',{cls:'numctl'},uni?[inp,uni,stpW]:[inp,stpW]);
+wrap.style.setProperty('--tintc',tint||'var(--blue)');
+let typing=false;
+const paint=function(){
+if(typing&&document.activeElement===inp)return;
+inp.classList.remove('bad');
+inp.value=numStr(+S[key]||0,dec);
+bD.disabled=(+S[key]||0)<=lo+1e-9;bI.disabled=(+S[key]||0)>=hi-1e-9;
+};
+(NUMREG[key]=NUMREG[key]||[]).push(paint);
+const apply=function(v){
+v=Math.round(clamp(v,lo,hi)*1e6)/1e6;
+if(Math.abs(v-(+S[key]||0))<1e-12){paint();return;}
+S[key]=v;typing=false;paint();repaintKey(key);(cb||scheduleRebuild)();
+};
+const stepBy=function(dir,mult){
+typing=false;
+let v=(+S[key]||0)+dir*st*(mult||1);
+v=Math.round(v/st)*st;
+apply(v);
+};
+/* ✅ FIX #2: hold() корректно снимает listener'ы при отпускании — утечки нет */
+const hold=function(btn,dir){
+let t1=null,t2=null,n=0,act=false;
+const stop=function(){
+if(!act)return;
+act=false;
+clearTimeout(t1);clearInterval(t2);t1=t2=null;n=0;
+btn.classList.remove('press');
+window.removeEventListener('pointerup',stop);
+window.removeEventListener('pointercancel',stop);
+};
+btn.addEventListener('pointerdown',function(e){
+if(e.pointerType==='mouse'&&e.button!==0)return;
+if(btn.disabled)return;
+e.preventDefault();act=true;btn.classList.add('press');stepBy(dir,1);
+t1=setTimeout(function(){t2=setInterval(function(){n++;stepBy(dir,n>18?10:1);},70);},420);
+window.addEventListener('pointerup',stop);window.addEventListener('pointercancel',stop);
+});
+btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();});
+};
+hold(bD,-1);hold(bI,1);
+inp.addEventListener('input',function(){
+typing=true;
+const raw=String(inp.value).replace(',','.').trim();
+if(raw===''||raw==='-'||raw==='.'||raw==='-.'){inp.classList.remove('bad');return;}
+const v=parseFloat(raw);
+if(!isFinite(v)){inp.classList.add('bad');return;}
+inp.classList.remove('bad');
+const cv=Math.round(clamp(v,lo,hi)*1e6)/1e6;
+bD.disabled=cv<=lo+1e-9;bI.disabled=cv>=hi-1e-9;
+if(Math.abs(cv-(+S[key]||0))>1e-12){S[key]=cv;repaintKey(key);(cb||scheduleRebuild)();}
+});
+inp.addEventListener('blur',function(){typing=false;paint();});
+inp.addEventListener('focus',function(){inp.select();});
+inp.addEventListener('keydown',function(e){
+e.stopPropagation();
+if(e.key==='Enter'){e.preventDefault();
+const v=parseFloat(String(inp.value).replace(',','.'));
+typing=false;if(isFinite(v))apply(v);else paint();inp.blur();}
+else if(e.key==='ArrowUp'){e.preventDefault();stepBy(1,e.shiftKey?10:1);}
+else if(e.key==='ArrowDown'){e.preventDefault();stepBy(-1,e.shiftKey?10:1);}
+else if(e.key==='Escape'){e.preventDefault();typing=false;paint();inp.blur();}
+});
+paint();
+const dummy=el('span');
+V['sl_'+key]={inp:dummy,v:dummy,paint:paint,unit:'',wrap:wrap,realInput:inp,stepper:stpW};
+return el('div',{cls:'row numrow'},[el('div',{cls:'rt'},[label]),wrap]);
+}
+function sync(key){const o=V['sl_'+key];
+if(o){o.inp.value=S[key];o.paint();
+o.v.textContent=(Math.round(S[key]*1000)/1000)+(o.unit?' '+o.unit:'');}
+repaintKey(key);}
+function seg(opts,key,cb,plain){
+const w=el('div',{cls:'seg'}),th=el('div',{cls:'thumb'});w.appendChild(th);
+const bs=opts.map(function(o){
+const b=el('button',{cls:S[key]===o.v?'active':''},[o.t]);
+b.onclick=function(){if(S[key]===o.v)return;S[key]=o.v;segAll(key,o.v);cb(o.v);};
+w.appendChild(b);return b;});
+const mv=function(){const a=w.querySelector('.active');if(!a||!a.offsetWidth)return;
+th.style.width=a.offsetWidth+'px';th.style.transform='translateX('+a.offsetLeft+'px)';};
+const api={mv:mv,w:w,opts:opts,bs:bs,set:function(val){S[key]=val;
+bs.forEach(function(b,i){b.classList.toggle('active',opts[i].v===val);});mv();}};
+(SEGS[key]=SEGS[key]||[]).push(api);
+requestAnimationFrame(mv);setTimeout(mv,80);setTimeout(mv,400);
+if(window.ResizeObserver)new ResizeObserver(mv).observe(w);
+if(plain)return w;
+return el('div',{cls:'row stack',style:'padding-top:8px'},[w]);
+}
+function syncSegs(){Object.keys(SEGS).forEach(function(k){(SEGS[k]||[]).forEach(function(s){s.mv();});});}
+function segAll(key,val){(SEGS[key]||[]).forEach(function(s){s.set(val);});}
+function btns(list){return el('div',{cls:'rowbtns'},list.map(function(b){
+const attrs={cls:'btn '+(b.k||'btn-gray'),onclick:b.fn};
+if(b.id)attrs.id=b.id;
+return el('button',attrs,[b.t]);}));}
+function field(label,key,ph,mono,cb){
+const i=el('input',{cls:'tf'+(mono?' mono':''),value:S[key],placeholder:ph||''});
+i.oninput=function(){S[key]=i.value;(cb||scheduleRebuild)();};
+return el('div',{cls:'row'},[el('div',{cls:'rt',style:'flex:0 0 104px'},[label]),i]);
+}
+function setVal(id,t,c){const n=V[id];if(n){n.textContent=t;n.className='rv '+(c||'');}}
+/* ----- Буквы осей станка ----- */
+function axisLetter(which){
+if(!S.axisCustom)return which==='x'?'X':(which==='y'?'Y':'A');
+return which==='x'?(S.axisX||'X'):(which==='y'?(S.axisY||'Y'):(S.axisA||'A'));
+}
+function applyAxisLabels(){
+const lx=$('#droXLabel'),ly=$('#droYLabel'),la=$('#droALabel');
+if(lx)lx.textContent=axisLetter('x')+' · мм';
+if(ly)ly.textContent=axisLetter('y')+' · мм';
+if(la)la.textContent=axisLetter('a')+' · град';
+}
+/* ----- Начало координат XY (парковка струны) ----- */
+function autoHomeX(){ return S.stockX + S.stockD/2 + S.homeOffset; }
+function autoHomeY(){ return S.stockH + S.homeOffset; }
+function getHome(){ return S.homeAuto ? [autoHomeX(), autoHomeY()] : [S.homeX, S.homeY]; }
+function syncHomeValues(){
+if(S.homeAuto){
+S.homeX = Math.round(autoHomeX()*1000)/1000;
+S.homeY = Math.round(autoHomeY()*1000)/1000;
+}
+}
+function updateHomeUI(){
+syncHomeValues();
+repaintKey('homeX'); repaintKey('homeY');
+['homeX','homeY'].forEach(function(k){
+const o = V['sl_'+k];
+if(!o) return;
+if(o.wrap){
+o.wrap.style.opacity = S.homeAuto ? '.5' : '1';
+o.wrap.style.pointerEvents = S.homeAuto ? 'none' : 'auto';
+}
+if(o.realInput){ o.realInput.disabled = S.homeAuto; }
+});
+if(V.sw_homeAuto) V.sw_homeAuto.classList.toggle('on', S.homeAuto);
+}
+function openAxisDialog(){
+$('#axXInput').value=S.axisX;
+$('#axYInput').value=S.axisY;
+$('#axAInput').value=S.axisA;
+$('#axisErr').textContent='';
+$('#axisScrim').hidden=false;
+const sw=$('#axEnableSw');
+const syncEnabled=function(){
+const on=!!S.axisCustom;
+if(sw)sw.classList.toggle('on',on);
+const box=$('#axInputs');
+if(box)box.style.opacity=on?'1':'0.4';
+['axXInput','axYInput','axAInput'].forEach(function(id){
+const el=document.getElementById(id);
+if(el)el.disabled=!on;
+});
+};
+syncEnabled();
+if(sw)sw.onclick=function(){
+S.axisCustom=!S.axisCustom;
+syncEnabled();
+applyAxisLabels();
+genGCode();
+updateInfoUI();
+saveState();
+if(S.axisCustom)setTimeout(function(){$('#axXInput').focus();$('#axXInput').select();},20);
+};
+['axXInput','axYInput','axAInput'].forEach(function(id){
+const el=document.getElementById(id);
+el.onkeydown=function(e){
+e.stopPropagation();
+if(e.key==='Enter'){e.preventDefault();saveAxisDialog();}
+if(e.key==='Escape'){e.preventDefault();closeAxisDialog();}
+};
+});
+setTimeout(function(){
+if(S.axisCustom){$('#axXInput').focus();$('#axXInput').select();}
+},40);
+}
+function closeAxisDialog(){$('#axisScrim').hidden=true;}
+function saveAxisDialog(){
+const rawX=$('#axXInput').value.toUpperCase().trim();
+const rawY=$('#axYInput').value.toUpperCase().trim();
+const rawA=$('#axAInput').value.toUpperCase().trim();
+const err=$('#axisErr');
+const re=/^[A-Z]$/;
+if(!re.test(rawX)||!re.test(rawY)||!re.test(rawA)){
+err.textContent='Каждая буква должна быть одной заглавной латинской A–Z';
+return;
+}
+if(rawX===rawY||rawX===rawA||rawY===rawA){
+err.textContent='Буквы не должны повторяться';
+return;
+}
+if('GM'.indexOf(rawX)>=0||'GM'.indexOf(rawY)>=0||'GM'.indexOf(rawA)>=0){
+err.textContent='Буквы G и M зарезервированы для G-кодов';
+return;
+}
+S.axisX=rawX;S.axisY=rawY;S.axisA=rawA;
+applyAxisLabels();
+genGCode();
+updateInfoUI();
+saveState();
+closeAxisDialog();
+if(S.axisCustom){
+toast('Буквы осей: '+rawX+', '+rawY+', '+rawA);
+log('Буквы осей изменены: линейные → '+rawX+'/'+rawY+', поворотная → '+rawA,'s');
+}else{
+toast('Используются стандартные буквы X, Y, A');
+log('Свои буквы отключены — используются X, Y, A','s');
+}
+}
+function resetAxisDialog(){
+$('#axXInput').value='X';
+$('#axYInput').value='Y';
+$('#axAInput').value='A';
+$('#axisErr').textContent='';
+S.axisCustom=false;
+const sw=$('#axEnableSw');
+if(sw)sw.classList.toggle('on',false);
+const box=$('#axInputs');
+if(box)box.style.opacity='0.4';
+['axXInput','axYInput','axAInput'].forEach(function(id){
+const el=document.getElementById(id);
+if(el)el.disabled=true;
+});
+}
+/* ==================================================================
+3 · ПАНЕЛИ
+================================================================== */
+const VIEWS=[{t:'Изометрия',v:'iso'},{t:'Спереди',v:'front'},{t:'Сверху',v:'top'},{t:'Сбоку',v:'side'}];
+function buildPanes(){
+const tl=$('#tabsL');tl.innerHTML='';
+[['model','Модель',IC.cube],['stock','Заготовка',IC.cyl],['layers','Слои',IC.layers]].forEach(function(a){
+const b=el('button',{cls:'ptab'+(S.tabL===a[0]?' active':''),html:a[2]+'<span>'+a[1]+'</span>',
+onclick:function(){switchL(a[0]);}});
+b.dataset.k=a[0];tl.appendChild(b);});
+const bl=$('#bodyL');bl.innerHTML='';
+const pM=el('div',{'data-ltab':'model'}),pS=el('div',{'data-ltab':'stock'}),pL=el('div',{'data-ltab':'layers'});
+bl.appendChild(pM);bl.appendChild(pS);bl.appendChild(pL);
+pM.appendChild(group('Файл модели',[
+tap('Открыть STL-файл…',IC.cube,function(){$('#file').click();}),
+info('Имя','—','mName'),info('Треугольников','—','mTri'),
+info('Габариты X·Y·Z','—','mBox'),info('Объём','—','mVol'),
+info('Высота после поворота','—','mH'),
+btns([{t:'Демо-модель',k:'btn-tint',fn:loadDemo},{t:'Вписать в заготовку',k:'btn-blue',fn:fitModel}])
+],'Внутренние отверстия и полости STL игнорируются: для каждого среза берётся только внешняя выпуклая оболочка.'));
+pM.appendChild(group('Ориентация модели',[
+el('div',{cls:'row nosep',style:'padding:2px 10px 6px'},[
+el('div',{cls:'sub',style:'font-size:11px;line-height:1.4'},[
+'Кнопки поворачивают модель приращениями по 90°. Нажмите дважды, чтобы получить 180°, трижды — 270° (= −90°).'
+])]),
+btns([
+{t:'X +90°',k:'btn-tint',fn:function(){rotateAxis90('rotX');}},
+{t:'Y +90°',k:'btn-tint',fn:function(){rotateAxis90('rotY');}},
+{t:'Z +90°',k:'btn-tint',fn:function(){rotateAxis90('rotZ');}}
+]),
+numbox('Поворот вокруг X','rotX','°','-180','180','1',null,'var(--indigo)'),
+numbox('Поворот вокруг Y','rotY','°','-180','180','1',null,'var(--indigo)'),
+numbox('Поворот вокруг Z','rotZ','°','-180','180','1',null,'var(--indigo)'),
+btns([{t:'Сбросить ориентацию',k:'btn-gray',fn:function(){
+S.rotX=0;S.rotY=0;S.rotZ=0;
+['rotX','rotY','rotZ'].forEach(sync);rebuild();}}])
+],'Кнопки +90° поворачивают модель пошагово. Числовые поля позволяют задать произвольный угол (Enter — применить, Esc — отменить). Поворот выполняется относительно центра габаритов модели, поэтому положение не «уезжает».'));
+pM.appendChild(group('Размещение модели',[
+numbox('Масштаб','scale','%','10','1000','0.5',null,'var(--indigo)'),
+numbox('Смещение X','offX','мм','-200','200','1',null,'var(--indigo)'),
+numbox('Смещение Y','offY','мм','-200','200','1',null,'var(--indigo)'),
+numbox('Смещение Z','offZ','мм','-200','200','1',null,'var(--indigo)'),
+btns([{t:'Центрировать по оси A',k:'btn-gray',fn:function(){S.offX=0;S.offZ=0;sync('offX');sync('offZ');rebuild();
+log('Модель центрирована по оси A');}}])
+],'Поле Y задаёт высоту низа модели над столом. Отрицательные значения опускают модель ниже плоскости стола — полезно, если у модели тонкое основание и нужно «врезать» её глубже. Деталь (зелёный прогноз) по-прежнему строится строго в пределах STL.'));
+pM.appendChild(group('Точность аппроксимации',[
+numbox('Срезов по высоте','slices','','16','400','2',null,'var(--purple)'),
+numbox('Допуск упрощения','tol','мм','0','1.5','0.01',null,'var(--purple)'),
+toggle('Сглаживание контура','smooth','Chaikin — скругление углов силуэта')
+],'Срезы по высоте определяют, сколько горизонтальных сечений берётся из STL. Допуск и сглаживание влияют на форму силуэтов.'));
+pS.appendChild(group('Виртуальная цилиндрическая заготовка',[
+numbox('Диаметр','stockD','мм','20','2000','1',function(){updateHomeUI();scheduleRebuild();},'var(--teal)'),
+numbox('Высота','stockH','мм','20','2000','1',function(){updateHomeUI();scheduleRebuild();},'var(--teal)'),
+numbox('Смещение центра X','stockX','мм','-1500','1500','0.5',function(){updateHomeUI();scheduleRebuild();},'var(--teal)'),
+numbox('Смещение центра Z','stockZ','мм','-1500','1500','0.5',function(){updateHomeUI();scheduleRebuild();},'var(--teal)'),
+btns([{t:'Подобрать по модели',k:'btn-tint',fn:autoStock}])
+],'Ноль координат — центр поворотного стола оси A, ось Y направлена вверх вдоль оси вращения.'));
+pS.appendChild(group('Модель станка',[
+numbox('Размер сетки','machineGrid','мм','300','2000','10',function(){
+rebuildMachine();fitAll();},'var(--gray)'),
+numbox('Диаметр стола A','machineTableD','мм','100','2000','5',function(){
+rebuildMachine();fitAll();},'var(--gray)'),
+numbox('Высота стола','machineTableH','мм','5','200','1',function(){
+rebuildMachine();},'var(--gray)'),
+btns([{t:'Подогнать под заготовку',k:'btn-tint',fn:autoMachine}])
+],'Размеры станочной оснастки в сцене. Кнопка «Подогнать» подбирает их по габаритам заготовки — удобно для крупных моделей.'));
+pS.appendChild(group('Контроль размещения',[
+info('Модель в заготовке','—','chkFit'),info('Запас по диаметру','—','chkD'),
+info('Запас по высоте','—','chkH'),info('Проходов / шаг A','—','chkP'),
+info('Рабочая зона X','—','chkX'),info('Подрезка основания','—','chkT')
+]));
+pL.appendChild(group('Слои сцены',Object.keys(LNAMES).map(layerToggle),
+'Сетка станины и полярная сетка стола включаются одним тумблером.'));
+pL.appendChild(group('Проекция камеры',[seg(VIEWS,'view',function(v){setView(v);})]));
+/* правая */
+const tr=$('#tabsR');tr.innerHTML='';
+[['cut','Резание',IC.sliders],['base','Основание',IC.base],['code','G-code',IC.code],['rep','Отчёт',IC.chart]].forEach(function(a){
+const b=el('button',{cls:'ptab'+(S.tabR===a[0]?' active':''),html:a[2]+'<span>'+a[1]+'</span>',
+onclick:function(){switchR(a[0]);}});
+b.dataset.k=a[0];tr.appendChild(b);});
+const br=$('#bodyR');br.innerHTML='';
+const rC=el('div',{'data-rtab':'cut'}),rB=el('div',{'data-rtab':'base'}),
+rG=el('div',{'data-rtab':'code'}),rR=el('div',{'data-rtab':'rep'});
+[rC,rB,rG,rR].forEach(function(n){br.appendChild(n);});
+rC.appendChild(group('Режим движения струны',[
+seg([
+{t:'Силуэт (180°)',v:'shuttle2'},
+{t:'Радиальное (360°)',v:'shuttleAxis'},
+{t:'Равновесие',v:'equilibrium'}
+],'motionMode',function(){
+buildCutMode();
+scheduleRebuild();
+toast('Режим: '+({shuttle2:'точка ↔ точка',shuttleAxis:'точка ↔ ось',equilibrium:'равновесие'}[S.motionMode]));
+})
+],'«Точка ↔ точка» — полный силуэт за проход, стол 180°. «Точка ↔ ось» — 360°. «Равновесие» — двоичное удвоение числа граней: 2ⁿ резов, 2ⁿ⁺¹ граней.'));
+rC.appendChild(group('Разбиение на проходы',[
+seg([{t:'Число проходов',v:'passes'},{t:'Угол поворота A',v:'angle'}],'angleMode',function(){buildCutMode();scheduleRebuild();}),
+el('div',{id:'cutMode'}),
+numbox('Начальный угол A','startAngle','°','0','359','1'),
+toggle('Реверс обхода (зиг-заг)','zigzag','Стол всегда в одну сторону, струна — встречно'),
+toggle('Компенсация люфта A','compBacklash','Перелёт на угол люфта и возврат перед резом'),
+numbox('Люфт оси A','backlash','°','0','3','0.05',null,'var(--gray)')
+]));
+rC.appendChild(group('Режимы резания',[
+numbox('Рабочая подача','feed','мм/мин','20','2000','10',null,'var(--orange)'),
+numbox('Холостой ход','rapid','мм/мин','100','6000','50',null,'var(--orange)'),
+numbox('Скорость оси A','aFeed','°/мин','30','3600','10',null,'var(--orange)'),
+numbox('Радиус струны','wireR','мм','0','1.5','0.05',null,'var(--orange)'),
+numbox('Выход за заготовку','exitLen','мм','2','60','0.5',null,'var(--orange)'),
+numbox('Безопасный отступ','safeGap','мм','1','60','0.5',null,'var(--orange)'),
+numbox('Прогрев струны','dwell','с','0','5','0.1',null,'var(--orange)'),
+numbox('Пауза перед поворотом A','waitRot','с','0','10','0.1',null,'var(--orange)')
+]));
+/* ----- Блок «Начало координат XY» ----- */
+rC.appendChild(group('Начало координат XY', (function(){
+  syncHomeValues();
+  const homeSub = el('div',{cls:'sub'},
+    [S.homeAuto?'X и Y считаются от края и верха заготовки':'Введите X и Y вручную']);
+  const sw = el('button',{cls:'switch'+(S.homeAuto?' on':'')});
+  sw.onclick = function(){
+    S.homeAuto = !S.homeAuto;
+    sw.classList.toggle('on', S.homeAuto);
+    homeSub.textContent = S.homeAuto?'X и Y считаются от края и верха заготовки':'Введите X и Y вручную';
+    updateHomeUI();
+    rebuild();
+    saveState();
+  };
+  V.sw_homeAuto = sw;
+  return [
+    el('div',{cls:'row'},[
+      el('div',{style:'flex:1;min-width:0'},[
+        el('div',{cls:'rt'},['Автоматическое положение']),
+        homeSub
+      ]),
+      sw
+    ]),
+    numbox('Отступ за заготовку','homeOffset','мм','0','200','0.5',
+      function(){updateHomeUI();scheduleRebuild();},'var(--orange)'),
+    numbox('Позиция X','homeX','мм','-2000','2000','1',null,'var(--orange)'),
+    numbox('Позиция Y','homeY','мм','-2000','2000','1',null,'var(--orange)'),
+    el('div',{cls:'row nosep',style:'padding:2px 10px 8px'},[
+      el('div',{cls:'sub',style:'font-size:11px;line-height:1.4'},[
+        'Струна стартует отсюда и возвращается сюда после завершения программы. '+
+        'Между проходами струна паркуется там, где закончила предыдущий рез.'
+      ])
+    ])
+  ];
+})(),
+'При включённом авто-положении X и Y считаются от края заготовки и её верха на расстоянии «отступ за заготовку». При выключенном — задаются вручную.'));
+rC.appendChild(group('Точность аппроксимации',[
+numbox('Срезов по высоте','slices','','16','400','2',null,'var(--purple)'),
+numbox('Допуск упрощения','tol','мм','0','1.5','0.01',null,'var(--purple)'),
+toggle('Сглаживание контура','smooth','Chaikin — скругляет углы силуэта')
+]));
+rB.appendChild(group('Технологическое основание',[
+toggle('Оставлять основание','keepBase','Держит деталь на столе до конца резки'),
+numbox('Высота основания','baseH','мм','0','80','0.5',null,'var(--mint)'),
+numbox('Ширина основания','baseW','%','40','160','1',null,'var(--mint)')
+],'Основание — неподрезанный низ заготовки: струна не опускается ниже этой высоты, деталь не падает.'));
+rB.appendChild(group('Подрезка основания (в самом конце)',[
+seg([
+{t:'Не подрезать',v:'none'},
+{t:'На всю ширину',v:'full'},
+{t:'С перемычкой',v:'bridge'}
+],'trimMode',function(){buildTrimUI();scheduleRebuild();}),
+el('div',{id:'trimOpts'})
+],'Струна режет горизонтально на заданной высоте — деталь отваливается от основания. Режим «с перемычкой»: сначала рез с одной стороны, возврат, поворот стола 180°, рез с другой стороны — остаётся тонкая перемычка, которую легко отломить.'));
+rB.appendChild(groupCollapsible('Карта операций',
+[el('div',{id:'passList',style:'max-height:300px;overflow:auto'})],
+'Клик по операции — переход к ней в симуляции.',false));
+rG.appendChild(group('Постпроцессор',[
+seg([{t:'LinuxCNC',v:'linuxcnc'},{t:'Mach3',v:'mach3'},{t:'GRBL',v:'grbl'}],'post',function(){genGCode();log('Постпроцессор: '+S.post);}),
+toggle('Комментарии в УП','gComments',null,function(){genGCode();}),
+seg([{t:';',v:'semi'},{t:'( )',v:'paren'},{t:'/',v:'slash'}],'commentStyle',function(){genGCode();}),
+field('Вкл. струну','wireOn','M3 S255',true,function(){genGCode();}),
+field('Выкл. струну','wireOff','M5',true,function(){genGCode();}),
+toggle('Не выключать струну до конца','wireKeepOn','M3 один раз в начале, M5 — только перед M2',function(){genGCode();}),
+seg([{t:'2 знака',v:2},{t:'3 знака',v:3},{t:'4 знака',v:4}],'gDec',function(){genGCode();}),
+field('Имя файла','fileName','program',false,function(){}),
+seg([{t:'NC',v:'nc'},{t:'TAP',v:'tap'},{t:'TXT',v:'txt'},{t:'CNC',v:'cnc'}],'gExt',function(v){
+updateDownloadBtn();
+toast('Расширение файла: .'+v);
+}),
+info('Строк / размер','—','sFile'),
+btns([{t:'Скачать .nc',id:'btnDownload',k:'btn-blue',fn:download},{t:'Копировать',k:'btn-tint',fn:copyCode}])
+],'Ось A — поворотный стол вокруг Y. По умолчанию струна включается перед резом и выключается перед поворотом стола. Опция «Не выключать струну» оставляет M3 активным между проходами — струна горит от первого реза до конца программы.'));
+rG.appendChild(group('Предпросмотр УП',[
+el('div',{style:'padding:8px 10px'},[el('div',{cls:'codebox',id:'codeBox',
+style:'max-height:330px;border-radius:8px;border:.5px solid var(--sep)'})])]));
+rR.appendChild(group('Сводка',[el('div',{cls:'kpi',id:'kpi'})]));
+rR.appendChild(group('Структура времени',[el('div',{cls:'bars',id:'bars'})]));
+rR.appendChild(group('Параметры',[el('div',{id:'repRows'})]));
+rR.appendChild(group('',[btns([{t:'Экспорт отчёта .txt',k:'btn-gray',fn:exportReport}])]));
+buildCutMode();
+buildTrimUI();
+const tb=$('#tabsB');tb.innerHTML='';
+[['unroll','Развёртка траектории',IC.wave],['log','Журнал',IC.list],['code','G-code',IC.code]].forEach(function(a){
+const b=el('button',{cls:'ptab'+(S.tabB===a[0]?' active':''),html:a[2]+'<span>'+a[1]+'</span>',
+onclick:function(){switchB(a[0]);}});
+b.dataset.k=a[0];tb.appendChild(b);});
+const s2=seg([{t:'Изо',v:'iso'},{t:'Спереди',v:'front'},{t:'Сверху',v:'top'},{t:'Сбоку',v:'side'}],
+'view',function(v){setView(v);},true);s2.classList.add('sm');$('#vpSeg').appendChild(s2);
+buildSpeedSlider();
+drawLegend();
+updateHomeUI();
+switchL(S.tabL);switchR(S.tabR);switchB(S.tabB);
+updateDownloadBtn();
+setTimeout(syncSegs,60);
+}
+function buildTrimUI(){
+const box=$('#trimOpts');if(!box)return;
+box.innerHTML='';
+if(S.trimMode==='none')return;
+box.appendChild(numbox('Рез ниже низа модели','trimBelow','мм','0','40','0.5',null,'var(--mint)'));
+if(S.trimMode==='bridge'){
+box.appendChild(numbox('Ширина перемычки','bridge','мм','0','80','1',null,'var(--mint)'));
+box.appendChild(seg([
+{t:'2 подреза (180°)',v:2},
+{t:'4 подреза (90°)', v:4}
+],'trimCount',function(){scheduleRebuild();}));
+}
+setTimeout(syncSegs,30);
+}
+function buildCutMode(){
+const box=$('#cutMode');if(!box)return;box.innerHTML='';
+if(S.motionMode==='equilibrium'){
+const n=clamp(Math.round(S.halvingLevels||4),1,8);
+box.appendChild(numbox('Уровней удвоения','halvingLevels','','1','8','1',
+function(){buildCutMode();scheduleRebuild();},'var(--blue)'));
+const cuts=Math.pow(2,n);
+const faces=cuts*2;
+let totalA=0;
+for(let k=1;k<=n;k++){
+const count=Math.pow(2,k-1);
+const smallStep=90/Math.pow(2,k-1);
+const bigStep=90/Math.pow(2,k-2);
+totalA+=(smallStep+(count-1)*bigStep);
+}
+box.appendChild(el('div',{cls:'row nosep',style:'padding:2px 10px 8px'},[
+el('div',{cls:'sub',style:'font-size:11px;line-height:1.4'},[
+'Резов: '+cuts+' (2^'+n+'). Граней: '+faces+'. '+
+'Суммарный поворот A ≈ '+nf(totalA,2)+'°.'
+])]));
+}else{
+box.appendChild(S.angleMode==='passes'
+? numbox('Проходов на оборот','passes','','2','90','1',null,'var(--blue)')
+: numbox('Угол поворота стола','angleStep','°','1','90','0.5',null,'var(--blue)'));
+}
+setTimeout(syncSegs,30);
+}
+function updateDownloadBtn(){
+const b=$('#btnDownload');
+if(b)b.textContent='Скачать .'+(S.gExt||'nc');
+}
+function buildSpeedSlider(){
+const box=$('#tpSpeed');if(!box)return;box.innerHTML='';
+const inp=el('input',{cls:'sl',type:'range',min:1,max:100,step:1,value:S.simSpeed});
+inp.style.setProperty('--tintc','var(--blue)');
+inp.style.flex='1 1 auto';
+inp.style.minWidth='0';
+const lbl=el('span',{cls:'mono',
+style:'flex:0 0 auto;min-width:44px;text-align:right;font-size:11.5px;font-weight:700;color:var(--label)'},
+['×'+S.simSpeed]);
+const paint=function(){inp.style.setProperty('--p',((inp.value-1)/(100-1)*100)+'%');};
+paint();
+inp.addEventListener('input',function(){
+S.simSpeed=parseFloat(inp.value);
+paint();
+lbl.textContent='×'+S.simSpeed;
+});
+box.appendChild(inp);
+box.appendChild(lbl);
+V['sl_simSpeed']={inp:inp,v:lbl,paint:paint,unit:''};
+}
+function switchL(k){S.tabL=k;
+$$('#tabsL .ptab').forEach(function(b){b.classList.toggle('active',b.dataset.k===k);});
+$$('#bodyL>[data-ltab]').forEach(function(n){n.hidden=(n.dataset.ltab!==k);});
+saveState();
+requestAnimationFrame(syncSegs);}
+function switchR(k){S.tabR=k;
+$$('#tabsR .ptab').forEach(function(b){b.classList.toggle('active',b.dataset.k===k);});
+$$('#bodyR>[data-rtab]').forEach(function(n){n.hidden=(n.dataset.rtab!==k);});
+saveState();
+requestAnimationFrame(syncSegs);}
+function switchB(k){S.tabB=k;
+$$('#tabsB .ptab').forEach(function(b){b.classList.toggle('active',b.dataset.k===k);});
+$$('[data-btab]').forEach(function(n){n.hidden=(n.dataset.btab!==k);});
+saveState();
+requestAnimationFrame(resizeAll);}
+function drawLegend(){
+const L=$('#legend');if(!L)return;L.innerHTML='';
+Object.keys(LNAMES).forEach(function(k){
+const d=el('div',{cls:S.layers[k]?'':'off',onclick:function(){
+S.layers[k]=!S.layers[k];syncLayerBtns(k);applyLayers();drawLegend();saveState();}});
+d.innerHTML='<i style="background:'+LCOL[k]+'"></i>'+LNAMES[k];
+L.appendChild(d);});
+}
+function applyOrientPreset(v){
+const o=ORIENTS.filter(function(x){return x.v===v;})[0];
+if(!o)return;
+S.rotX=o.rx;S.rotY=o.ry;S.rotZ=o.rz;
+['rotX','rotY','rotZ'].forEach(sync);
+rebuild();log('Ориентация модели: '+o.t+' (X '+o.rx+'° Y '+o.ry+'° Z '+o.rz+'°)');
+}
+function rotateAxis90(axis){
+if(axis!=='rotX'&&axis!=='rotY'&&axis!=='rotZ')return;
+let v=(+S[axis]||0)+90;
+v=((v+180)%360+360)%360-180;
+S[axis]=v;
+sync(axis);
+rebuild();
+const nm={rotX:'X',rotY:'Y',rotZ:'Z'}[axis]||axis;
+log('Ориентация модели: поворот '+nm+' → '+nf(S[axis],1)+'°');
+}
+/* ==================================================================
+4 · МЕНЮ
+================================================================== */
+const MENUS={
+file:[{t:'Открыть STL…',k:'⌘O',fn:function(){$('#file').click();}},
+{t:'Демо-модель (ваза)',fn:loadDemo},{sep:1},
+{t:'Экспорт G-code…',k:'⌘S',fn:download},
+{t:'Копировать G-code',k:'⌘⇧C',fn:copyCode},
+{t:'Экспорт отчёта .txt',fn:exportReport},{sep:1},
+{t:'Снимок вида PNG',k:'⌘⇧S',fn:screenshot}],
+edit:[{t:'Пересчитать траекторию',k:'R',fn:function(){rebuild();}},
+{t:'Вписать модель в заготовку',k:'⇧F',fn:fitModel},
+{t:'Подобрать заготовку',fn:autoStock},{sep:1},
+{t:'Ориентация: как в файле',fn:function(){applyOrientPreset('asis');segAll('orient','asis');}},
+{t:'Ориентация: Z-up → Y-up',fn:function(){applyOrientPreset('zup');segAll('orient','zup');}},
+{t:'Сбросить параметры резания',fn:resetParams},
+{t:'Сбросить всё (включая сохранённые)',fn:resetAllState},{sep:1},
+{t:'Тема оформления',k:'T',fn:cycleTheme},{sep:1},
+{t:'О методе резки',k:'?',fn:aboutMethod}],
+view:[{t:'Изометрия',k:'1',fn:function(){setView('iso');}},{t:'Спереди (плоскость XY)',k:'2',fn:function(){setView('front');}},
+{t:'Сверху',k:'3',fn:function(){setView('top');}},{t:'Сбоку',k:'4',fn:function(){setView('side');}},
+{t:'Показать всё',k:'F',fn:fitAll},{sep:1}].concat(
+Object.keys(LNAMES).map(function(k){return {t:LNAMES[k],check:function(){return S.layers[k];},
+fn:function(){S.layers[k]=!S.layers[k];syncLayerBtns(k);applyLayers();drawLegend();}};})).concat(
+[{sep:1},{t:'Показать / скрыть консоль',k:'⌘~',fn:toggleConsole}]),
+tools:[{t:'Пуск / пауза симуляции',k:'Space',fn:function(){setPlaying(!SIM.playing);}},
+{t:'В начало',k:'Home',fn:function(){setPlaying(false);setSimTime(0);}},
+{t:'В конец',k:'End',fn:function(){setPlaying(false);setSimTime(SIM.total);}},
+{t:'Следующая операция',k:'→',fn:function(){stepPass(1);}},
+{t:'Предыдущая операция',k:'←',fn:function(){stepPass(-1);}},{sep:1},
+{t:'Палитра команд',k:'⌘K',fn:openPalette},{sep:1},
+{t:'Буквы осей станка…',fn:openAxisDialog},
+{t:'Проверить размещение',fn:function(){validate(false);}}],
+help:[{t:'О методе резки',fn:aboutMethod},{t:'Горячие клавиши',k:'?',fn:showKeys},
+{t:'О программе',fn:function(){alert_('HotWireStudio — векторный CAM - Rotary A',
+'4-осевая ЧПУ-резка пенопласта горячей струной. X и Y — линейные оси, A — поворотный стол вокруг оси Y. Версия 2026.10.17 (v4).','');}}]
+};
+function toggleConsole(){const b=$('#bottom');
+b.style.display=(b.style.display==='none')?'flex':'none';resizeAll();}
+let openMenu=null;
+function closeMenu(){if(openMenu){openMenu.el.classList.remove('open');
+if(openMenu.pop&&openMenu.pop.parentNode)openMenu.pop.parentNode.removeChild(openMenu.pop);openMenu=null;}}
+function showMenu(elm,name){
+closeMenu();
+const items=MENUS[name];if(!items)return;
+const p=el('div',{cls:'mpop'});
+items.forEach(function(it){
+if(it.sep){p.appendChild(el('div',{cls:'msep'}));return;}
+const on=it.check?!!it.check():false;
+const r=el('div',{cls:'mi',onclick:function(e){e.stopPropagation();closeMenu();if(it.fn)it.fn();}},
+[el('span',{cls:'ck'},[on?'✓':'']),el('span',{},[it.t]),it.k?el('span',{cls:'k mono'},[it.k]):null]);
+if(!it.check)r.firstChild.style.visibility='hidden';
+p.appendChild(r);});
+document.body.appendChild(p);
+const b=elm.getBoundingClientRect();
+p.style.left=Math.max(6,Math.min(b.left,window.innerWidth-p.offsetWidth-8))+'px';
+p.style.top=(b.bottom+3)+'px';
+elm.classList.add('open');openMenu={el:elm,pop:p};
+}
+document.addEventListener('mousedown',function(e){
+const it=e.target.closest?e.target.closest('.mb-item'):null;
+if(it){e.preventDefault();const was=openMenu&&openMenu.el===it;closeMenu();if(!was)showMenu(it,it.dataset.menu);return;}
+if(openMenu&&!(e.target.closest&&e.target.closest('.mpop')))closeMenu();
+});
+$$('#menubar .mb-item').forEach(function(n){
+n.addEventListener('mouseenter',function(){if(openMenu&&openMenu.el!==n)showMenu(n,n.dataset.menu);});});
+/* ==================================================================
+5 · ПАЛИТРА КОМАНД
+================================================================== */
+const CMDS=[
+{t:'Открыть STL-файл…',k:'⌘O',i:IC.cube,fn:function(){$('#file').click();}},
+{t:'Загрузить демо-модель',i:IC.cube,fn:loadDemo},
+{t:'Пересчитать траекторию',k:'R',i:IC.wand,fn:function(){rebuild();}},
+{t:'Экспорт G-code (.nc)',k:'⌘S',i:IC.dl,fn:download},
+{t:'Копировать G-code',i:IC.copy,fn:copyCode},
+{t:'Экспорт отчёта (.txt)',i:IC.chart,fn:exportReport},
+{t:'Снимок вида (PNG)',i:IC.cam,fn:screenshot},
+{t:'Буквы осей станка…',i:IC.sliders,fn:openAxisDialog},
+{t:'На весь экран',i:IC.expand,fn:toggleFullscreen},
+{t:'Пуск / пауза симуляции',k:'Space',i:IC.play,fn:function(){setPlaying(!SIM.playing);}},
+{t:'Симуляция: в начало',k:'Home',i:IC.home,fn:function(){setPlaying(false);setSimTime(0);}},
+{t:'Симуляция: в конец',k:'End',i:IC.wave,fn:function(){setPlaying(false);setSimTime(SIM.total);}},
+{t:'Следующая операция',k:'→',i:IC.wave,fn:function(){stepPass(1);}},
+{t:'Предыдущая операция',k:'←',i:IC.wave,fn:function(){stepPass(-1);}},
+{t:'Вид: изометрия',k:'1',i:IC.cube,fn:function(){setView('iso');}},
+{t:'Вид: спереди (XY)',k:'2',i:IC.cube,fn:function(){setView('front');}},
+{t:'Вид: сверху',k:'3',i:IC.cube,fn:function(){setView('top');}},
+{t:'Вид: сбоку',k:'4',i:IC.cube,fn:function(){setView('side');}},
+{t:'Показать всё',k:'F',i:IC.fit,fn:fitAll},
+{t:'Вписать модель в заготовку',k:'⇧F',i:IC.wand,fn:fitModel},
+{t:'Подобрать заготовку по модели',i:IC.cyl,fn:autoStock},
+{t:'Начало координат XY: авто/вручную',i:IC.sliders,fn:function(){
+S.homeAuto=!S.homeAuto;
+if(V.sw_homeAuto)V.sw_homeAuto.classList.toggle('on',S.homeAuto);
+updateHomeUI();rebuild();saveState();
+toast('Парковка струны: '+(S.homeAuto?'авто':'вручную'));}},
+{t:'Ориентация: как в файле',i:IC.rot,fn:function(){applyOrientPreset('asis');segAll('orient','asis');}},
+{t:'Ориентация: Z-up → Y-up',i:IC.rot,fn:function(){applyOrientPreset('zup');segAll('orient','zup');}},
+{t:'Ориентация: на боку',i:IC.rot,fn:function(){applyOrientPreset('side');segAll('orient','side');}},
+{t:'Ориентация: вверх ногами',i:IC.rot,fn:function(){applyOrientPreset('flip');segAll('orient','flip');}},
+{t:'Подрезка основания: не подрезать',i:IC.base,fn:function(){S.trimMode='none';segAll('trimMode','none');buildTrimUI();rebuild();}},
+{t:'Подрезка основания: на всю ширину',i:IC.base,fn:function(){S.trimMode='full';segAll('trimMode','full');buildTrimUI();rebuild();}},
+{t:'Подрезка основания: с перемычкой',i:IC.base,fn:function(){S.trimMode='bridge';segAll('trimMode','bridge');buildTrimUI();rebuild();}},
+{t:'Технологическое основание: вкл/выкл',i:IC.base,fn:function(){S.keepBase=!S.keepBase;
+if(V.sw_keepBase)V.sw_keepBase.classList.toggle('on',S.keepBase);rebuild();}},
+{t:'Струна: показать / скрыть',i:IC.wire,fn:function(){S.layers.wire=!S.layers.wire;
+syncLayerBtns('wire');applyLayers();drawLegend();}},
+{t:'Показать все силуэты',i:IC.layers,fn:function(){S.layers.contours=!S.layers.contours;
+syncLayerBtns('contours');applyLayers();drawLegend();}},
+{t:'Развёртка траектории (внизу)',i:IC.wave,fn:function(){switchB('unroll');}},
+{t:'Журнал событий (внизу)',i:IC.list,fn:function(){switchB('log');}},
+{t:'Отчёт и статистика',i:IC.chart,fn:function(){switchR('rep');}},
+{t:'Сбросить параметры резания',i:IC.sliders,fn:resetParams},
+{t:'Сбросить всё (включая сохранённые)',i:IC.warn,fn:resetAllState},
+{t:'Проверить размещение модели',i:IC.warn,fn:function(){validate(false);}},
+{t:'Показать / скрыть консоль',k:'⌘~',i:IC.list,fn:toggleConsole},
+{t:'Тема: светлая / тёмная / системная',k:'T',i:IC.moon,fn:cycleTheme},
+{t:'Горячие клавиши',k:'?',i:IC.list,fn:showKeys},
+{t:'О методе резки',i:IC.list,fn:aboutMethod}
+];
+let palSel=0,palList=[];
+function openPalette(){$('#pscrim').hidden=false;$('#palInput').value='';filterPal('');
+setTimeout(function(){$('#palInput').focus();},30);}
+function closePalette(){$('#pscrim').hidden=true;}
+function filterPal(q){
+q=(q||'').trim().toLowerCase();
+palList=CMDS.filter(function(c){return !q||c.t.toLowerCase().indexOf(q)>=0;});
+palSel=0;const box=$('#palRes');box.innerHTML='';
+palList.forEach(function(c,i){
+const r=el('div',{cls:'pr'+(i===0?' sel':''),onclick:function(){closePalette();c.fn();}},
+[el('span',{cls:'pi',html:c.i||IC.wand}),el('span',{},[c.t]),c.k?el('span',{cls:'pk mono'},[c.k]):null]);
+r.onmouseenter=function(){palSel=i;$$('.pr').forEach(function(n,j){n.classList.toggle('sel',j===i);});};
+box.appendChild(r);});
+if(!palList.length)box.innerHTML='<div class="pr" style="opacity:.5">Ничего не найдено</div>';
+}
+$('#palInput').oninput=function(e){filterPal(e.target.value);};
+$('#palInput').onkeydown=function(e){
+if(e.key==='Escape'){closePalette();return;}
+if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();
+palSel=clamp(palSel+(e.key==='ArrowDown'?1:-1),0,Math.max(0,palList.length-1));
+const all=$$('.pr');all.forEach(function(n,j){n.classList.toggle('sel',j===palSel);});
+if(all[palSel])all[palSel].scrollIntoView({block:'nearest'});return;}
+if(e.key==='Enter'&&palList[palSel]){closePalette();palList[palSel].fn();}};
+$('#pscrim').onclick=function(e){if(e.target.id==='pscrim')closePalette();};
+$('#tbPal').onclick=openPalette;
+function showKeys(){
+const rows=[['⌘/Ctrl + K','Палитра команд'],['⌘/Ctrl + O','Открыть STL'],['⌘/Ctrl + S','Экспорт G-code'],
+['Space','Пуск / пауза симуляции'],['R','Пересчитать траекторию'],['F','Показать всё'],
+['Shift + F','Вписать модель в заготовку'],['1  2  3  4','Изометрия / спереди / сверху / сбоку'],
+['←  →','Предыдущая / следующая операция'],['Home / End','В начало / в конец симуляции'],
+['↑  ↓  (в числовом поле)','Изменить значение на шаг, Shift — ×10'],['Enter / Esc (в поле)','Применить / отменить ввод значения'],
+['⌘/Ctrl + ~','Показать или скрыть консоль'],['T','Переключить тему'],['?','Эта справка']];
+let html='<div class="keys">';
+rows.forEach(function(r){html+='<kbd>'+r[0]+'</kbd><span>'+r[1]+'</span>';});
+html+='</div>';
+alert_('Горячие клавиши','',html);
+}
+function aboutMethod(){
+$('#helpScrim').hidden=false;
+const body=document.querySelector('#helpScrim .help-body');
+if(body)body.scrollTop=0;
+}
+function closeHelp(){$('#helpScrim').hidden=true;}
+/* ✅ FIX #5: добавлен сброс simSpeed */
+function resetParams(){
+S.motionMode='shuttle2';
+S.orient='asis';
+S.rotX=0;S.rotY=0;S.rotZ=0;
+S.machineGrid=620;S.machineTableD=260;S.machineTableH=20;
+S.axisX='X';S.axisY='Y';S.axisA='A';S.axisCustom=false;
+S.passes=24;S.angleStep=15;S.startAngle=0;S.halvingLevels=4;S.feed=280;S.rapid=1400;S.aFeed=1080;S.wireR=0.35;
+S.safeGap=10;S.dwell=0.7;S.exitLen=12;S.waitRot=0.6;S.zigzag=true;S.compBacklash=false;S.backlash=0.6;
+S.wireKeepOn=false;S.gExt='nc';S.commentStyle='paren';
+S.slices=150;S.tol=0.12;S.smooth=false;S.keepBase=true;S.baseH=16;S.baseW=100;
+S.trimMode='bridge';S.trimCount=2;S.trimBelow=2;S.bridge=16;
+S.homeAuto=true;S.homeOffset=15;S.homeX=170;S.homeY=230;
+S.simSpeed=20;
+['passes','angleStep','startAngle','halvingLevels','feed','rapid','aFeed','wireR','safeGap','dwell','exitLen','waitRot',
+'backlash','slices','tol','baseH','baseW','trimBelow','bridge','homeOffset','homeX','homeY',
+'machineGrid','machineTableD','machineTableH','simSpeed'].forEach(sync);
+segAll('motionMode','shuttle2');
+segAll('orient','asis');
+segAll('gExt','nc');
+segAll('commentStyle','paren');
+updateDownloadBtn();
+['rotX','rotY','rotZ'].forEach(sync);
+[['zigzag',true],['compBacklash',false],['smooth',false],['keepBase',true],['wireKeepOn',false]].forEach(function(p){
+if(V['sw_'+p[0]])V['sw_'+p[0]].classList.toggle('on',p[1]);});
+segAll('trimMode','bridge');
+segAll('trimCount',2);
+buildTrimUI();
+rebuildMachine();
+applyAxisLabels();
+updateHomeUI();
+rebuild();toast('Параметры сброшены');log('Параметры резания сброшены к значениям по умолчанию');
+}
+function resetAllState(){
+alert_('Сбросить все настройки?',
+'Все параметры резания, размещения, заготовки, G-code и сохранённое состояние будут очищены. Программа вернётся к заводским настройкам.',
+'<div style="display:flex;gap:8px;justify-content:center;margin-top:12px">'+
+'<button class="btn btn-gray" id="rsCancel" style="flex:1;padding:8px">Отмена</button>'+
+'<button class="btn btn-blue" id="rsOk" style="flex:1;padding:8px">Сбросить</button>'+
+'</div>');
+const ok=$('#rsOk'),cancel=$('#rsCancel');
+if(cancel)cancel.onclick=function(){$('#scrim').hidden=true;};
+if(ok)ok.onclick=function(){
+$('#scrim').hidden=true;
+clearState();
+resetParams();
+toast('Все настройки сброшены');
+log('Полный сброс: параметры и сохранённое состояние очищены','w');
+};
+}
+function cycleTheme(){
+const o=['auto','light','dark'];S.theme=o[(o.indexOf(S.theme)+1)%3];applyTheme();
+localStorage.setItem('pr-theme',S.theme);
+toast('Тема: '+({auto:'системная',light:'светлая',dark:'тёмная'})[S.theme]);
+log('Тема оформления: '+S.theme);
+}
+function applyTheme(){
+let t=S.theme;
+if(t==='auto')t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+document.documentElement.setAttribute('data-theme',t);
+const b=$('#tbTheme');if(b)b.innerHTML=(t==='dark')?IC.sun:IC.moon;
+requestAnimationFrame(function(){resizeAll();});
+}
+/* ==================================================================
+6 · THREE.JS СЦЕНА
+================================================================== */
+let renderer,scene,camera,controls,tableGroup,machineGroup,wireGroup,wireCore,wireLine,wireGlowA,wireGlowB,
+coneA,coneB,stockMesh,modelMesh,resultMesh,baseMesh,pathLine,pathRest,contourGroup,
+gridH,polarG,bedMesh,tableMesh;
+function initScene(){
+renderer=new THREE.WebGLRenderer({canvas:$('#scene'),antialias:true,alpha:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+scene=new THREE.Scene();
+camera=new THREE.PerspectiveCamera(38,1,0.5,8000);
+camera.position.set(330,270,380);
+controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=0.08;controls.target.set(0,95,0);
+controls.minDistance=50;controls.maxDistance=3000;
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a99ac,0.9));
+const d1=new THREE.DirectionalLight(0xffffff,1.05);d1.position.set(260,460,280);scene.add(d1);
+const d2=new THREE.DirectionalLight(0xa9c6ff,0.45);d2.position.set(-280,150,-240);scene.add(d2);
+machineGroup=new THREE.Group();scene.add(machineGroup);
+bedMesh=null;
+gridH=new THREE.GridHelper(620,31,0x9aa0aa,0xb9bec7);gridH.position.y=-19.5;
+gridH.material.transparent=true;gridH.material.opacity=0.34;machineGroup.add(gridH);
+tableGroup=new THREE.Group();scene.add(tableGroup);
+tableMesh=new THREE.Group();tableGroup.add(tableMesh);
+polarG=new THREE.PolarGridHelper(126,8,6,72,0x6c727c,0x4a4f57);
+polarG.position.y=-19.4;tableGroup.add(polarG);
+stockMesh=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1,72),
+new THREE.MeshStandardMaterial({color:0x9ea4ad,roughness:0.95,transparent:true,opacity:0.13,
+side:THREE.DoubleSide,depthWrite:false}));
+stockMesh.renderOrder=1;tableGroup.add(stockMesh);
+modelMesh=new THREE.Mesh(new THREE.BufferGeometry(),
+new THREE.MeshStandardMaterial({color:0x0a84ff,roughness:0.42,metalness:0.05,transparent:true,opacity:0.34,
+side:THREE.DoubleSide,depthWrite:false}));
+modelMesh.renderOrder=2;tableGroup.add(modelMesh);
+resultMesh=new THREE.Mesh(new THREE.BufferGeometry(),
+new THREE.MeshStandardMaterial({color:0x30d158,roughness:0.5,metalness:0.04,transparent:true,opacity:0.62,
+side:THREE.DoubleSide,depthWrite:false}));
+resultMesh.renderOrder=3;tableGroup.add(resultMesh);
+baseMesh=new THREE.Mesh(new THREE.BufferGeometry(),
+new THREE.MeshStandardMaterial({color:0xff9f0a,roughness:0.6,transparent:true,opacity:0.4,
+side:THREE.DoubleSide,depthWrite:false}));
+baseMesh.renderOrder=3;tableGroup.add(baseMesh);
+contourGroup=new THREE.Group();scene.add(contourGroup);
+pathLine=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xff453a,transparent:true,opacity:0.95}));
+pathLine.renderOrder=6;scene.add(pathLine);
+pathRest=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0x0a84ff,transparent:true,opacity:0.4}));
+pathRest.renderOrder=5;scene.add(pathRest);
+wireGroup=new THREE.Group();scene.add(wireGroup);
+const hm=new THREE.MeshStandardMaterial({color:0xc7ccd3,roughness:0.3,metalness:0.85});
+coneA=new THREE.Mesh(new THREE.ConeGeometry(7,24,20),hm);coneA.rotation.x=Math.PI/2;wireGroup.add(coneA);
+coneB=new THREE.Mesh(new THREE.ConeGeometry(7,24,20),hm);coneB.rotation.x=-Math.PI/2;wireGroup.add(coneB);
+wireCore=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,10,10),
+new THREE.MeshStandardMaterial({color:0xb9bec6,emissive:0xff453a,emissiveIntensity:0.2,roughness:0.3,
+transparent:true,opacity:0.95}));
+wireCore.rotation.x=Math.PI/2;wireGroup.add(wireCore);
+wireLine=new THREE.Line(
+new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-50),new THREE.Vector3(0,0,50)]),
+new THREE.LineBasicMaterial({color:0xff453a,transparent:true,opacity:0.95}));
+wireLine.renderOrder=8;wireGroup.add(wireLine);
+wireGlowA=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(),color:0xff9f0a,transparent:true,opacity:0,
+blending:THREE.AdditiveBlending,depthWrite:false}));
+wireGlowA.scale.set(70,70,1);wireGroup.add(wireGlowA);
+wireGlowB=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(),color:0xff9f0a,transparent:true,opacity:0,
+blending:THREE.AdditiveBlending,depthWrite:false}));
+wireGlowB.scale.set(70,70,1);wireGroup.add(wireGlowB);
+updateWireLen();
+if(window.ResizeObserver)new ResizeObserver(function(){resizeAll();}).observe($('#stage'));
+resizeAll();
+animate(0);
+}
+function rebuildMachine(){
+if(!tableMesh||!polarG)return;
+const G=S.machineGrid;
+const TD=S.machineTableD/2,TH=S.machineTableH;
+machineGroup.remove(gridH);
+gridH.geometry.dispose();
+const div=Math.max(6,Math.round(G/20));
+gridH=new THREE.GridHelper(G,div,0x9aa0aa,0xb9bec7);
+gridH.position.y=-19.5;
+gridH.material.transparent=true;gridH.material.opacity=0.34;
+machineGroup.add(gridH);
+while(tableMesh.children.length){
+const c=tableMesh.children[0];
+if(c.geometry)c.geometry.dispose();
+tableMesh.remove(c);
+}
+const tm=new THREE.MeshStandardMaterial({color:0x3c4046,roughness:0.55,metalness:0.5});
+const plate=new THREE.Mesh(new THREE.CylinderGeometry(TD*0.95,TD,TH*0.6,72),tm);
+plate.position.y=-TH*0.3;tableMesh.add(plate);
+const ringR=TD*0.85;
+const ring=new THREE.Mesh(new THREE.TorusGeometry(ringR,Math.max(1.2,TD*0.02),8,72),
+new THREE.MeshStandardMaterial({color:0x8e9298,roughness:0.35,metalness:0.75}));
+ring.rotation.x=Math.PI/2;ring.position.y=TH*0.04;tableMesh.add(ring);
+const jawLen=TD*0.42,jawW=Math.max(8,TD*0.12);
+for(let i=0;i<4;i++){
+const j=new THREE.Mesh(new THREE.BoxGeometry(jawW,TH*0.35,jawLen),tm);
+const a=i*Math.PI/2+Math.PI/4;
+j.position.set(Math.cos(a)*TD*0.65,-TH*0.65,Math.sin(a)*TD*0.65);
+j.rotation.y=-a;tableMesh.add(j);
+}
+tableGroup.remove(polarG);
+polarG.geometry.dispose();
+polarG=new THREE.PolarGridHelper(TD,8,6,72,0x6c727c,0x4a4f57);
+polarG.position.y=-19.4;tableGroup.add(polarG);
+updateWireLen();
+}
+function glowTex(){
+const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
+const r=g.createRadialGradient(32,32,0,32,32,32);
+r.addColorStop(0,'rgba(255,224,170,1)');r.addColorStop(0.35,'rgba(255,140,40,.5)');r.addColorStop(1,'rgba(255,80,0,0)');
+g.fillStyle=r;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);
+}
+function updateWireLen(){
+if(!wireGroup)return;
+const L=Math.max(70,S.stockD*1.35),hz=L/2;
+const cA=-(hz+12),cB=(hz+12);
+coneA.position.set(0,0,cA);coneB.position.set(0,0,cB);
+if(wireGlowA)wireGlowA.position.set(0,0,cA);
+if(wireGlowB)wireGlowB.position.set(0,0,cB);
+wireCore.scale.set(1,L/10,1);
+const pos=wireLine.geometry.attributes.position;
+pos.setXYZ(0,0,0,-hz);pos.setXYZ(1,0,0,hz);pos.needsUpdate=true;
+wireLine.geometry.computeBoundingSphere();
+}
+function resizeAll(){
+if(!renderer)return;
+const st=$('#stage');if(!st)return;
+const w=st.clientWidth,h=st.clientHeight;
+if(w>0&&h>0){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+const u=$('#unroll');
+if(u&&u.parentElement){
+const bw=u.parentElement.clientWidth,bh=u.parentElement.clientHeight;
+if(bw>0&&bh>0){
+const dpr=Math.min(window.devicePixelRatio||1,2);
+u.width=Math.round(bw*dpr);u.height=Math.round(bh*dpr);
+u.style.width=bw+'px';u.style.height=bh+'px';
+}
+}
+drawUnroll();
+}
+let camTween=null;
+function setView(v){
+S.view=v;segAll('view',v);
+saveState();
+if(!camera)return;
+const c=controls.target.clone();
+const R=Math.max(210,
+(S.stockD||150)*2.05,
+(S.stockH||215)*1.15,
+(S.machineGrid||620)*1.4);
+const P={iso:new THREE.Vector3(R*0.98,R*0.88,R*1.08),
+front:new THREE.Vector3(0,c.y,R*1.6),
+top:new THREE.Vector3(0,c.y+R*1.7,0.01),
+side:new THREE.Vector3(R*1.6,c.y,0)}[v];
+if(P)camTween={t:0,from:camera.position.clone(),to:P,tf:c.clone(),tt:c.clone()};
+}
+function setViewDir(d){
+if(!camera)return;
+const dist=camera.position.distanceTo(controls.target);
+camTween={t:0,from:camera.position.clone(),
+to:controls.target.clone().add(d.clone().normalize().multiplyScalar(dist)),
+tf:controls.target.clone(),tt:controls.target.clone()};
+}
+function fitAll(){
+if(!controls)return;
+controls.target.set(S.stockX,S.offY+(S.stockH||215)*0.42,S.stockZ);
+setView(S.view);
+}
+function applyLayers(){
+if(!stockMesh)return;
+stockMesh.visible=S.layers.stock;
+modelMesh.visible=S.layers.model;
+resultMesh.visible=S.layers.result;
+baseMesh.visible=S.layers.base;
+contourGroup.visible=S.layers.contours;
+tableMesh.visible=S.layers.table;
+polarG.visible=S.layers.grid;gridH.visible=S.layers.grid;
+wireGroup.visible=S.layers.wire;
+pathLine.visible=S.layers.path;pathRest.visible=S.layers.path;
+}
+function toggleFullscreen(){
+const el=document.documentElement;
+if(!document.fullscreenElement&&!document.webkitFullscreenElement){
+const req=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
+if(req){const p=req.call(el);if(p&&p.catch)p.catch(function(){});}
+}else{
+const ex=document.exitFullscreen||document.webkitExitFullscreen||document.msExitFullscreen;
+if(ex){const p=ex.call(document);if(p&&p.catch)p.catch(function(){});}
+}
+}
+function syncFullBtn(){
+const b=$('#btnFull');if(!b)return;
+const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
+b.innerHTML=on?IC.collapse:IC.expand;
+b.title=on?'Выйти из полноэкранного режима':'На весь экран';
+}
+['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange'].forEach(function(ev){
+document.addEventListener(ev,function(){
+syncFullBtn();
+setTimeout(resizeAll,150);
+});
+});
+function screenshot(){
+if(!renderer)return;
+renderer.render(scene,camera);
+const a=document.createElement('a');
+a.download=(S.fileName||'view')+'.png';a.href=renderer.domElement.toDataURL('image/png');
+document.body.appendChild(a);a.click();
+setTimeout(function(){if(a.parentNode)a.parentNode.removeChild(a);},500);
+toast('Снимок вида сохранён');log('Снимок вида экспортирован в PNG','s');
+}
+const AXV=[{v:new THREE.Vector3(1,0,0),c:'#ff453a',l:'X'},
+{v:new THREE.Vector3(0,1,0),c:'#30d158',l:'Y'},
+{v:new THREE.Vector3(0,0,1),c:'#0a84ff',l:'Z'}];
+let gizPts=[];
+function drawGizmo(){
+const c=$('#gizmo');if(!c||!camera)return;
+const g=c.getContext('2d');if(!g)return;
+const W=c.width,H=c.height,k=W/104,R=(W/2)-16*k;
+g.clearRect(0,0,W,H);
+const m=new THREE.Matrix4().extractRotation(camera.matrixWorldInverse);
+gizPts=AXV.map(function(a){const v=a.v.clone().applyMatrix4(m);
+return {c:a.c,l:a.l,sx:W/2+v.x*R,sy:H/2-v.y*R,z:v.z,v:a.v};});
+gizPts.sort(function(p,q){return p.z-q.z;});
+gizPts.forEach(function(a){
+g.globalAlpha=a.z>0?1:0.32;
+g.beginPath();g.moveTo(W/2,H/2);g.lineTo(a.sx,a.sy);
+g.strokeStyle=a.c;g.lineWidth=2.1*k;g.lineCap='round';g.stroke();
+g.beginPath();g.arc(a.sx,a.sy,9.4*k,0,Math.PI*2);g.fillStyle=a.c;g.fill();
+g.globalAlpha=1;g.fillStyle='#fff';
+g.font='700 '+(10.5*k)+'px -apple-system,Inter,sans-serif';
+g.textAlign='center';g.textBaseline='middle';g.fillText(a.l,a.sx,a.sy+0.4*k);});
+g.globalAlpha=1;
+}
+$('#gizmo').addEventListener('click',function(e){
+const c=$('#gizmo'),r=c.getBoundingClientRect(),k=c.width/Math.max(1,r.width);
+const x=(e.clientX-r.left)*k,y=(e.clientY-r.top)*k;
+let best=null,bd=1e9;
+gizPts.forEach(function(a){const d=Math.hypot(a.sx-x,a.sy-y);if(d<bd){bd=d;best=a;}});
+if(best&&bd<28*k){
+const s=best.z>0?1:-1;let dir;
+if(best.l==='Y')dir=new THREE.Vector3(0,s,0.001);
+else if(best.l==='Z')dir=new THREE.Vector3(0,0.001,s);
+else dir=new THREE.Vector3(s,0.001,0);
+setViewDir(dir);
+const map={X:'side',Y:'top',Z:'front'};S.view=map[best.l];segAll('view',S.view);
+}
+});
+/* ==================================================================
+7 · STL + ДЕМО-МОДЕЛЬ
+================================================================== */
+function parseSTL(buf){
+const dv=new DataView(buf),u8=new Uint8Array(buf);
+let binary=false,n=0;
+if(buf.byteLength>=84){n=dv.getUint32(80,true);if(n>0&&84+n*50===buf.byteLength)binary=true;}
+if(!binary){
+let head='';for(let i=0;i<Math.min(400,u8.length);i++)head+=String.fromCharCode(u8[i]);
+if(/^\s*solid/i.test(head)&&/facet/i.test(head)){
+const txt=new TextDecoder('utf-8').decode(u8);
+const re=/vertex\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)/gi;
+const a=[];let m;while((m=re.exec(txt))!==null)a.push(parseFloat(m[1]),parseFloat(m[2]),parseFloat(m[3]));
+if(a.length>=9)return new Float32Array(a);
+}
+binary=true;
+}
+if(!binary||n<=0)throw new Error('Не удалось определить формат STL');
+const pos=new Float32Array(n*9);let o=84;
+for(let i=0;i<n;i++){o+=12;for(let j=0;j<9;j++){pos[i*9+j]=dv.getFloat32(o,true);o+=4;}o+=2;}
+return pos;
+}
+function bboxOf(pos){
+const mn=[1e18,1e18,1e18],mx=[-1e18,-1e18,-1e18];
+for(let i=0;i<pos.length;i+=3){
+const x=pos[i],y=pos[i+1],z=pos[i+2];
+if(x<mn[0])mn[0]=x;if(y<mn[1])mn[1]=y;if(z<mn[2])mn[2]=z;
+if(x>mx[0])mx[0]=x;if(y>mx[1])mx[1]=y;if(z>mx[2])mx[2]=z;
+}
+return {min:mn,max:mx,cx:(mn[0]+mx[0])/2,cy:(mn[1]+mx[1])/2,cz:(mn[2]+mx[2])/2,
+size:[mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2]]};
+}
+function meshInfo(pos){
+const n=Math.floor(pos.length/9);let vol=0;
+for(let i=0;i<n;i++){
+const a=i*9;
+const ax=pos[a],ay=pos[a+1],az=pos[a+2],bx=pos[a+3],by=pos[a+4],bz=pos[a+5],
+cx=pos[a+6],cy=pos[a+7],cz=pos[a+8];
+vol+=(ax*(by*cz-bz*cy)-ay*(bx*cz-bz*cx)+az*(bx*cy-by*cx))/6;
+}
+const bb=bboxOf(pos);
+return {count:n,vol:Math.abs(vol),min:bb.min,max:bb.max,center:[bb.cx,bb.cy,bb.cz],size:bb.size,name:'model'};
+}
+function buildDemoModel(){
+const P=[];
+const tri=function(a,b,c){P.push(a[0],a[1],a[2],b[0],b[1],b[2],c[0],c[1],c[2]);};
+const quad=function(a,b,c,d){tri(a,b,c);tri(a,c,d);};
+const NS=72,NH=52,yb=0,ybt=16,Rb=72,y0=16,y1=205,wall=9.5,yCav=46;
+const prof=function(u){const s=Math.sin(Math.PI*Math.pow(Math.min(u,0.999),0.82));
+return 24+31*Math.pow(s,0.95)+7*Math.cos(u*Math.PI*2.4);};
+const star=function(u,th){return 1+0.155*Math.cos(4*th+u*2.9*Math.PI*2);};
+const RO=function(u,th){return Math.max(9,prof(u)*star(u,th));};
+const pt=function(r,y,th){return [Math.cos(th)*r,y,Math.sin(th)*r];};
+for(let j=0;j<NS;j++){
+const t0=j/NS*Math.PI*2,t1=(j+1)/NS*Math.PI*2;
+quad(pt(Rb,yb,t0),pt(Rb,yb,t1),pt(Rb,ybt,t1),pt(Rb,ybt,t0));
+tri([0,yb,0],pt(Rb,yb,t1),pt(Rb,yb,t0));
+tri([0,ybt,0],pt(Rb,ybt,t0),pt(Rb,ybt,t1));
+}
+const out=[],inn=[];
+for(let i=0;i<=NH;i++){
+const u=i/NH,y=y0+(y1-y0)*u,ro=[],ri=[];
+for(let j=0;j<=NS;j++){const th=j/NS*Math.PI*2,R=RO(u,th);
+ro.push(pt(R,y,th));ri.push(pt(u>0.14?Math.max(4,R-wall):R,y,th));}
+out.push(ro);inn.push(ri);
+}
+for(let i=0;i<NH;i++)for(let j=0;j<NS;j++)quad(out[i][j],out[i][j+1],out[i+1][j+1],out[i+1][j]);
+const cav=[];
+for(let i=0;i<=NH;i++){
+const y=yCav+(y1-yCav)*i/NH,uu=(y-y0)/(y1-y0),rr=[];
+for(let j=0;j<=NS;j++){const th=j/NS*Math.PI*2;rr.push(pt(Math.max(3,RO(uu,th)-wall),y,th));}
+cav.push({y:y,rr:rr});
+}
+for(let i=0;i<cav.length-1;i++)for(let j=0;j<NS;j++)
+quad(cav[i].rr[j],cav[i+1].rr[j],cav[i+1].rr[j+1],cav[i].rr[j+1]);
+for(let j=0;j<NS;j++)tri([0,cav[0].y,0],cav[0].rr[j+1],cav[0].rr[j]);
+const la=out[NH],li=inn[NH];
+for(let j=0;j<NS;j++)quad(la[j],li[j],li[j+1],la[j+1]);
+for(let j=0;j<NS;j++)quad(out[0][j],inn[0][j],inn[0][j+1],out[0][j+1]);
+return new Float32Array(P);
+}
+/* ==================================================================
+8 · ОРИЕНТАЦИЯ (XYZ) + СРЕЗЫ
+================================================================== */
+function buildOrient(){
+const key=[S.scale,S.rotX,S.rotY,S.rotZ].join('|');
+if(ORIENT&&ORIENT_KEY===key)return ORIENT;
+const c=RAW.info.center,s=S.scale/100,n=RAW.info.count;
+const m=new THREE.Matrix4().makeRotationFromEuler(
+new THREE.Euler(S.rotX*D2R,S.rotY*D2R,S.rotZ*D2R,'XYZ'));
+const pos=new Float32Array(n*9),v=new THREE.Vector3();
+for(let i=0;i<n*9;i+=3){
+v.set(RAW.pos[i]-c[0],RAW.pos[i+1]-c[1],RAW.pos[i+2]-c[2]);
+v.multiplyScalar(s).applyMatrix4(m);
+pos[i]=v.x;pos[i+1]=v.y;pos[i+2]=v.z;
+}
+ORIENT={pos:pos,bb:bboxOf(pos),key:key};
+ORIENT_KEY=key;
+SLICES=null;SLICES_KEY='';
+return ORIENT;
+}
+function hull2(pts){
+const n=pts.length/2;if(n<3)return null;
+const idx=[];for(let i=0;i<n;i++)idx.push(i);
+idx.sort(function(a,b){return (pts[2*a]-pts[2*b])||(pts[2*a+1]-pts[2*b+1]);});
+const cr=function(o,a,b){return (pts[2*a]-pts[2*o])*(pts[2*b+1]-pts[2*o+1])-(pts[2*a+1]-pts[2*o+1])*(pts[2*b]-pts[2*o]);};
+const lo=[],up=[];
+for(let q=0;q<idx.length;q++){const i=idx[q];
+while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],i)<=0)lo.pop();lo.push(i);}
+for(let q=idx.length-1;q>=0;q--){const i=idx[q];
+while(up.length>=2&&cr(up[up.length-2],up[up.length-1],i)<=0)up.pop();up.push(i);}
+lo.pop();up.pop();
+const h=lo.concat(up);if(h.length<3)return null;
+const o=new Float64Array(h.length*2);
+h.forEach(function(i,k){o[2*k]=pts[2*i];o[2*k+1]=pts[2*i+1];});
+return o;
+}
+function slicePositions(pos,nL,bb){
+const nT=Math.floor(pos.length/9);
+const ymin=bb.min[1],ymax=bb.max[1],span=Math.max(1e-6,ymax-ymin);
+const levels=new Float64Array(nL);
+for(let i=0;i<nL;i++)levels[i]=ymin+span*(i+0.5)/nL;
+const buckets=[];for(let i=0;i<nL;i++)buckets.push([]);
+for(let t=0;t<nT;t++){
+const a=t*9;
+const y0=pos[a+1],y1=pos[a+4],y2=pos[a+7];
+const lo=Math.min(y0,y1,y2),hi=Math.max(y0,y1,y2);
+let i0=clamp(Math.floor((lo-ymin)/span*nL-0.5),0,nL-1);
+let i1=clamp(Math.floor((hi-ymin)/span*nL-0.5),0,nL-1);
+if(i1<i0){const m=clamp(Math.round(((lo+hi)/2-ymin)/span*nL-0.5),0,nL-1);i0=i1=m;}
+for(let i=i0;i<=i1;i++)buckets[i].push(t);
+}
+const hulls=new Array(nL);
+for(let i=0;i<nL;i++){
+const hgt=levels[i],bk=buckets[i];let tmp=[];
+for(let q=0;q<bk.length;q++){
+const a=bk[q]*9;
+const ya=pos[a+1]-hgt,yb=pos[a+4]-hgt,yc=pos[a+7]-hgt;
+const ax=pos[a],az=pos[a+2],bx=pos[a+3],bz=pos[a+5],cx=pos[a+6],cz=pos[a+8];
+if((ya>0)!==(yb>0)){const s=ya/(ya-yb);tmp.push(ax+s*(bx-ax),az+s*(bz-az));}
+if((yb>0)!==(yc>0)){const s=yb/(yb-yc);tmp.push(bx+s*(cx-bx),bz+s*(cz-bz));}
+if((yc>0)!==(ya>0)){const s=yc/(yc-ya);tmp.push(cx+s*(ax-cx),cz+s*(az-cz));}
+}
+hulls[i]=(tmp.length>=6)?hull2(Float64Array.from(tmp)):null;
+}
+return {levels:levels,hulls:hulls,n:nL,bb:bb};
+}
+function placedSlices(){
+const O=buildOrient(),bb=O.bb;
+const key=S.slices+'|'+O.key;
+if(!SLICES||SLICES_KEY!==key){SLICES=slicePositions(O.pos,S.slices|0,bb);SLICES_KEY=key;}
+const dx=S.offX-bb.cx, dy=S.offY-bb.min[1], dz=S.offZ-bb.cz;
+const src=SLICES,n=src.n;
+let first=-1,last=-1;
+for(let i=0;i<n;i++)if(src.hulls[i]){if(first<0)first=i;last=i;}
+if(first<0)return null;
+const outN=n+2;
+const levels=new Float64Array(outN),hulls=new Array(outN);
+levels[0]=dy+bb.min[1];hulls[0]=shiftHull(src.hulls[first],dx,dz);
+for(let i=0;i<n;i++){levels[i+1]=src.levels[i]+dy;hulls[i+1]=src.hulls[i]?shiftHull(src.hulls[i],dx,dz):null;}
+levels[outN-1]=dy+bb.max[1];hulls[outN-1]=shiftHull(src.hulls[last],dx,dz);
+const valid=[];for(let i=0;i<outN;i++)if(hulls[i])valid.push(i);
+return {levels:levels,hulls:hulls,n:outN,valid:valid,
+yMin:levels[0],yMax:levels[outN-1],dx:dx,dy:dy,dz:dz,
+hModel:bb.max[1]-bb.min[1]};
+}
+function shiftHull(h,dx,dz){
+const o=new Float64Array(h.length);
+for(let k=0;k<h.length;k+=2){o[k]=h[k]+dx;o[k+1]=h[k+1]+dz;}
+return o;
+}
+/* ==================================================================
+9 · ПРОХОДЫ
+================================================================== */
+function support(hull,ca,sa){
+let mn=1e18,mx=-1e18,cx=0,cz=0;const n=Math.max(1,hull.length/2);
+for(let k=0;k<hull.length;k+=2){
+const d=hull[k]*ca+hull[k+1]*sa;
+if(d<mn)mn=d;if(d>mx)mx=d;cx+=hull[k];cz+=hull[k+1];}
+return {mn:mn,mx:mx,cx:cx/n,cz:cz/n};
+}
+function rdp(ch,eps){
+if(ch.length<3||eps<=0)return ch;
+const keep=new Uint8Array(ch.length);keep[0]=1;keep[ch.length-1]=1;
+const st=[[0,ch.length-1]];
+while(st.length){
+const cur=st.pop(),a=cur[0],b=cur[1];
+let mx=-1,mi=-1;
+const x1=ch[a][0],y1=ch[a][1],dx=ch[b][0]-x1,dy=ch[b][1]-y1,L=Math.hypot(dx,dy)||1e-9;
+for(let i=a+1;i<b;i++){const d=Math.abs((ch[i][0]-x1)*dy-(ch[i][1]-y1)*dx)/L;if(d>mx){mx=d;mi=i;}}
+if(mx>eps&&mi>0){keep[mi]=1;st.push([a,mi]);st.push([mi,b]);}
+}
+const o=[];for(let i=0;i<ch.length;i++)if(keep[i])o.push(ch[i]);
+return o;
+}
+function chaikin(p){
+if(p.length<3)return p;
+const q=[p[0]];
+for(let i=0;i<p.length-1;i++){const A=p[i],B=p[i+1];
+q.push([A[0]*0.75+B[0]*0.25,A[1]*0.75+B[1]*0.25]);
+q.push([A[0]*0.25+B[0]*0.75,A[1]*0.25+B[1]*0.75]);}
+q.push(p[p.length-1]);return q;
+}
+function post(ch){let c=rdp(ch,S.tol);if(S.smooth&&c.length>3)c=chaikin(c);return c;}
+function passCount(){
+if(S.motionMode==='equilibrium'){
+const n=clamp(Math.round(S.halvingLevels||4),1,8);
+return Math.pow(2,n);
+}
+const totalAngle=(S.motionMode==='shuttleAxis')?360:180;
+if(S.angleMode==='passes')return clamp(Math.round(S.passes),2,180);
+return clamp(Math.round(totalAngle/Math.max(0.5,S.angleStep)),2,240);
+}
+function equilibriumAngles(){
+const n=clamp(Math.round(S.halvingLevels||4),1,8);
+const angles=[S.startAngle];
+let cur=S.startAngle;
+for(let k=1;k<=n;k++){
+const count=Math.pow(2,k-1);
+const smallStep=90/Math.pow(2,k-1);
+const bigStep=90/Math.pow(2,k-2);
+for(let i=0;i<count;i++){
+cur+=(i===0)?smallStep:bigStep;
+angles.push(cur);
+}
+}
+return angles;
+}
+function polyLen(pts){let L=0;for(let i=1;i<pts.length;i++)L+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);return L;}
+function buildSides(P,smax,smin,yBot,yTop){
+const samples=[];
+for(let i=0;i<P.n;i++){
+if(!P.hulls[i])continue;
+samples.push({y:P.levels[i],smax:smax[i],smin:smin[i]});
+}
+if(samples.length<1)return null;
+let first=-1,last=-1;
+for(let s=0;s<samples.length;s++){
+if(samples[s].y>=yBot-1e-6&&samples[s].y<=yTop+1e-6){
+if(first<0)first=s;
+last=s;
+}
+}
+if(first<0){
+first=0;last=samples.length-1;
+}
+const right=[],left=[];
+if(first>0){
+const A=samples[first-1],B=samples[first];
+const t=clamp((yBot-A.y)/(B.y-A.y),0,1);
+right.push([lerp(A.smax,B.smax,t),yBot]);
+left.push([lerp(A.smin,B.smin,t),yBot]);
+}else{
+right.push([samples[0].smax,yBot]);
+left.push([samples[0].smin,yBot]);
+}
+for(let s=first;s<=last;s++){
+right.push([samples[s].smax,samples[s].y]);
+left.push([samples[s].smin,samples[s].y]);
+}
+if(last<samples.length-1){
+const A=samples[last],B=samples[last+1];
+const t=clamp((yTop-A.y)/(B.y-A.y),0,1);
+right.push([lerp(A.smax,B.smax,t),yTop]);
+left.push([lerp(A.smin,B.smin,t),yTop]);
+}else{
+right.push([samples[samples.length-1].smax,yTop]);
+left.push([samples[samples.length-1].smin,yTop]);
+}
+return {right:right,left:left};
+}
+function polyCum(pts){const c=[0];let L=0;
+for(let i=1;i<pts.length;i++){L+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);c.push(L);}
+return {cum:c,len:L};}
+function buildPasses(){
+const P=PLACED;
+if(!P||!P.valid.length)return [];
+const mode=S.motionMode||'shuttle2';
+let angles;
+if(mode==='equilibrium'){
+angles=equilibriumAngles();
+}else{
+const Na=passCount();
+const totalAngle=(mode==='shuttleAxis')?360:180;
+const stepA=totalAngle/Na;
+angles=[];
+for(let i=0;i<Na;i++)angles.push(S.startAngle+i*stepA);
+}
+const N=angles.length;
+const w=S.wireR;
+const yTop=P.yMax;
+const yModelBot=P.yMin;
+const yBot=S.keepBase?Math.min(S.baseH,yModelBot-0.001):Math.max(0.8,yModelBot);
+const safeTop=S.stockH+S.safeGap;
+const R=S.stockD/2;
+const trimY=Math.max(0.4,yModelBot-Math.max(0,S.trimBelow));
+const gapY=S.safeGap;
+const out=[];
+const homePos=getHome();
+let prevX=homePos[0];
+let prevY=homePos[1];
+for(let k=0;k<N;k++){
+const ang=angles[k];
+const a=ang*D2R,ca=Math.cos(a),sa=Math.sin(a);
+const sminArr=new Float64Array(P.n);
+const smaxArr=new Float64Array(P.n);
+for(let i=0;i<P.n;i++){
+const hh=P.hulls[i];
+if(!hh){sminArr[i]=NaN;smaxArr[i]=NaN;continue;}
+const sp=support(hh,ca,sa);
+sminArr[i]=sp.mn-w;
+smaxArr[i]=sp.mx+w;
+}
+const cp=S.stockX*ca+S.stockZ*sa;
+const X1=cp+R+S.exitLen;
+const X2=cp-R-S.exitLen;
+const sides=buildSides(P,smaxArr,sminArr,yBot,yTop);
+if(!sides)continue;
+const right=sides.right,left=sides.left;
+const dir=(S.zigzag&&k%2===1)?-1:1;
+let contour;
+if(mode!=='shuttleAxis'){
+const pA=[X1,yBot],pB=[X2,yBot];
+if(dir>0){
+contour=[pA].concat(right);
+contour=contour.concat(left.slice().reverse());
+contour.push(pB);
+}else{
+contour=[pB].concat(left);
+contour=contour.concat(right.slice().reverse());
+contour.push(pA);
+}
+}else{
+const axisX=cp;
+const pA=[X1,yBot];
+const pB=[axisX,yTop+gapY];
+if(dir>0){
+contour=[pA].concat(right);
+contour.push([axisX,yTop]);
+contour.push(pB);
+}else{
+contour=[pB];
+contour.push([axisX,yTop]);
+contour=contour.concat(right.slice().reverse());
+contour.push(pA);
+}
+}
+contour=post(contour);
+if(contour.length<2)continue;
+const moves=[];
+const startPt=contour[0];
+const dx=Math.abs(startPt[0]-prevX),dy=Math.abs(startPt[1]-prevY);
+if(dx<0.05&&dy<0.05){
+/* уже на месте */
+}else if(k===0){
+moves.push({t:'rap',pts:[[prevX,prevY],[startPt[0],safeTop],[startPt[0],startPt[1]]]});
+}else if(dx<0.05){
+moves.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[startPt[0],startPt[1]]]});
+}else{
+moves.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[startPt[0],safeTop],[startPt[0],startPt[1]]]});
+}
+moves.push({t:'cut',pts:contour.slice()});
+const cm=polyCum(contour);
+out.push({
+k:k,type:'cut',ang:ang,a:a,dir:dir,
+contour:contour,moves:moves,
+cutPts:contour,cum:cm.cum,cutLen:cm.len,
+smin:sminArr,smax:smaxArr,
+yBot:yBot,yTop:yTop,
+pointA:[X1,yBot],
+pointB:(mode==='shuttle2'?[X2,yBot]:[cp,yTop+gapY])
+});
+prevX=contour[contour.length-1][0];
+prevY=contour[contour.length-1][1];
+}
+NPASS=N;
+if(trimActive()){
+const lastInc=(N>=2)?(angles[N-1]-angles[N-2]):90;
+const angFinal=angles[N-1]+lastInc;
+const a=angFinal*D2R,ca=Math.cos(a),sa=Math.sin(a);
+const cp=S.stockX*ca+S.stockZ*sa;
+const X1=cp+R+S.exitLen;
+const X2=cp-R-S.exitLen;
+const gR=cp+S.bridge/2;
+if(S.trimMode==='full'){
+const moves=[];
+moves.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[X1,safeTop],[X1,trimY]]});
+moves.push({t:'cut',pts:[[X1,trimY],[X2,trimY]]});
+let cutPts=[],cutLen=0;
+moves.forEach(function(m){
+if(m.t==='cut'){cutPts=cutPts.concat(m.pts);cutLen+=polyLen(m.pts);}
+});
+out.push({
+k:N,type:'trim',subtype:'full',ang:angFinal,a:a,dir:1,
+contour:[[X1,trimY],[X2,trimY]],
+moves:moves,cutPts:cutPts,cum:null,cutLen:cutLen,
+smin:null,smax:null,yBot:trimY,yTop:trimY,
+trimY:trimY,X1:X1,X2:X2
+});
+prevX=X2;prevY=trimY;
+}
+else if(S.trimMode==='bridge'){
+const total=S.trimCount||2;
+const angleStepTrim=360/total;
+const Xstay=X1;
+const gRstay=gR;
+for(let i=0;i<total;i++){
+const angI=angFinal+i*angleStepTrim;
+const aI=angI*D2R;
+const movesI=[];
+if(i===0){
+movesI.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[Xstay,safeTop],[Xstay,trimY]]});
+}else{
+movesI.push({t:'rap',pts:[[Xstay,trimY],[Xstay,trimY]]});
+}
+movesI.push({t:'cut',pts:[[Xstay,trimY],[gRstay,trimY]]});
+movesI.push({t:'cut',pts:[[gRstay,trimY],[Xstay,trimY]]});
+let cPtsI=[],cLenI=0;
+movesI.forEach(function(m){
+if(m.t==='cut'){cPtsI=cPtsI.concat(m.pts);cLenI+=polyLen(m.pts);}
+});
+const sub=(i===0)?'first':(i===total-1?'last':'mid');
+out.push({
+k:N+i,type:'trim',subtype:sub,trimIndex:i,trimTotal:total,
+ang:angI,a:aI,dir:1,
+contour:[[Xstay,trimY],[gRstay,trimY]],
+moves:movesI,cutPts:cPtsI,cum:null,cutLen:cLenI,
+smin:null,smax:null,yBot:trimY,yTop:trimY,
+trimY:trimY,X1:Xstay,bridgeEdge:gRstay
+});
+}
+prevX=Xstay;prevY=trimY;
+}
+}
+return out;
+}
+/* ==================================================================
+10 · ПРОГНОЗ ДЕТАЛИ
+================================================================== */
+function clipHalf(poly,nx,ny,d){
+const o=[],n=poly.length;if(n<3)return o;
+for(let i=0;i<n;i++){
+const A=poly[i],B=poly[(i+1)%n];
+const da=A[0]*nx+A[1]*ny-d,db=B[0]*nx+B[1]*ny-d;
+if(da<=0)o.push(A);
+if((da<0&&db>0)||(da>0&&db<0)){
+const t=da/(da-db);o.push([A[0]+t*(B[0]-A[0]),A[1]+t*(B[1]-A[1])]);}
+}
+return o;
+}
+function resample(poly,N){
+if(poly.length<3)return null;
+let cx=0,cy=0;poly.forEach(function(p){cx+=p[0];cy+=p[1];});
+cx/=poly.length;cy/=poly.length;
+const r=new Float64Array(N);
+for(let j=0;j<N;j++){
+const th=j/N*Math.PI*2,dx=Math.cos(th),dy=Math.sin(th);let best=1e18;
+for(let i=0;i<poly.length;i++){
+const A=poly[i],B=poly[(i+1)%poly.length];
+const ex=B[0]-A[0],ey=B[1]-A[1],den=dx*ey-dy*ex;
+if(Math.abs(den)<1e-12)continue;
+const t=((A[0]-cx)*ey-(A[1]-cy)*ex)/den;
+const u=((A[0]-cx)*dy-(A[1]-cy)*dx)/den;
+if(t>1e-9&&u>=-1e-9&&u<=1+1e-9&&t<best)best=t;
+}
+r[j]=(best>1e17)?0:best;
+}
+return {cx:cx,cy:cy,r:r};
+}
+function polyArea(p){let s=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];s+=a[0]*b[1]-b[0]*a[1];}return Math.abs(s)/2;}
+function polyAreaFlat(f){let s=0;const n=f.length/2;
+for(let i=0;i<n;i++){const j=(i+1)%n;s+=f[2*i]*f[2*j+1]-f[2*j]*f[2*i+1];}return Math.abs(s)/2;}
+function distToHull(x,z,f){
+let d=1e18;const n=f.length/2;if(n<2)return 0;
+for(let i=0;i<n;i++){
+const j=(i+1)%n,ax=f[2*i],ay=f[2*i+1],ex=f[2*j]-ax,ey=f[2*j+1]-ay,L=ex*ex+ey*ey||1e-9;
+const t=clamp(((x-ax)*ex+(z-ay)*ey)/L,0,1);
+const dd=Math.hypot(x-ax-t*ex,z-ay-t*ey);if(dd<d)d=dd;
+}
+return d;
+}
+function slabPoly(i,upto,circle){
+let poly=circle.slice();
+for(let k=0;k<upto&&k<PASSES.length;k++){
+const p=PASSES[k];
+if(p.type!=='cut'||!p.smin)continue;
+if(isNaN(p.smax[i])||isNaN(p.smin[i]))continue;
+const ca=Math.cos(p.a),sa=Math.sin(p.a);
+poly=clipHalf(poly,ca,sa,p.smax[i]);if(poly.length<3)return null;
+poly=clipHalf(poly,-ca,-sa,-p.smin[i]);if(poly.length<3)return null;
+}
+return poly.length>=3?poly:null;
+}
+function computeResult(upto){
+const P=PLACED;if(!P||!PASSES.length)return null;
+const NS=104,R=S.stockD/2,circle=[];
+for(let j=0;j<44;j++){const t=j/44*Math.PI*2;circle.push([S.stockX+R*Math.cos(t),S.stockZ+R*Math.sin(t)]);}
+const out=[],baseOut=[];let volR=0,volM=0,maxDev=0;
+for(let i=0;i<P.n;i++){
+if(!P.hulls[i])continue;
+if(P.levels[i]<P.yMin-1e-9||P.levels[i]>P.yMax+1e-9)continue;
+const poly=slabPoly(i,upto,circle);if(!poly)continue;
+const rs=resample(poly,NS);if(!rs)continue;
+volR+=polyArea(poly);volM+=polyAreaFlat(P.hulls[i]);
+const mh=P.hulls[i];
+for(let j=0;j<NS;j+=6){
+const th=j/NS*Math.PI*2;
+const d=distToHull(rs.cx+rs.r[j]*Math.cos(th),rs.cy+rs.r[j]*Math.sin(th),mh);
+if(d>maxDev)maxDev=d;
+}
+out.push({y:P.levels[i],cx:rs.cx,cz:rs.cy,r:rs.r,idx:i});
+}
+out.sort(function(a,b){return a.y-b.y;});
+const yBot=S.keepBase?Math.min(S.baseH,P.yMin-0.001):P.yMin;
+if(yBot<P.yMin-1e-6){
+let bi=P.valid[0];
+for(let q=0;q<P.valid.length;q++){if(P.levels[P.valid[q]]>=P.yMin-1e-9){bi=P.valid[q];break;}}
+const poly=slabPoly(bi,upto,circle);
+if(poly){const rs=resample(poly,NS);
+if(rs){baseOut.push({y:Math.max(0.2,yBot),cx:rs.cx,cz:rs.cy,r:rs.r,idx:bi});
+baseOut.push({y:P.yMin,cx:rs.cx,cz:rs.cy,r:rs.r,idx:bi});}}
+}
+const dY=out.length>1?(out[1].y-out[0].y):1;
+return {levels:out,base:baseOut,NS:NS,volR:volR*dY/1000,volM:volM*dY/1000,
+excess:volM>0?(volR-volM)/volM*100:0,maxDev:maxDev};
+}
+function loftGeo(lv,NS){
+if(lv.length<2)return new THREE.BufferGeometry();
+const pos=[],idx=[];
+for(let i=0;i<lv.length;i++){const rw=lv[i];
+for(let j=0;j<=NS;j++){const jj=j%NS,th=jj/NS*Math.PI*2;
+pos.push(rw.cx+rw.r[jj]*Math.cos(th),rw.y,rw.cz+rw.r[jj]*Math.sin(th));}}
+for(let i=0;i<lv.length-1;i++)for(let j=0;j<NS;j++){
+const A=i*(NS+1)+j,B=A+1,C=A+NS+1,D=C+1;idx.push(A,C,B,B,C,D);}
+const f=lv[0],c0=pos.length/3;pos.push(f.cx,f.y,f.cz);
+for(let j=0;j<=NS;j++){const jj=j%NS,th=jj/NS*Math.PI*2;
+pos.push(f.cx+f.r[jj]*Math.cos(th),f.y,f.cz+f.r[jj]*Math.sin(th));}
+for(let j=0;j<NS;j++)idx.push(c0,c0+1+j,c0+2+j);
+const l=lv[lv.length-1],c1=pos.length/3;pos.push(l.cx,l.y,l.cz);
+for(let j=0;j<=NS;j++){const jj=j%NS,th=jj/NS*Math.PI*2;
+pos.push(l.cx+l.r[jj]*Math.cos(th),l.y,l.cz+l.r[jj]*Math.sin(th));}
+for(let j=0;j<NS;j++)idx.push(c1,c1+2+j,c1+1+j);
+const g=new THREE.BufferGeometry();
+g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+g.setIndex(idx);g.computeVertexNormals();
+return g;
+}
+function buildResultMesh(){
+if(!resultMesh)return;
+const r=RESULT;
+resultMesh.geometry.dispose();baseMesh.geometry.dispose();
+if(!r){resultMesh.geometry=new THREE.BufferGeometry();baseMesh.geometry=new THREE.BufferGeometry();return;}
+resultMesh.geometry=(r.levels.length>1)?loftGeo(r.levels,r.NS):new THREE.BufferGeometry();
+baseMesh.geometry=(r.base.length>1)?loftGeo(r.base,r.NS):new THREE.BufferGeometry();
+}
+/* ==================================================================
+11 · СБОРКА СЦЕНЫ
+================================================================== */
+function buildSceneObjects(){
+const O=buildOrient(),bb=O.bb;
+const R=S.stockD/2,H=S.stockH;
+if(S.machineGrid<Math.max(620,S.stockD*1.4,S.stockH*0.7)||
+S.machineTableD<Math.max(260,S.stockD*1.15))autoMachine();
+stockMesh.geometry.dispose();stockMesh.geometry=new THREE.CylinderGeometry(R,R,H,72);
+stockMesh.position.set(S.stockX,H/2,S.stockZ);
+const g=new THREE.BufferGeometry();
+g.setAttribute('position',new THREE.BufferAttribute(O.pos,3));
+g.computeVertexNormals();g.computeBoundingSphere();
+modelMesh.geometry.dispose();modelMesh.geometry=g;
+modelMesh.position.set(S.offX-bb.cx,S.offY-bb.min[1],S.offZ-bb.cz);
+modelMesh.rotation.set(0,0,0);modelMesh.scale.setScalar(1);
+tableMesh.position.set(S.stockX,0,S.stockZ);
+polarG.position.set(S.stockX,-19.4,S.stockZ);
+updateWireLen();
+}
+function buildContours(){
+if(!contourGroup)return;
+while(contourGroup.children.length){
+const c=contourGroup.children[0];
+if(c.geometry)c.geometry.dispose();
+contourGroup.remove(c);
+}
+const mat=new THREE.LineBasicMaterial({color:0xaf52de,transparent:true,opacity:0.3});
+PASSES.forEach(function(p){
+if(!p.contour||!p.contour.length)return;
+const pts=p.contour.map(function(q){return new THREE.Vector3(q[0],q[1],0);});
+if(p.type==='cut'&&pts.length)pts.push(pts[0].clone());
+contourGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),mat));
+});
+}
+function passListUI(){
+const box=$('#passList');if(!box)return;box.innerHTML='';
+if(!PASSES.length){box.appendChild(el('div',{cls:'row'},[el('div',{cls:'rt',style:'color:var(--label2)'},['Нет данных'])]));return;}
+PASSES.forEach(function(p,k){
+let label;
+if(p.type==='trim'){
+let sub='';
+if(p.trimIndex!==undefined&&p.trimTotal){
+sub=' ('+(p.trimIndex+1)+'/'+p.trimTotal+' · '+
+(p.trimIndex===0?'старт':(p.trimIndex===p.trimTotal-1?'финал':'промежут.'))+')';
+}
+label='⚑ Подрезка основания'+sub+' · A '+nf(p.ang,2)+'° · Y '+nf(p.trimY,1);
+}else{
+label=String(p.k+1).padStart(2,'0')+' · A '+nf(p.ang,2)+'° · '+(p.dir>0?'↻ CCW':'↺ CW');
+}
+const r=el('div',{cls:'row tap',onclick:function(){jumpPass(k);}},[
+el('div',{cls:'rt mono',style:'font-size:11.5px'},[label]),
+el('div',{cls:'rv'},[nf(p.cutLen,1)+' мм'])]);
+r.dataset.k=k;box.appendChild(r);});
+}
+function jumpPass(k){
+let target=null;
+for(let i=0;i<SIM.segs.length;i++){if(SIM.segs[i].k===k&&SIM.segs[i].type==='mv'){target=SIM.segs[i];break;}}
+if(target){setPlaying(false);setSimTime(target.t0+1e-6);}
+}
+function stepPass(d){
+if(!PASSES.length)return;
+let cur=-1;
+SIM.segs.forEach(function(s){if(s.t1<=SIM.t+1e-3&&s.k>cur)cur=s.k;});
+jumpPass(clamp(cur+d,0,PASSES.length-1));
+}
+/* ==================================================================
+12 · G-CODE
+================================================================== */
+/* ✅ FIX #4: круглые скобки в тексте заменяем на ], не удаляем содержимое */
+function cmtWrap(s){
+const st=S.commentStyle||'paren';
+let body=String(s==null?'':s);
+if(body.length>=2&&body.charAt(0)==='('&&body.charAt(body.length-1)===')')body=body.slice(1,-1);
+if(st==='paren')body=body.replace(/[()]/g,'');
+if(!body)return '';
+if(st==='semi')return '; '+body;
+if(st==='slash')return '/ '+body;
+return '('+body+')';
+}
+function cmtInline(s){
+if(!S.gComments)return '';
+const st=S.commentStyle||'paren';
+let body=String(s==null?'':s);
+if(st==='paren')body=body.replace(/\)/g,']');
+if(st==='semi')return ' ; '+body;
+if(st==='slash')return ' / '+body;
+return ' ('+body+')';
+}
+function genGCode(){
+if(!PASSES.length){GCODE='';updateCodeUI();return;}
+const AX=axisLetter('x'),AY=axisLetter('y');
+const rot=axisLetter('a');
+const d=S.gDec,F=function(v){return fmt(v,d);};
+const home=getHome();
+const L=[],C=function(s){
+if(!S.gComments)return;
+if(!s){L.push('');return;}
+L.push(cmtWrap(s));
+};
+C('(===== PENOREZ STUDIO / HOT WIRE =====)');
+C('(Post      : '+({linuxcnc:'LinuxCNC',mach3:'Mach3',grbl:'GRBL'}[S.post])+')');
+C('(Model     : '+RAW.info.name+')');
+C('(Orient    : X'+F(S.rotX)+' Y'+F(S.rotY)+' Z'+F(S.rotZ)+' deg, scale '+F(S.scale,1)+'%)');
+C('(Triangles : '+RAW.info.count+')');
+C('(Stock     : D'+F(S.stockD)+' x H'+F(S.stockH)+' mm, center X'+F(S.stockX)+' Z'+F(S.stockZ)+')');
+let motionLine,passesLine;
+if(S.motionMode==='equilibrium'){
+const nH=clamp(Math.round(S.halvingLevels||4),1,8);
+motionLine='equilibrium doubling: 2^'+nH+'='+NPASS+' cuts, '+(NPASS*2)+' faces';
+passesLine=NPASS+'   halving levels '+nH+'   start '+F(S.startAngle)+' deg';
+}else{
+const totalAng=(S.motionMode==='shuttleAxis')?360:180;
+motionLine=(S.motionMode==='shuttleAxis'?'shuttle to axis A, '+totalAng+' deg total':'shuttle between two points, '+totalAng+' deg total');
+passesLine=NPASS+'   step '+F(totalAng/Math.max(1,NPASS))+' deg   start '+F(S.startAngle)+' deg';
+}
+C('(Motion    : '+motionLine+')');
+C('(Passes    : '+passesLine+')');
+C('(Wire      : R'+F(S.wireR)+' mm   feed '+S.feed+' mm/min   '+rot+'-feed '+S.aFeed+' deg/min)');
+C('(Exit beyond stock: '+F(S.exitLen)+' mm   wait before rotate: '+F(S.waitRot,1)+' s)');
+C('(Home XY   : X'+F(home[0])+' Y'+F(home[1])+' mm'+
+  (S.homeAuto?(' (auto, offset '+F(S.homeOffset)+' mm)'):' (manual)')+')');
+C('(Cycle     : home -> approach -> wire ON -> contour -> exit -> wait -> wire OFF -> rotate '+rot+')');
+C('(Base trim : '+(S.trimMode==='full'?('full width, '+F(Math.max(0.4,PLACED.yMin-S.trimBelow),2)+' mm below model')
+:S.trimMode==='bridge'?('bridge '+F(S.bridge)+' mm, '+F(Math.max(0.4,PLACED.yMin-S.trimBelow),2)+' mm below model, '+
+(S.trimCount||2)+' cuts with '+(360/(S.trimCount||2))+' deg flip')
+:'none')+')');
+C('(Cut length: '+F(STATS.cutLen,1)+' mm   est. time '+hms(STATS.time)+')');
+C('(Generated: '+new Date().toLocaleString('ru-RU')+')');
+L.push('G21 G90 G94 G17');
+L.push(S.wireOff+cmtInline('wire off'));
+L.push('G0 '+AX+F(home[0])+' '+AY+F(home[1])+cmtInline('home'));
+L.push('G0 '+rot+F(S.startAngle));
+if(S.wireKeepOn)L.push(S.wireOn+cmtInline('wire on — stays on until M2'));
+PASSES.forEach(function(p,k){
+C('');
+if(p.type==='trim'){
+let sub='';
+if(p.trimIndex!==undefined&&p.trimTotal){
+const rotStep=360/p.trimTotal;
+sub=' / '+(p.trimIndex+1)+' of '+p.trimTotal+
+(p.trimIndex>0?' (after '+F(rotStep)+' deg)':'');
+}
+C('(--- FINAL: BASE TRIM'+sub+'  '+rot+'='+F(p.ang)+'  Y='+F(p.trimY)+' ---)');
+}
+else{
+const modeTag=(S.motionMode==='shuttleAxis')?'AXIS':(S.motionMode==='equilibrium'?'EQUILIBRIUM':'SHUTTLE');
+C('(--- PASS '+(k+1)+'/'+NPASS+'  '+modeTag+'  '+rot+'='+F(p.ang)+'  '+(p.dir>0?'→':'←')+' ---)');
+}
+p.moves.forEach(function(m){
+if(m.t!=='rap')return;
+for(let i=1;i<m.pts.length;i++){
+const q=m.pts[i],pr=m.pts[i-1];
+if(Math.abs(q[0]-pr[0])<1e-9&&Math.abs(q[1]-pr[1])<1e-9)continue;
+L.push('G0 '+AX+F(q[0])+' '+AY+F(q[1]));
+}
+});
+if(!S.wireKeepOn)L.push(S.wireOn+cmtInline('wire on'));
+if(S.dwell>0)L.push('G4 P'+F(S.dwell)+cmtInline(S.wireKeepOn?'heat, wire stays on':'heat'));
+p.moves.forEach(function(m){
+if(m.t!=='cut')return;
+let first=true;
+for(let i=1;i<m.pts.length;i++){
+const q=m.pts[i],pr=m.pts[i-1];
+if(Math.abs(q[0]-pr[0])<1e-9&&Math.abs(q[1]-pr[1])<1e-9)continue;
+L.push('G1 '+AX+F(q[0])+' '+AY+F(q[1])+(first?' F'+S.feed:''));
+first=false;
+}
+});
+if(S.waitRot>0)L.push('G4 P'+F(S.waitRot)+(S.gComments?' (wait, wire outside stock)':''));
+if(!S.wireKeepOn)L.push(S.wireOff+(S.gComments?' (wire off)':''));
+const nxt=PASSES[k+1];
+if(nxt&&Math.abs(nxt.ang-p.ang)>1e-9){
+if(S.compBacklash&&S.backlash>0)L.push('G1 '+rot+F(nxt.ang+S.backlash)+' F'+S.aFeed);
+L.push('G1 '+rot+F(nxt.ang)+' F'+S.aFeed+cmtInline('rotate table'));
+}
+});
+C('');C('(--- END OF PROGRAM ---)');
+L.push('G0 '+rot+F(S.startAngle));
+L.push('G0 '+AX+F(home[0])+' '+AY+F(home[1])+cmtInline('return to home'));
+L.push(S.wireOff);
+L.push('M2');L.push('%');
+GCODE=L.join('\n');
+STATS.lines=L.length;STATS.bytes=GCODE.length;
+updateCodeUI();
+}
+function hlLine(s){
+let o=String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+if(/^\s*[();]/.test(o))return '<span class="cd">'+o+'</span>';
+const letters=axisLetter('x')+axisLetter('y')+axisLetter('a')+'Z';
+const uniq=Array.from(new Set(letters.split(''))).filter(function(c){
+return c!=='G'&&c!=='M';
+}).join('');
+const re=new RegExp('\\b(['+uniq+'])(-?\\d+\\.?\\d*)','g');
+return o.replace(/\b(G)(\d+\.?\d*)/g,'<span class="g">$1$2</span>')
+.replace(/\b(M)(\d+\.?\d*)/g,'<span class="m">$1$2</span>')
+.replace(re,'<span class="ax">$1$2</span>');
+}
+function renderCode(box,lines,max){
+if(!box)return;
+const shown=lines.slice(0,max);
+let h='';
+for(let i=0;i<shown.length;i++)h+='<div><span class="ln">'+(i+1)+'</span><span>'+hlLine(shown[i])+'</span></div>';
+if(lines.length>max)h+='<div><span class="ln">…</span><span class="cd">показаны первые '+max+' из '+lines.length+' строк</span></div>';
+box.innerHTML=h;
+}
+function updateCodeUI(){
+const lines=GCODE?GCODE.split('\n'):[];
+renderCode($('#codeBox'),lines,1200);
+renderCode($('#codeFull'),lines,4000);
+setVal('sFile',nf(STATS.lines)+' стр · '+nf((STATS.bytes||0)/1024,1)+' КБ');
+}
+function download(){
+if(!GCODE){toast('Сначала пересчитайте траекторию',false);return;}
+const ext=(S.gExt||'nc');
+const name=(S.fileName||'program')+'.'+ext;
+const a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([GCODE],{type:'text/plain'}));
+a.download=name;
+document.body.appendChild(a);a.click();
+setTimeout(function(){URL.revokeObjectURL(a.href);if(a.parentNode)a.parentNode.removeChild(a);},3000);
+toast('УП сохранена: '+name);
+log('Экспорт УП '+name+' ('+nf(STATS.bytes/1024,1)+' КБ)','s');
+}
+function copyCode(){
+if(!GCODE){toast('Нет данных для копирования',false);return;}
+const done=function(){toast('G-code скопирован');log('G-code скопирован в буфер обмена','s');};
+const fallback=function(){
+const ta=document.createElement('textarea');ta.value=GCODE;document.body.appendChild(ta);
+ta.select();try{document.execCommand('copy');done();}catch(e){toast('Не удалось скопировать',false);}
+document.body.removeChild(ta);};
+if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(GCODE).then(done).catch(fallback);
+else fallback();
+}
+function exportReport(){
+const home=getHome();
+const t=[
+'HotWireStudio — ОТЧЁТ ПО УП','Дата: '+new Date().toLocaleString('ru-RU'),'',
+'МОДЕЛЬ: '+RAW.info.name,'  треугольников: '+RAW.info.count,'  объём: '+nf(RAW.info.vol/1000,1)+' см3',
+'  габариты (файл): '+RAW.info.size.map(function(v){return nf(v,1);}).join(' x ')+' мм',
+'  ориентация: X '+nf(S.rotX,1)+'  Y '+nf(S.rotY,1)+'  Z '+nf(S.rotZ,1)+' град',
+'  масштаб '+nf(S.scale,1)+'%   смещение X '+nf(S.offX,1)+' / зазор от стола '+nf(S.offY,1)+' / Z '+nf(S.offZ,1),
+'  высота после поворота: '+nf(PLACED?PLACED.hModel:0,1)+' мм','',
+'ЗАГОТОВКА: цилиндр D'+nf(S.stockD,1)+' x H'+nf(S.stockH,1)+' мм, центр X'+nf(S.stockX,1)+' Z'+nf(S.stockZ,1),'',
+'ПАРКОВКА XY: X'+nf(home[0],1)+' Y'+nf(home[1],1)+' мм  '+(S.homeAuto?('(авто, отступ '+nf(S.homeOffset,1)+' мм)'):'(вручную)'),'',
+'ЦИКЛ: home -> подход вне заготовки -> струна ВКЛ -> рез по силуэту -> выход за заготовку ('+nf(S.exitLen,1)+' мм) -> '+
+'пауза '+nf(S.waitRot,1)+' с -> струна ВЫКЛ -> поворот стола A -> … -> возврат в home','',
+'РЕЗАНИЕ: проходов '+NPASS+(S.motionMode==='equilibrium'
+?('  метод «равновесие», уровней удвоения '+(S.halvingLevels||4)+', граней '+(NPASS*2))
+:('  шаг A '+nf(360/Math.max(1,NPASS),3)+' град'))+'  начальный угол '+nf(S.startAngle,1),
+'  подача '+S.feed+' мм/мин  холостой ход '+S.rapid+' мм/мин  скорость A '+S.aFeed+' град/мин',
+'  радиус струны '+nf(S.wireR,2)+' мм  отступ '+nf(S.safeGap,1)+' мм  прогрев '+nf(S.dwell,1)+' с',
+'  зиг-заг: '+(S.zigzag?'да':'нет')+'   компенсация люфта: '+(S.compBacklash?nf(S.backlash,2)+' град':'нет'),
+'  срезов по высоте '+S.slices+'  допуск упрощения '+nf(S.tol,2)+' мм  сглаживание: '+(S.smooth?'да':'нет'),'',
+'ОСНОВАНИЕ: '+(S.keepBase?'высота '+nf(S.baseH,1)+' мм, ширина '+nf(S.baseW,0)+'%':'нет')+
+'   подрезка в конце: '+(trimActive()?('да, '+trimModeName()+', '+nf(S.trimBelow,1)+' мм ниже модели'+(S.trimMode==='bridge'?', перемычка '+nf(S.bridge,0)+' мм':'')):'нет'),'',
+'РЕЗУЛЬТАТ: длина реза '+nf(STATS.cutLen,1)+' мм   холостые '+nf(STATS.airLen,0)+' мм   поворот A '+nf(STATS.rotDeg,0)+' град',
+'  расчётное время '+hms(STATS.time),
+'  объём детали (прогноз) '+nf(STATS.volR,1)+' см3   избыток +'+nf(STATS.excess,1)+'%   макс. отклонение '+nf(STATS.maxDev,2)+' мм',
+'  УП: '+nf(STATS.lines)+' строк, '+nf(STATS.bytes/1024,1)+' КБ, постпроцессор '+S.post,''].join('\n');
+const a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));
+a.download=(S.fileName||'report')+'_report.txt';
+document.body.appendChild(a);a.click();
+setTimeout(function(){URL.revokeObjectURL(a.href);if(a.parentNode)a.parentNode.removeChild(a);},3000);
+toast('Отчёт сохранён');log('Экспорт отчёта','s');
+}
+/* ==================================================================
+13 · РАЗВЁРТКА ТРАЕКТОРИИ
+================================================================== */
+function drawUnroll(){
+const c=$('#unroll');if(!c||!c.width||!c.height)return;
+const g=c.getContext('2d');if(!g)return;
+const dpr=Math.min(window.devicePixelRatio||1,2),k=dpr;
+const W=c.width,H=c.height;
+g.clearRect(0,0,W,H);
+const dark=document.documentElement.getAttribute('data-theme')==='dark';
+const fg=dark?'rgba(235,235,245,.85)':'rgba(20,20,25,.85)';
+const mut=dark?'rgba(235,235,245,.38)':'rgba(20,20,25,.4)';
+const grid=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
+if(!PASSES.length){
+g.fillStyle=mut;g.font='600 '+(12*k)+'px -apple-system,Inter,sans-serif';
+g.textAlign='center';g.textBaseline='middle';
+g.fillText('Развёртка появится после расчёта траектории',W/2,H/2);return;
+}
+const ml=56*k,mr=18*k,mt=16*k,mb=28*k;
+const iw=Math.max(10,W-ml-mr),ih=Math.max(10,H-mt-mb);
+let xAbs=1,yMin=0,yMax=S.stockH;
+PASSES.forEach(function(p){if(!p.contour)return;p.contour.forEach(function(q){
+if(Math.abs(q[0])>xAbs)xAbs=Math.abs(q[0]);
+if(q[1]<yMin)yMin=q[1];if(q[1]>yMax)yMax=q[1];});});
+xAbs*=1.12;const yPad=(yMax-yMin)*0.06||1;yMin-=yPad;yMax+=yPad;
+const Y=function(y){return mt+ih-((y-yMin)/(yMax-yMin))*ih;};
+g.strokeStyle=grid;g.lineWidth=1*k;
+g.font='600 '+(10*k)+'px -apple-system,Inter,sans-serif';
+for(let i=0;i<=6;i++){
+const y=yMin+(yMax-yMin)*i/6,py=Y(y);
+g.beginPath();g.moveTo(ml,py);g.lineTo(W-mr,py);g.stroke();
+g.fillStyle=mut;g.textAlign='right';g.textBaseline='middle';g.fillText(nf(y,0),ml-7*k,py);
+}
+for(let i=0;i<=8;i++){const px=ml+iw*i/8;g.beginPath();g.moveTo(px,mt);g.lineTo(px,mt+ih);g.stroke();}
+g.setLineDash([4*k,3*k]);g.strokeStyle=mut;g.lineWidth=1.2*k;
+g.strokeRect(ml,mt,iw,ih);g.setLineDash([]);
+const N=PASSES.length,slot=iw/N;
+PASSES.forEach(function(p,i){
+if(!p.contour||!p.contour.length)return;
+const t=N>1?i/(N-1):0;
+g.strokeStyle=p.type==='trim'?'#ff9f0a':'hsl('+(212+t*70)+' '+(dark?85:90)+'% '+(dark?62:52)+'%)';
+g.globalAlpha=N>16?0.55:0.85;g.lineWidth=(p.type==='trim'?1.8:1.1)*k;
+const cxp=ml+slot*(i+0.5),sc=(slot*0.44)/xAbs;
+g.beginPath();
+p.contour.forEach(function(q,j){
+const px=cxp+q[0]*sc,py=Y(q[1]);
+if(j)g.lineTo(px,py);else g.moveTo(px,py);});
+g.stroke();
+});
+g.globalAlpha=1;
+if(SIM.wire){
+const i=SIM.wire.k,slot2=iw/N;
+const sc=(slot2*0.44)/xAbs;
+const px=ml+slot2*(i+0.5)+SIM.wire.x*sc,py=Y(SIM.wire.y);
+g.strokeStyle='rgba(255,69,58,.5)';g.lineWidth=1*k;
+g.beginPath();g.moveTo(ml,py);g.lineTo(W-mr,py);g.moveTo(px,mt);g.lineTo(px,mt+ih);g.stroke();
+g.fillStyle='#ff453a';g.beginPath();g.arc(px,py,4*k,0,Math.PI*2);g.fill();
+g.strokeStyle='#fff';g.lineWidth=1.4*k;g.stroke();
+}
+g.fillStyle=fg;g.textAlign='center';g.textBaseline='top';
+g.fillText('Операция / угол поворота стола A  →  0 … 360°',ml+iw/2,H-mb+9*k);
+g.save();g.translate(15*k,mt+ih/2);g.rotate(-Math.PI/2);g.textAlign='center';g.textBaseline='middle';
+g.fillText('Y (высота), мм',0,0);g.restore();
+g.textAlign='left';g.textBaseline='top';g.fillStyle=mut;
+g.fillText(NPASS+' проходов · '+(S.motionMode==='equilibrium'
+?('равновесие · '+(S.halvingLevels||4)+' ур. · '+(NPASS*2)+' граней')
+:('шаг '+nf(360/Math.max(1,NPASS),2)+'°'))+
+(trimActive()?' · + подрезка основания':''),ml+4*k,mt+3*k);
+}
+/* ==================================================================
+14 · ПЕРЕСЧЁТ
+================================================================== */
+let tmr=null;
+function scheduleRebuild(){clearTimeout(tmr);tmr=setTimeout(function(){rebuild();},120);}
+function rebuild(quiet){
+clearTimeout(tmr);
+if(!RAW)return;
+busy(!quiet);
+setTimeout(function(){
+const t0=(window.performance&&performance.now)?performance.now():Date.now();
+try{
+PLACED=placedSlices();
+if(!PLACED)throw new Error('модель не имеет ни одного горизонтального сечения');
+buildSceneObjects();
+PASSES=buildPasses();
+RESULT=computeResult(PASSES.length);
+buildContours();
+buildResultMesh();
+computeStats();
+genGCode();
+buildTimeline();
+passListUI();
+updateInfoUI();
+reportUI();
+setPassPath(0,0,false);
+SIM.done=-1;
+SIM.t=0;
+setSimTime(0);
+applyLayers();
+resizeAll();
+const ms=Math.round(((window.performance&&performance.now)?performance.now():Date.now())-t0);
+if(!quiet)toast('Пересчитано за '+ms+' мс · '+NPASS+' проходов'+(trimActive()?' + подрезка':''));
+log('Пересчёт: '+NPASS+' проходов ('+(S.motionMode==='equilibrium'
+?('равновесие, '+(NPASS*2)+' граней')
+:('шаг '+nf(360/Math.max(1,NPASS),2)+'°'))+')'+
+(trimActive()?(' + '+trimModeName()):'')+', '+nf(STATS.pts)+' точек, '+
+nf(STATS.cutLen/1000,2)+' м реза, '+hms(STATS.time)+' · '+ms+' мс','s');
+saveState();
+validate(true);
+}catch(err){
+console.error(err);
+alert_('Ошибка расчёта',String((err&&err.message)||err));
+log('ОШИБКА: '+((err&&err.message)||err),'e');
+}
+busy(false);
+},10);
+}
+function computeStats(){
+let cut=0,air=0,rot=0,pts=0,tCut=0,tAir=0,tRot=0,tDwell=0;
+let xMin=1e18,xMax=-1e18,pa=S.startAngle;
+PASSES.forEach(function(p,k){
+p.moves.forEach(function(m){
+const L=polyLen(m.pts);
+m.pts.forEach(function(q){pts++;if(q[0]<xMin)xMin=q[0];if(q[0]>xMax)xMax=q[0];});
+if(m.t==='cut'){cut+=L;tCut+=L/S.feed*60;}
+else{air+=L;tAir+=L/S.rapid*60;}
+});
+tDwell+=S.dwell+S.waitRot;
+const nxt=PASSES[k+1];
+if(nxt){const da=Math.abs(nxt.ang-p.ang)+(S.compBacklash?S.backlash*2:0);rot+=da;tRot+=da/S.aFeed*60;}
+else rot+=0;
+});
+rot+=Math.abs(PASSES.length?PASSES[0].ang-pa:0);
+tRot+=Math.abs(PASSES.length?PASSES[0].ang-pa:0)/S.aFeed*60;
+STATS.cutLen=cut;STATS.airLen=air;STATS.rotDeg=rot;STATS.pts=pts;
+STATS.tCut=tCut;STATS.tAir=tAir;STATS.tRot=tRot;STATS.tDwell=tDwell;
+STATS.time=tCut+tAir+tRot+tDwell;
+STATS.xMin=xMin===1e18?0:xMin;STATS.xMax=xMax===-1e18?0:xMax;
+STATS.safeX=Math.max(Math.abs(STATS.xMin),Math.abs(STATS.xMax));
+STATS.volR=RESULT?RESULT.volR:0;STATS.volM=RESULT?RESULT.volM:0;
+STATS.excess=RESULT?RESULT.excess:0;STATS.maxDev=RESULT?RESULT.maxDev:0;
+}
+function validate(silent){
+if(!RAW||!PLACED)return true;
+let rMax=0;
+for(let i=0;i<PLACED.n;i++){const h=PLACED.hulls[i];if(!h)continue;
+for(let k=0;k<h.length;k+=2){const r=Math.hypot(h[k]-S.stockX,h[k+1]-S.stockZ);if(r>rMax)rMax=r;}}
+const needD2=rMax*2+2*S.wireR;
+const okD=needD2<=S.stockD-0.5;
+const topY=PLACED.yMax;
+const okH=topY<=S.stockH-0.5&&topY>0.5;
+setVal('chkFit',okD&&okH?'вписывается':'НЕ вписывается',okD&&okH?'ok':'bad');
+setVal('chkD',nf(S.stockD-needD2,1)+' мм',okD?'ok':'bad');
+setVal('chkH',nf(S.stockH-topY,1)+' мм',okH?'ok':'bad');
+const N=NPASS;
+if(S.motionMode==='equilibrium'){
+setVal('chkP',N+' резов · '+(S.halvingLevels||4)+' уровней · '+(N*2)+' граней','ok');
+}else{
+setVal('chkP',N+' × '+nf(360/Math.max(1,N),2)+'°',N<6?'warn':'ok');
+}
+setVal('chkX',nf(STATS.xMin,1)+' … '+nf(STATS.xMax,1)+' мм');
+const doTrim=trimActive();
+const yT=Math.max(0.4,PLACED.yMin-Math.max(0,S.trimBelow));
+const okT=!doTrim||(yT>0.4&&yT<PLACED.yMin+1e-6);
+setVal('chkT',doTrim?(okT?(trimModeName()+', Y = '+nf(yT,1)+' мм'):'слишком высоко'):'выкл',okT?'ok':'warn');
+if(!silent&&(!okD||!okH)){
+alert_('Модель не помещается в заготовку',
+!okD?('Требуемый диаметр '+nf(needD2,1)+' мм больше заготовки Ø'+nf(S.stockD,1)+' мм.')
+:('Верх модели ('+nf(topY,1)+' мм) выше заготовки ('+nf(S.stockH,1)+' мм).'));
+log('Проверка: модель НЕ вписывается в заготовку','w');
+}
+return okD&&okH;
+}
+function updateInfoUI(){
+const I=RAW.info;
+const mf=$('#mbFile');if(mf)mf.textContent=I.name;
+setVal('mName',I.name);
+setVal('mTri',nf(I.count));
+setVal('mBox',I.size.map(function(v){return nf(v,1);}).join(' × ')+' мм');
+setVal('mVol',nf(I.vol/1000,1)+' см³');
+setVal('mH',nf(PLACED?PLACED.hModel:0,1)+' мм · низ на Y '+nf(PLACED?PLACED.yMin:0,1));
+const sl=$('#stLen');if(sl)sl.textContent=nf(STATS.cutLen,0);
+const si=$('#stInfo');
+if(si)si.textContent=NPASS+' проходов'+(trimActive()?' + подрезка':'')+' · '+nf(STATS.cutLen/1000,2)+' м реза · '+
+nf(STATS.pts)+' точек · '+hms(STATS.time)+' · '+nf((STATS.bytes||0)/1024,1)+' КБ';
+}
+function reportUI(){
+const k=$('#kpi');if(!k)return;
+const stockV=Math.PI*Math.pow(S.stockD/2,2)*S.stockH/1000;
+const home=getHome();
+const data=[['Проходов',NPASS],
+['Шаг A',S.motionMode==='equilibrium'?('равновесие · '+(NPASS*2)+' граней'):(nf(360/Math.max(1,NPASS),2)+'°')],
+['Длина реза',nf(STATS.cutLen/1000,2)+' м'],['Время УП',hms(STATS.time)],
+['Объём детали',nf(STATS.volR,1)+' см³'],['Избыток','+'+nf(STATS.excess,1)+' %'],
+['Отклонение',nf(STATS.maxDev,2)+' мм'],['Удалено',nf(stockV>0?Math.max(0,stockV-STATS.volR)/stockV*100:0,0)+' %']];
+k.innerHTML='';
+data.forEach(function(d){k.appendChild(el('div',{},[el('b',{},[String(d[1])]),el('span',{},[d[0]])]));});
+const T=Math.max(1e-6,(STATS.tCut||0)+(STATS.tAir||0)+(STATS.tRot||0)+(STATS.tDwell||0));
+const parts=[['Резание',STATS.tCut||0,'var(--orange)'],['Холостые',STATS.tAir||0,'var(--blue)'],
+['Поворот A',STATS.tRot||0,'var(--purple)'],['Паузы/прогрев',STATS.tDwell||0,'var(--gray)']];
+const bar=el('div',{cls:'bar'});
+parts.forEach(function(p){if(p[1]>0)bar.appendChild(el('i',{style:'width:'+(p[1]/T*100)+'%;background:'+p[2]}));});
+const lg=el('div',{cls:'blg'});
+parts.forEach(function(p){lg.appendChild(el('span',{},[el('i',{style:'background:'+p[2]}),
+p[0]+' · '+hms(p[1])+' ('+nf(p[1]/T*100,0)+'%)']));});
+const bx=$('#bars');bx.innerHTML='';bx.appendChild(bar);bx.appendChild(lg);
+const rows=$('#repRows');rows.innerHTML='';
+const box=el('div',{cls:'card'});
+const info2=[['Постпроцессор',{linuxcnc:'LinuxCNC',mach3:'Mach3',grbl:'GRBL'}[S.post]],
+['Ось вращения',axisLetter('a')+' вокруг '+axisLetter('y')],
+['Парковка XY','X'+nf(home[0],1)+' Y'+nf(home[1],1)+(S.homeAuto?(' (авто '+nf(S.homeOffset,1)+' мм)'):' (ручн.)')],
+['Ориентация модели','X'+nf(S.rotX,0)+'° Y'+nf(S.rotY,0)+'° Z'+nf(S.rotZ,0)+'°'],
+['Радиус струны',nf(S.wireR,2)+' мм'],['Выход за заготовку',nf(S.exitLen,1)+' мм'],
+['Пауза перед поворотом',nf(S.waitRot,1)+' с'],['Срезов по высоте',String(S.slices)],
+['Допуск упрощения',nf(S.tol,2)+' мм'],['Точек в УП',nf(STATS.pts)],['Строк УП',nf(STATS.lines)],
+['Объём заготовки',nf(stockV,0)+' см³'],['Объём модели (срезы)',nf(STATS.volM,1)+' см³'],
+['Основание',S.keepBase?(nf(S.baseH,1)+' мм / '+nf(S.baseW,0)+' %'):'нет'],
+['Подрезка основания',trimLabel()]];
+info2.forEach(function(r,i){
+box.appendChild(el('div',{cls:'row'+(i===0?' nosep':'')},
+[el('div',{cls:'rt'},[r[0]]),el('div',{cls:'rv'},[r[1]])]));});
+rows.appendChild(box);
+}
+function autoMachine(){
+S.machineTableD=Math.max(260,Math.ceil(S.stockD*1.25/5)*5);
+S.machineTableH=Math.max(20,Math.ceil(S.stockD*0.05));
+S.machineGrid=Math.max(620,
+Math.ceil(Math.max(S.stockD*1.8,S.stockH*0.7)/10)*10);
+['machineGrid','machineTableD','machineTableH'].forEach(sync);
+rebuildMachine();fitAll();
+toast('Станок подогнан: Ø'+S.machineTableD+' · сетка '+S.machineGrid+' мм');
+log('Модель станка подогнана: стол Ø'+S.machineTableD+', сетка '+S.machineGrid+' мм','s');
+}
+function autoStock(){
+let rMax=0,hTop=0;
+if(PLACED){
+for(let i=0;i<PLACED.n;i++){const h=PLACED.hulls[i];if(!h)continue;
+for(let k=0;k<h.length;k+=2){const r=Math.hypot(h[k],h[k+1]);if(r>rMax)rMax=r;}}
+hTop=PLACED.yMax;
+}
+S.stockD=Math.ceil(clamp(rMax*2+16,30,400));
+S.stockH=Math.ceil(clamp(hTop+20,30,500));
+S.stockX=0;S.stockZ=0;
+['stockD','stockH','stockX','stockZ'].forEach(sync);
+updateHomeUI();
+rebuild();toast('Заготовка: Ø'+S.stockD+' × '+S.stockH+' мм');
+log('Заготовка подобрана автоматически: Ø'+S.stockD+' × H'+S.stockH,'s');
+}
+function fitModel(){
+const O=buildOrient(),bb=O.bb;
+const d=Math.max(1e-6,Math.hypot(bb.size[0],bb.size[2])),h=Math.max(1e-6,bb.size[1]);
+const baseZone=S.keepBase?Math.max(0,S.baseH):0;
+const s=Math.min((S.stockD-16)/d,(S.stockH-baseZone-14)/h);
+S.scale=clamp(Math.round(s*1000)/10,5,1000);
+S.offX=0;S.offZ=0;S.offY=baseZone>0?baseZone:1;S.rotX=S.rotX;
+['scale','offX','offZ','offY'].forEach(sync);
+rebuild();fitAll();
+toast('Модель вписана · '+nf(S.scale,1)+' %');
+log('Модель вписана в заготовку, масштаб '+nf(S.scale,1)+' %, низ на Y='+nf(S.offY,1),'s');
+}
+function loadDemo(){
+const pos=buildDemoModel();
+RAW={pos:pos,info:meshInfo(pos)};RAW.info.name='демо-ваза (процедурная)';
+ORIENT=null;ORIENT_KEY='';SLICES=null;SLICES_KEY='';
+S.rotX=0;S.rotY=0;S.rotZ=0;S.orient='asis';segAll('orient','asis');
+['rotX','rotY','rotZ'].forEach(sync);
+fitModelSilent();rebuild();
+log('Загружена демо-модель: '+nf(RAW.info.count)+' треугольников','s');
+}
+function fitModelSilent(){
+const O=buildOrient(),bb=O.bb;
+const d=Math.max(1e-6,Math.hypot(bb.size[0],bb.size[2])),h=Math.max(1e-6,bb.size[1]);
+const baseZone=S.keepBase?Math.max(0,S.baseH):0;
+const s=Math.min((S.stockD-16)/d,(S.stockH-baseZone-14)/h);
+S.scale=clamp(Math.round(s*1000)/10,5,1000);
+S.offX=0;S.offZ=0;
+const modelH=(bb.max[1]-bb.min[1])*S.scale/100;
+S.offY=(modelH>baseZone*1.5)?baseZone:0;
+['scale','offX','offZ','offY'].forEach(sync);
+}
+function loadFile(f){
+busy(true,'Чтение STL…');
+log('Открытие файла '+f.name+' ('+nf(f.size/1048576,2)+' МБ)');
+const fr=new FileReader();
+fr.onload=function(){
+try{
+const pos=parseSTL(fr.result);
+if(!pos||pos.length<9)throw new Error('файл пуст');
+RAW={pos:pos,info:meshInfo(pos)};
+RAW.info.name=f.name.replace(/\.stl$/i,'');
+S.fileName='penorez_'+RAW.info.name.slice(0,28).replace(/[^\w\-а-яА-Я]/g,'_');
+ORIENT=null;ORIENT_KEY='';SLICES=null;SLICES_KEY='';
+fitModelSilent();rebuild();fitAll();
+toast('Загружено '+nf(RAW.info.count)+' треугольников');
+log('STL прочитан: '+nf(RAW.info.count)+' треугольников, габариты '+
+RAW.info.size.map(function(v){return nf(v,1);}).join(' × ')+' мм','s');
+}catch(err){
+busy(false);alert_('Не удалось прочитать STL',String((err&&err.message)||err));
+log('Ошибка чтения STL: '+((err&&err.message)||err),'e');
+}
+};
+fr.onerror=function(){busy(false);alert_('Ошибка чтения файла','');log('Ошибка чтения файла','e');};
+fr.readAsArrayBuffer(f);
+}
+/* ==================================================================
+15 · СИМУЛЯЦИЯ
+================================================================== */
+const SIM={segs:[],total:1,t:0,playing:false,done:-1,everRun:false,wire:null};
+/* ✅ FIX #3: добавлен финальный сегмент возврата в home */
+function buildTimeline(){
+SIM.segs=[];let t=0;
+if(!PASSES.length){SIM.total=0.001;return;}
+const home=getHome();
+let pa=0,px=home[0],py=home[1];
+if(Math.abs(PASSES[0].ang-pa)>1e-9){
+const d=Math.max(0.06,Math.abs(PASSES[0].ang-pa)/S.aFeed*60);
+SIM.segs.push({type:'rot',t0:t,t1:t+d,a0:pa,a1:PASSES[0].ang,k:-1,done:-1,wx:px,wy:py});
+t+=d;pa=PASSES[0].ang;
+}
+PASSES.forEach(function(p,k){
+p.moves.forEach(function(m){
+if(m.t!=='rap')return;
+const cm=polyCum(m.pts);
+if(cm.len<1e-9)return;
+const d=Math.max(0.02,cm.len/S.rapid*60);
+SIM.segs.push({type:'mv',t0:t,t1:t+d,k:k,done:k-1,cut:false,
+pts:m.pts,cum:cm.cum,len:cm.len,a:p.ang,pt:p.type});
+t+=d;
+px=m.pts[m.pts.length-1][0];py=m.pts[m.pts.length-1][1];
+});
+if(S.dwell>0){
+SIM.segs.push({type:'wait',t0:t,t1:t+S.dwell,k:k,done:k-1,cut:true,
+x:px,y:py,a:p.ang});
+t+=S.dwell;
+}
+p.moves.forEach(function(m){
+if(m.t!=='cut')return;
+const cm=polyCum(m.pts);
+if(cm.len<1e-9)return;
+const d=Math.max(0.02,cm.len/S.feed*60);
+SIM.segs.push({type:'mv',t0:t,t1:t+d,k:k,done:k-1,cut:true,
+pts:m.pts,cum:cm.cum,len:cm.len,a:p.ang,pt:p.type});
+t+=d;
+px=m.pts[m.pts.length-1][0];py=m.pts[m.pts.length-1][1];
+});
+if(S.waitRot>0){
+SIM.segs.push({type:'wait',t0:t,t1:t+S.waitRot,k:k,done:k,cut:true,
+x:px,y:py,a:p.ang});
+t+=S.waitRot;
+}
+const nxt=PASSES[k+1];
+if(nxt&&Math.abs(nxt.ang-p.ang)>1e-9){
+if(S.compBacklash&&S.backlash>0){
+const d1=S.backlash/S.aFeed*60;
+SIM.segs.push({type:'rot',t0:t,t1:t+d1,a0:p.ang,a1:p.ang+S.backlash,k:k,done:k,wx:px,wy:py});
+t+=d1;
+}
+const da=Math.abs(nxt.ang-p.ang),d=Math.max(0.06,da/S.aFeed*60);
+SIM.segs.push({type:'rot',t0:t,t1:t+d,a0:p.ang,a1:nxt.ang,k:k,done:k,wx:px,wy:py});
+t+=d;pa=nxt.ang;
+}
+});
+/* Возврат в home после завершения программы (соответствует G0 home в G-code) */
+if(Math.abs(px-home[0])>0.05||Math.abs(py-home[1])>0.05){
+const safeTop=S.stockH+S.safeGap;
+const returnPts=[[px,py],[px,safeTop],[home[0],safeTop],[home[0],home[1]]];
+const cm=polyCum(returnPts);
+const d=Math.max(0.02,cm.len/S.rapid*60);
+SIM.segs.push({type:'mv',t0:t,t1:t+d,k:PASSES.length-1,done:PASSES.length-1,
+cut:false,pts:returnPts,cum:cm.cum,len:cm.len,a:PASSES[PASSES.length-1].ang,pt:'cut'});
+t+=d;
+}
+SIM.total=Math.max(0.001,t);
+}
+function atLen(pts,cum,d){
+if(!pts.length)return [0,0];
+if(d<=0)return pts[0];
+let lo=0,hi=cum.length-1;
+while(lo<hi-1){const m=(lo+hi)>>1;if(cum[m]<=d)lo=m;else hi=m;}
+const seg=Math.max(1e-9,cum[hi]-cum[lo]),u=clamp((d-cum[lo])/seg,0,1);
+return [lerp(pts[lo][0],pts[hi][0],u),lerp(pts[lo][1],pts[hi][1],u)];
+}
+let lastHl=-1,lastUnroll=0;
+function setSimTime(t){
+SIM.t=clamp(t,0,SIM.total);
+if(!SIM.segs.length)return;
+let s=SIM.segs[0];
+for(let i=0;i<SIM.segs.length;i++){if(SIM.t<=SIM.segs[i].t1||i===SIM.segs.length-1){s=SIM.segs[i];break;}}
+const u=clamp((SIM.t-s.t0)/Math.max(1e-9,s.t1-s.t0),0,1);
+let ang=s.a,x=0,y=0,on=false;
+if(s.type==='rot'){ang=lerp(s.a0,s.a1,u);x=s.wx;y=s.wy;on=false;}
+else if(s.type==='wait'){ang=s.a;x=s.x;y=s.y;on=true;}
+else{ang=s.a;const p=atLen(s.pts,s.cum,u*s.len);x=p[0];y=p[1];on=!!s.cut;}
+if(S.wireKeepOn&&s.k>=0)on=true;
+SIM.wire={x:x,y:y,k:Math.max(0,s.k),on:on};
+if(tableGroup)tableGroup.rotation.y=ang*D2R;
+setWire(x,y,on);
+const pp=PASSES[Math.max(0,s.k)];
+updateDRO(x,y,ang,on,pp);
+const done=(s.done===undefined)?Math.max(0,s.k):s.done;
+if(done!==SIM.done){
+SIM.done=done;
+RESULT=computeResult(Math.max(0,done+1));
+buildResultMesh();
+STATS.volR=RESULT?RESULT.volR:0;STATS.excess=RESULT?RESULT.excess:0;STATS.maxDev=RESULT?RESULT.maxDev:0;
+}
+if(s.type==='mv')setPassPath(s.k,u,s.cut);
+const r=$('#simRange');
+if(r&&document.activeElement!==r){r.value=Math.round(SIM.t/SIM.total*1000);paintSlider(r);}
+const st=$('#simTime');if(st)st.textContent=hms(SIM.t)+' / '+hms(SIM.total);
+const fin=SIM.t>=SIM.total-1e-3;
+const ss=$('#stState');if(ss)ss.textContent=fin?'Готово':(SIM.playing?(on?'Резка':'Перемещение'):'Пауза');
+const sd=$('#stDot');if(sd)sd.className='sdot'+(on?' hot':(SIM.playing?' run':''));
+const sp=$('#stPass');if(sp)sp.textContent=(Math.max(0,s.k)+1)+' / '+PASSES.length;
+const spp=$('#simPass');
+if(spp){
+let label;
+if(fin)label='Готово · '+NPASS+' проходов'+(trimActive()?' + подрезка':'')+' · '+hms(SIM.total);
+else if(s.type==='rot')label='Поворот стола A → '+nf(ang,2)+'°';
+else if(s.type==='wait')label='Ожидание · струна вне заготовки · A '+nf(ang,2)+'°';
+else label=(s.pt==='trim'?'Подрезка основания':(S.motionMode==='equilibrium'?'Равновесие ':'Проход ')+
+(s.k+1)+'/'+NPASS)+' · A '+nf(ang,2)+'° · '+
+(s.cut?'рез':'холостой ход')+' · '+nf(u*100,0)+' %';
+spp.textContent=label;
+}
+const now=(window.performance&&performance.now)?performance.now():Date.now();
+if(now-lastUnroll>60){lastUnroll=now;drawUnroll();}
+}
+function setWire(x,y,on){
+if(!wireGroup)return;
+wireGroup.position.set(x,y,0);
+wireCore.material.emissiveIntensity=on?2.6:0.15;
+wireCore.material.color.setHex(on?0xffe0b0:0xb9bec6);
+wireLine.material.color.setHex(on?0xff453a:0x9aa0aa);
+wireLine.material.opacity=on?1:0.75;
+if(wireGlowA)wireGlowA.material.opacity=on?0.85:0;
+if(wireGlowB)wireGlowB.material.opacity=on?0.85:0;
+const sw=$('#stWire');if(sw)sw.textContent=on?'ВКЛ':'выкл';
+}
+function updateDRO(x,y,a,on,p){
+const a1=$('#droX'),a2=$('#droY'),a3=$('#droA'),a4=$('#droDir');
+if(a1)a1.textContent=x.toFixed(3);
+if(a2)a2.textContent=y.toFixed(3);
+if(a3)a3.textContent=a.toFixed(2);
+if(a4)a4.textContent=p?(p.type==='trim'?' ⚑':(p.dir>0?' ↻':' ↺')):'';
+}
+function setPassPath(k,u,cutting){
+if(!pathLine)return;
+const p=PASSES[k];
+if(!p||!p.cutPts||!p.cutPts.length){
+pathLine.geometry.dispose();pathLine.geometry=new THREE.BufferGeometry();
+pathRest.geometry.dispose();pathRest.geometry=new THREE.BufferGeometry();return;}
+const pts=p.cutPts.map(function(q){return new THREE.Vector3(q[0],q[1],0);});
+if(pathLine.userData.k!==k||(pathLine.geometry.attributes.position&&pathLine.geometry.attributes.position.count!==pts.length)){
+pathLine.geometry.dispose();pathLine.geometry=new THREE.BufferGeometry().setFromPoints(pts);
+pathRest.geometry.dispose();pathRest.geometry=new THREE.BufferGeometry().setFromPoints(pts);
+pathLine.userData.k=k;lastHl=-1;
+}
+const n=pts.length,cut=cutting?clamp(1+Math.floor(u*(n-1)),1,n):n;
+pathLine.geometry.setDrawRange(0,cut);
+pathRest.geometry.setDrawRange(cut,Math.max(0,n-cut));
+pathLine.visible=S.layers.path;pathRest.visible=S.layers.path;
+if(lastHl!==k){
+lastHl=k;
+$$('#passList .row').forEach(function(r,i){r.style.background=(i===k)?'var(--tintf)':'';});
+}
+}
+function setPlaying(v){
+SIM.playing=v;SIM.everRun=true;
+const a=$('#btnPlay');
+if(a)a.innerHTML=v?IC.pause:IC.play;
+if(v&&SIM.t>=SIM.total-1e-3){SIM.t=0;SIM.done=-1;log('Симуляция запущена с начала');}
+const ss=$('#stState');if(ss)ss.textContent=v?'Резка':'Пауза';
+}
+let lastT=0;
+function animate(ts){
+requestAnimationFrame(animate);
+const now=ts||0;
+const dt=Math.min(0.05,(now-(lastT||now))/1000);lastT=now;
+if(camTween){
+camTween.t=Math.min(1,camTween.t+dt*2.6);
+const e=1-Math.pow(1-camTween.t,3);
+camera.position.lerpVectors(camTween.from,camTween.to,e);
+controls.target.lerpVectors(camTween.tf,camTween.tt,e);
+if(camTween.t>=1)camTween=null;
+}
+if(SIM.playing){
+SIM.t+=dt*S.simSpeed;
+if(SIM.t>=SIM.total){SIM.t=SIM.total;setPlaying(false);
+toast('Резка завершена · '+NPASS+' проходов'+(trimActive()?' + подрезка':''));
+log('Симуляция завершена. Деталь готова к снятию со стола.','s');}
+setSimTime(SIM.t);
+}
+if(controls)controls.update();
+drawGizmo();
+if(renderer&&scene&&camera)renderer.render(scene,camera);
+}
+/* ==================================================================
+16 · СОБЫТИЯ
+================================================================== */
+function initSplitters(){
+const root=document.documentElement;
+let saved={};
+try{saved=JSON.parse(localStorage.getItem('pr-layout')||'{}');}catch(e){saved={};}
+if(saved.wl)root.style.setProperty('--wl',saved.wl+'px');
+if(saved.wr)root.style.setProperty('--wr',saved.wr+'px');
+if(saved.hb)root.style.setProperty('--hb',saved.hb+'px');
+const save=function(){
+const cs=getComputedStyle(root);
+localStorage.setItem('pr-layout',JSON.stringify({
+wl:parseInt(cs.getPropertyValue('--wl'))||330,
+wr:parseInt(cs.getPropertyValue('--wr'))||356,
+hb:parseInt(cs.getPropertyValue('--hb'))||186}));
+};
+$$('.splitter,.hsplit').forEach(function(sp){
+sp.addEventListener('mousedown',function(e){
+e.preventDefault();sp.classList.add('drag');
+document.body.style.cursor=sp.classList.contains('hsplit')?'row-resize':'col-resize';
+const which=sp.dataset.sp,st=getComputedStyle(root);
+const sx=e.clientX,sy=e.clientY;
+const w0=parseInt(st.getPropertyValue('--wl'))||330;
+const r0=parseInt(st.getPropertyValue('--wr'))||356;
+const b0=parseInt(st.getPropertyValue('--hb'))||186;
+const mv=function(ev){
+if(which==='l')root.style.setProperty('--wl',clamp(w0+ev.clientX-sx,240,560)+'px');
+if(which==='r')root.style.setProperty('--wr',clamp(r0-(ev.clientX-sx),260,640)+'px');
+if(which==='b')root.style.setProperty('--hb',clamp(b0-(ev.clientY-sy),70,Math.min(520,window.innerHeight-280))+'px');
+resizeAll();
+};
+const up=function(){
+sp.classList.remove('drag');document.body.style.cursor='';
+window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);
+save();resizeAll();syncSegs();
+};
+window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);
+});
+sp.addEventListener('dblclick',function(){
+if(sp.dataset.sp==='l')root.style.setProperty('--wl','330px');
+if(sp.dataset.sp==='r')root.style.setProperty('--wr','356px');
+if(sp.dataset.sp==='b')root.style.setProperty('--hb','186px');
+save();resizeAll();syncSegs();
+});
+});
+}
+function initEvents(){
+$('#tbOpen').onclick=function(){$('#file').click();};
+$('#tbDemo').onclick=loadDemo;
+$('#tbSave').onclick=download;
+$('#tbCalc').onclick=function(){rebuild();};
+$('#btnPlay').onclick=function(){setPlaying(!SIM.playing);};
+$('#btnStart').onclick=function(){setPlaying(false);setSimTime(0);};
+$('#btnEnd').onclick=function(){setPlaying(false);setSimTime(SIM.total);};
+$('#btnStep').onclick=function(){stepPass(1);};
+$('#tbTheme').onclick=cycleTheme;
+$('#btnFit').onclick=function(){fitAll();toast('Показан весь станок');};
+$('#btnShot').onclick=screenshot;
+$('#btnFull').onclick=toggleFullscreen;
+$('#simRange').oninput=function(e){
+paintSlider(e.target);
+if(SIM.playing)setPlaying(false);
+setSimTime(e.target.value/1000*SIM.total);
+};
+$('#axisOk').onclick=saveAxisDialog;
+$('#axisCancel').onclick=closeAxisDialog;
+$('#axisReset').onclick=resetAxisDialog;
+$('#axisScrim').onclick=function(e){if(e.target.id==='axisScrim')closeAxisDialog();};
+$('#helpOk').onclick=closeHelp;
+$('#helpClose').onclick=closeHelp;
+$('#helpScrim').onclick=function(e){if(e.target.id==='helpScrim')closeHelp();};
+paintSlider($('#simRange'));
+$('#file').onchange=function(e){const f=e.target.files[0];if(f)loadFile(f);e.target.value='';};
+const st=$('#stage');
+['dragenter','dragover'].forEach(function(ev){
+st.addEventListener(ev,function(e){e.preventDefault();st.classList.add('drag-over');});});
+st.addEventListener('dragleave',function(e){
+if(!st.contains(e.relatedTarget))st.classList.remove('drag-over');});
+st.addEventListener('drop',function(e){
+e.preventDefault();st.classList.remove('drag-over');
+const f=e.dataTransfer&&e.dataTransfer.files?e.dataTransfer.files[0]:null;
+if(f&&/\.stl$/i.test(f.name))loadFile(f);
+else alert_('Неверный формат','Нужен файл .stl (бинарный или ASCII).');
+});
+window.addEventListener('keydown',function(e){
+const tag=(e.target.tagName||'').toLowerCase();
+if((tag==='input'&&e.target.type!=='range')||tag==='textarea'||tag==='select')return;
+const mod=e.metaKey||e.ctrlKey;
+if(mod&&(e.key==='k'||e.key==='K'||e.key==='л'||e.key==='Л')){e.preventDefault();openPalette();return;}
+if(mod&&(e.key==='o'||e.key==='O'||e.key==='щ'||e.key==='Щ')){e.preventDefault();$('#file').click();return;}
+if(mod&&(e.key==='s'||e.key==='S'||e.key==='ы'||e.key==='Ы')){e.preventDefault();
+if(e.shiftKey)screenshot();else download();return;}
+if(mod&&(e.key==='`'||e.key==='~'||e.key==='ё'||e.key==='Ё')){e.preventDefault();toggleConsole();return;}
+if(e.key==='Escape'){
+if(!$('#helpScrim').hidden){closeHelp();return;}
+if(!$('#axisScrim').hidden){closeAxisDialog();return;}
+closePalette();closeMenu();return;
+}
+if(mod||e.altKey)return;
+if(e.code==='Space'){e.preventDefault();setPlaying(!SIM.playing);return;}
+if(e.key==='Enter'&&!$('#axisScrim').hidden){e.preventDefault();saveAxisDialog();return;}
+if(e.key==='Enter'&&!$('#helpScrim').hidden){e.preventDefault();closeHelp();return;}
+const k=e.key;
+if(k==='r'||k==='R'||k==='к'||k==='К'){rebuild();}
+else if(k==='f'||k==='F'||k==='а'||k==='А'){if(e.shiftKey)fitModel();else fitAll();}
+else if(k==='1'){setView('iso');}
+else if(k==='2'){setView('front');}
+else if(k==='3'){setView('top');}
+else if(k==='4'){setView('side');}
+else if(k==='Home'){setPlaying(false);setSimTime(0);}
+else if(k==='End'){setPlaying(false);setSimTime(SIM.total);}
+else if(k==='ArrowRight'){e.preventDefault();stepPass(1);}
+else if(k==='ArrowLeft'){e.preventDefault();stepPass(-1);}
+else if(k==='t'||k==='T'||k==='е'||k==='Е'){cycleTheme();}
+else if(k==='?'){showKeys();}
+});
+window.addEventListener('resize',function(){resizeAll();syncSegs();});
+window.addEventListener('beforeunload',function(){saveState(true);});
+document.addEventListener('visibilitychange',function(){
+if(document.visibilityState==='hidden')saveState(true);
+});
+if(window.ResizeObserver)new ResizeObserver(function(){drawUnroll();}).observe($('#bottom'));
+document.addEventListener('contextmenu',function(e){
+const t=e.target;
+const tag=(t.tagName||'').toLowerCase();
+if(tag==='input'||tag==='textarea'||tag==='select')return;
+if(t.isContentEditable)return;
+e.preventDefault();
+});
+}
+/* ==================================================================
+17 · СТАРТ
+================================================================== */
+try{
+const hadState=loadState();
+$('#tbTheme').innerHTML=IC.moon;
+$('#btnFit').innerHTML=IC.fit;
+$('#btnShot').innerHTML=IC.cam;
+$('#btnPlay').innerHTML=IC.play;
+syncFullBtn();
+applyAxisLabels();
+applyTheme();
+buildPanes();
+initSplitters();
+initScene();
+rebuildMachine();
+initEvents();
+const pos=buildDemoModel();
+RAW={pos:pos,info:meshInfo(pos)};
+RAW.info.name='демо-ваза (процедурная)';
+if(!hadState)fitModelSilent();
+log('HotWireStudio — векторный CAM - Rotary A запущен','s');
+log(hadState?'Параметры восстановлены из сохранения (pr-state)':'Настройки по умолчанию — сохранений пока нет',hadState?'s':'i');
+log('Оси: X и Y — линейные; A — поворотный стол вокруг оси Y. Струна перпендикулярна плоскости XY.');
+log('Цикл: home → подход → рез по силуэту → выход за заготовку → пауза → поворот стола → … → возврат в home.');
+rebuild(true);
+setTimeout(function(){
+const b=$('#boot');if(b&&b.parentNode)b.parentNode.removeChild(b);
+fitAll();setSimTime(0);syncSegs();resizeAll();
+log('Демо-модель загружена: '+nf(RAW.info.count)+' треугольников','s');
+log('Space — запуск симуляции, ⌘/Ctrl+K — палитра команд, ? — горячие клавиши');
+},140);
+}catch(err){
+console.error(err);
+const b=$('#boot');
+if(b)b.innerHTML='<div><b>Ошибка инициализации</b>'+String((err&&err.message)||err)+
+'<br><br>Проверьте доступ к CDN three.js и поддержку WebGL.</div>';
+}
+</script>
+</body>
+</html>
