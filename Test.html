@@ -10,7 +10,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/600.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/700.css">
 <style>
-/* ======================= iOS / macOS tokens ======================= */
 :root{
 --bg:#f2f2f7; --card:#fff; --card2:#f7f7fa; --pane:#f5f5f8;
 --label:#000; --label2:rgba(60,60,67,.62); --label3:rgba(60,60,67,.34);
@@ -125,6 +124,7 @@ border-top:.5px solid var(--sep);white-space:nowrap;overflow:hidden;z-index:50}
 .sdot{width:7px;height:7px;border-radius:50%;background:var(--gray);display:inline-block;margin-right:5px;vertical-align:-0.5px}
 .sdot.hot{background:var(--orange);animation:pls 1.1s infinite}
 .sdot.run{background:var(--green);animation:pls 1.4s infinite}
+.sdot.busy{background:var(--orange);animation:pls .7s infinite}
 @keyframes pls{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
 .group{margin:12px 10px 0}
 .group:first-child{margin-top:10px}
@@ -176,7 +176,6 @@ box-shadow:0 1.5px 4px rgba(0,0,0,.22),0 0 0 .5px rgba(0,0,0,.05);transition:tra
 .sl::-moz-range-track{height:4px;border-radius:2px;background:var(--fill1)}
 .sl::-moz-range-progress{height:4px;border-radius:2px;background:var(--tintc,var(--blue))}
 .sl::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:#fff;box-shadow:0 1.5px 4px rgba(0,0,0,.22)}
-/* ============ iOS: числовое поле + степпер (UIStepper) ============ */
 .numrow{min-height:38px;padding:5px 10px;gap:8px}
 .numrow .rt{font-size:12.5px;line-height:1.25;padding-right:2px;letter-spacing:-.15px}
 .numctl{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin-left:auto;transition:opacity .2s}
@@ -279,6 +278,10 @@ font-variant-numeric:tabular-nums;gap:10px}
 box-shadow:var(--shadow);font-size:12.5px;font-weight:600}
 .spinner{width:22px;height:22px;margin:0 auto 8px;border-radius:50%;border:2.5px solid var(--fill1);border-top-color:var(--blue);animation:sp .75s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+.busy-cancel{margin-top:12px;padding:6px 16px;border:0;border-radius:8px;background:var(--fill2);color:var(--label);
+font-weight:600;font-size:12.5px;cursor:pointer;display:none}
+.busy.on .busy-cancel{display:inline-block}
+.busy-cancel:hover{background:var(--fill1)}
 #boot{position:absolute;inset:0;z-index:90;display:grid;place-items:center;background:var(--bg);text-align:center;padding:30px}
 #boot div{max-width:470px;font-size:13px;color:var(--label2);line-height:1.5}
 #boot b{display:block;font-size:16px;color:var(--label);margin-bottom:8px}
@@ -308,11 +311,6 @@ line-height:1.65;padding:6px 0;user-select:text}
 .kpi div{background:var(--card2);border-radius:8px;padding:7px 9px}
 .kpi b{display:block;font-size:16px;font-weight:700;letter-spacing:-.4px;font-variant-numeric:tabular-nums}
 .kpi span{font-size:10px;color:var(--label2);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.seq{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;align-items:center}
-.seq b{background:var(--fill2);border-radius:6px;padding:3px 7px;font-size:10.5px;font-weight:600;color:var(--label2)}
-.seq b.hot{background:rgba(255,149,0,.18);color:var(--orange)}
-.seq i{color:var(--label3);font-style:normal}
-/* ======================= Справка (модальное окно) ======================= */
 .helpbox{width:min(720px,94vw);max-height:88vh;background:var(--pop);
 backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);
 border-radius:14px;border:.5px solid var(--sep);
@@ -383,6 +381,14 @@ transition:opacity .25s,transform .35s cubic-bezier(.3,1.4,.5,1);display:flex;al
 font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inline-block;min-width:22px;text-align:center}
 .keys span{color:var(--label2)}
 .keys .hd{grid-column:1/-1;color:var(--label);font-weight:600;margin-top:4px}
+/* ✅ NEW: focus-visible для клавиатурной навигации */
+.btn:focus-visible,.tbtn:focus-visible,.switch:focus-visible,.ptab:focus-visible,
+.tp-btn:focus-visible,.playbtn:focus-visible,.rbtn:focus-visible,.numfield:focus-visible,
+.tf:focus-visible,.mpop .mi:focus-visible,.help-close:focus-visible,.help-foot button:focus-visible{
+  outline:2px solid var(--blue);outline-offset:2px;
+}
+/* ✅ NEW: подсказка под полями home */
+.home-hint{font-size:10px;color:var(--label3);margin-top:2px;line-height:1.3;font-family:ui-monospace,Menlo,monospace}
 </style>
 </head>
 <body>
@@ -445,7 +451,7 @@ font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inlin
 </div>
 <div class="tp-spd" id="tpSpeed"></div>
 </div>
-<div class="busy" id="busy"><div class="box"><div class="spinner"></div><span id="busyText">Расчёт…</span></div></div>
+<div class="busy" id="busy"><div class="box"><div class="spinner"></div><span id="busyText">Расчёт…</span><br><button class="busy-cancel" id="busyCancel">Отмена (Esc)</button></div></div>
 </main>
 <div class="splitter" data-sp="r"></div>
 <aside class="pane pane-r" id="paneR">
@@ -468,7 +474,7 @@ font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inlin
 <span>Струна <b id="stWire">выкл</b></span>
 <span>Рез <b id="stLen">0</b> мм</span>
 <span class="sp"></span>
-<span id="stInfo">—</span>
+<span id="stInfo">Готов к работе</span>
 </footer>
 </div>
 <div class="scrim" id="scrim" hidden><div class="alert">
@@ -489,18 +495,12 @@ font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inlin
 <button class="switch" id="axEnableSw" type="button"></button>
 </div>
 <div id="axInputs" style="display:flex;flex-direction:column;gap:8px">
-<div class="row nosep" style="padding:0;min-height:auto">
-<div class="rt" style="flex:0 0 130px">Линейная ось X</div>
-<input class="tf mono" id="axXInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700">
-</div>
-<div class="row nosep" style="padding:0;min-height:auto">
-<div class="rt" style="flex:0 0 130px">Линейная ось Y</div>
-<input class="tf mono" id="axYInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700">
-</div>
-<div class="row nosep" style="padding:0;min-height:auto">
-<div class="rt" style="flex:0 0 130px">Поворотная ось</div>
-<input class="tf mono" id="axAInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700">
-</div>
+<div class="row nosep" style="padding:0;min-height:auto"><div class="rt" style="flex:0 0 130px">Линейная ось X</div>
+<input class="tf mono" id="axXInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700"></div>
+<div class="row nosep" style="padding:0;min-height:auto"><div class="rt" style="flex:0 0 130px">Линейная ось Y</div>
+<input class="tf mono" id="axYInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700"></div>
+<div class="row nosep" style="padding:0;min-height:auto"><div class="rt" style="flex:0 0 130px">Поворотная ось</div>
+<input class="tf mono" id="axAInput" maxlength="1" style="text-align:center;font-size:15px;font-weight:700"></div>
 </div>
 <div id="axisErr" style="color:var(--red);font-size:12px;min-height:16px;margin-top:10px;text-align:center"></div>
 </div>
@@ -527,11 +527,9 @@ font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inlin
 </ul>
 <h3>Как формируется деталь</h3>
 <p>Струна, двигаясь по замкнутому контуру, «вырезает» призму — тело, у которого каждое горизонтальное сечение повторяет силуэт контура. За N проходов стол поворачивается на общий угол <b>180°</b> (или <b>360°</b> в режиме «точка ↔ ось»), и материал, оставшийся после всех проходов, представляет собой <b>пересечение N силуэтных призм</b>. Чем больше проходов — тем ближе эта форма к настоящей 3D-модели.</p>
-<div class="tip">
-<b>Геометрическое правило:</b> горизонтальное сечение детали всегда является пересечением выпуклых оболочек срезов под разными углами. Именно поэтому внутренние полости и поднутрения не вырезаются — струна «не видит» их.
-</div>
+<div class="tip"><b>Геометрическое правило:</b> горизонтальное сечение детали всегда является пересечением выпуклых оболочек срезов под разными углами. Именно поэтому внутренние полости и поднутрения не вырезаются — струна «не видит» их.</div>
 <h3>Начало координат XY (парковка струны)</h3>
-<p>Струна начинает программу из точки <b>парковки</b> и возвращается в неё после завершения. Позиция задаётся во вкладке «Резание» → блок «Начало координат XY»:</p>
+<p>Струна начинает программу из точки <b>парковки</b> и возвращается в неё после завершения. Позиция задаётся во вкладке «Резание» → блок «Начало координат XY» и отображается в сцене зелёным маркером:</p>
 <ul>
 <li><b>Автоматическое положение</b> — X и Y вычисляются от края и верха заготовки на расстоянии «отступ за заготовку».</li>
 <li><b>Вручную</b> — значения X и Y задаются вручную в полях.</li>
@@ -544,7 +542,7 @@ font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inlin
 <li>Опускается на рабочую высоту Y.</li>
 <li>Прогрев (пауза) — струна набирает температуру.</li>
 <li>Включается (<code>M3</code>).</li>
-<li>Режет по силуэту текущего угла A — обходит контур по контуру.</li>
+<li>Режет по силуэту текущего угла A.</li>
 <li>Выходит за пределы заготовки и ждёт.</li>
 <li>Выключается (<code>M5</code>).</li>
 <li>Стол поворачивается на заданный шаг A.</li>
@@ -552,86 +550,65 @@ font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inlin
 </ol>
 <p>После последнего прохода струна возвращается в home и выключается.</p>
 <h3>Режимы движения струны</h3>
-<table>
-<tr><th>Режим</th><th>Как работает</th><th>Оборот стола</th></tr>
-<tr><td><b>Точка ↔ точка</b></td>
-<td>Струна режет полный силуэт — правый борт, верх, левый борт — и останавливается слева. Затем обратно справа налево.</td>
-<td>180°</td></tr>
-<tr><td><b>Точка ↔ ось</b></td>
-<td>Струна режет только правый борт, доходит до оси A, уходит вертикально вверх и ждёт. Обратный рез — тем же маршрутом.</td>
-<td>360°</td></tr>
+<table><tr><th>Режим</th><th>Как работает</th><th>Оборот стола</th></tr>
+<tr><td><b>Точка ↔ точка</b></td><td>Полный силуэт за проход, стол 180°.</td><td>180°</td></tr>
+<tr><td><b>Точка ↔ ось</b></td><td>Только правый борт + вертикаль до оси, стол 360°.</td><td>360°</td></tr>
 </table>
-<p>Первый режим быстрее и подходит для симметричных моделей. Второй даёт больше контроля над поднутрениями, но занимает вдвое больше времени.</p>
 <h3>Подрезка основания</h3>
-<p>Чтобы деталь держалась на столе во время резки, нижняя часть заготовки (высотой «высота основания») остаётся нетронутой. После всех проходов струна отделяет деталь одним из трёх способов:</p>
-<table>
-<tr><th>Режим</th><th>Что происходит</th></tr>
-<tr><td><b>Не подрезать</b></td>
-<td>Деталь остаётся соединённой с основанием. Используйте, если будете отрезать вручную или если нужен «козырёк».</td></tr>
-<tr><td><b>На всю ширину</b></td>
-<td>Один горизонтальный рез от края до края на заданной высоте. Деталь полностью освобождается и падает на стол.</td></tr>
-<tr><td><b>С перемычкой</b></td>
-<td>Струна режет с одной стороны до центральной «перемычки», возвращается, стол поворачивается на <b>180°</b> или <b>90°</b> (2 или 4 подреза), и режет с другой стороны. Деталь остаётся на тонком «мостике», который легко отломить.</td></tr>
+<table><tr><th>Режим</th><th>Что происходит</th></tr>
+<tr><td><b>Не подрезать</b></td><td>Деталь остаётся соединённой с основанием.</td></tr>
+<tr><td><b>На всю ширину</b></td><td>Один горизонтальный рез от края до края.</td></tr>
+<tr><td><b>С перемычкой</b></td><td>2 или 4 подреза, деталь остаётся на «мостике».</td></tr>
 </table>
 <h3>Параметры и их влияние</h3>
-<table>
-<tr><th>Параметр</th><th>Что влияет</th></tr>
-<tr><td>Число проходов</td><td>Больше — точнее форма, но дольше рез. 24–48 для типовой задачи, 72+ для моделей с плавными изгибами.</td></tr>
-<tr><td>Срезы по высоте</td><td>Сколько горизонтальных сечений берётся из STL. 150 по умолчанию, 300+ для высоких моделей.</td></tr>
-<tr><td>Допуск упрощения</td><td>Максимальное отклонение ломаной от исходного контура. Меньше — точнее, но длиннее G-code. 0.12 мм по умолчанию.</td></tr>
-<tr><td>Радиус струны</td><td>Реальная толщина нихрома (0.2–0.5 мм). Учитывается в опорной функции — компенсирует пропил.</td></tr>
-<tr><td>Отступ за заготовку</td><td>Насколько парковочная позиция струны удалена от края и верха заготовки (в авто-режиме).</td></tr>
-<tr><td>Выход за заготовку</td><td>Насколько струна выезжает за радиус заготовки, чтобы гарантированно выйти из материала перед поворотом.</td></tr>
-<tr><td>Безопасный отступ</td><td>На сколько струна поднимается над верхом заготовки при переходах между проходами.</td></tr>
-<tr><td>Подача</td><td>Скорость реза (мм/мин). Зависит от плотности пенопласта и мощности нагрева.</td></tr>
-<tr><td>Прогрев струны</td><td>Пауза после включения перед началом движения. Даёт струне набрать температуру.</td></tr>
-<tr><td>Зиг-заг</td><td>Струна идёт вперёд и обратно, стол всегда поворачивается в одну сторону. Экономит время на реверсах.</td></tr>
-<tr><td>Компенсация люфта</td><td>Дополнительный перелёт по A с возвратом. Убирает ошибки от люфта червячной передачи.</td></tr>
+<table><tr><th>Параметр</th><th>Что влияет</th></tr>
+<tr><td>Число проходов</td><td>Больше — точнее, но дольше. 24–48 для типовой задачи.</td></tr>
+<tr><td>Срезы по высоте</td><td>Сколько горизонтальных сечений берётся из STL.</td></tr>
+<tr><td>Допуск упрощения</td><td>Точность ломаной. 0.12 мм по умолчанию.</td></tr>
+<tr><td>Радиус струны</td><td>Толщина нихрома (0.2–0.5 мм).</td></tr>
+<tr><td>Отступ за заготовку</td><td>Расстояние парковки от края и верха заготовки.</td></tr>
+<tr><td>Выход за заготовку</td><td>Насколько струна выезжает за радиус для выхода из материала.</td></tr>
+<tr><td>Безопасный отступ</td><td>Подъём над верхом при переходах.</td></tr>
+<tr><td>Подача</td><td>Скорость реза (мм/мин).</td></tr>
+<tr><td>Прогрев струны</td><td>Пауза после включения перед движением.</td></tr>
+<tr><td>Зиг-заг</td><td>Струна идёт вперёд-назад, стол в одну сторону.</td></tr>
+<tr><td>Компенсация люфта</td><td>Перелёт по A с возвратом.</td></tr>
 </table>
-<div class="tip">
-<b>Ввод значений:</b> все числовые параметры задаются в полях со степпером <b>⊖ / ⊕</b> — как в настройках iOS. Значение можно вбить с клавиатуры (Enter — применить, Esc — отменить), стрелки <b>↑ ↓</b> меняют его на шаг, с <b>Shift</b> — на 10 шагов. Удержание кнопки степпера ускоряет изменение.
-</div>
+<div class="tip"><b>Ввод значений:</b> все числовые параметры задаются в полях со степпером <b>⊖ / ⊕</b>. Значение можно вбить с клавиатуры (Enter — применить, Esc — отменить), стрелки <b>↑ ↓</b> меняют на шаг, с <b>Shift</b> — на 10 шагов. Удержание кнопки степпера ускоряет изменение.</div>
 <h3>Что метод не может сделать</h3>
 <ul>
-<li><b>Внутренние полости.</b> Отверстия в детали (например, «рот» буквы R) не вырезаются — струна обходит только внешний контур.</li>
-<li><b>Поднутрения.</b> Вогнутости на боковой поверхности (средний изгиб S, C-образные профили) срезаются как выпуклая оболочка.</li>
-<li><b>4-осевые поверхности.</b> Винты, спирали, конические отверстия со сложной геометрией требуют наклоняемой струны (U/V оси).</li>
+<li><b>Внутренние полости</b> — струна обходит только внешний контур.</li>
+<li><b>Поднутрения</b> — срезаются как выпуклая оболочка.</li>
+<li><b>4-осевые поверхности</b> — требуют наклоняемой струны.</li>
 </ul>
-<div class="warn">
-<b>Важно:</b> если модель имеет вогнутости, деталь получится полнее, чем STL — «залитая» выпуклой оболочкой. Программа покажет прогноз зелёным цветом: он уже учитывает это упрощение.
-</div>
+<div class="warn"><b>Важно:</b> если модель имеет вогнутости, деталь получится полнее, чем STL. Программа покажет прогноз зелёным цветом — он уже учитывает это упрощение.</div>
 <h3>Типичные проблемы</h3>
-<table>
-<tr><th>Симптом</th><th>Решение</th></tr>
-<tr><td>Ступеньки на плавных изгибах</td><td>Увеличить число проходов (24 → 48 или 72).</td></tr>
-<tr><td>Деталь держится на тонком «волоске»</td><td>Уменьшить «рез ниже низа модели» или увеличить перемычку.</td></tr>
-<tr><td>Рез идёт слишком долго</td><td>Уменьшить срезы или увеличить допуск упрощения.</td></tr>
-<tr><td>Деталь отваливается в середине цикла</td><td>Увеличить высоту основания или отключить подрезку до конца.</td></tr>
-<tr><td>Ошибка модели «не вписывается в заготовку»</td><td>Увеличить диаметр или высоту заготовки, либо уменьшить масштаб модели.</td></tr>
-<tr><td>Струна режет по воздуху (не касается заготовки)</td><td>Уменьшить диаметр заготовки или передвинуть модель к центру.</td></tr>
+<table><tr><th>Симптом</th><th>Решение</th></tr>
+<tr><td>Ступеньки на плавных изгибах</td><td>Увеличить число проходов.</td></tr>
+<tr><td>Деталь держится на «волоске»</td><td>Уменьшить «рез ниже низа» или увеличить перемычку.</td></tr>
+<tr><td>Рез идёт слишком долго</td><td>Уменьшить срезы или увеличить допуск.</td></tr>
+<tr><td>Деталь отваливается в середине</td><td>Увеличить высоту основания или отключить подрезку.</td></tr>
+<tr><td>Модель «не вписывается»</td><td>Увеличить диаметр/высоту заготовки или уменьшить масштаб.</td></tr>
+<tr><td>Струна режет по воздуху</td><td>Уменьшить диаметр заготовки или передвинуть модель к центру.</td></tr>
 <tr><td>Струна задевает оснастку в home</td><td>Увеличить отступ за заготовку или задать X и Y вручную.</td></tr>
 </table>
 <h3>С чего начать</h3>
 <ol style="margin:6px 0 6px 20px;padding:0">
-<li>Откройте демо-модель кнопкой «Демо» — ваза идеально подходит для знакомства.</li>
-<li>Запустите симуляцию (Space) — посмотрите, как ходит струна, как поворачивается стол.</li>
-<li>Посмотрите развёртку траектории внизу — там видно, как меняется силуэт от прохода к проходу.</li>
-<li>Нажмите «G-code» — изучите постпроцессор. Проверьте, что ось A на вашем контроллере называется так же (в LinuxCNC это A).</li>
-<li>Загрузите свою STL-модель, настройте ориентацию (поворот Z-up → Y-up часто нужен для файлов из CAD).</li>
-<li>Установите заготовку реального размера, запустите «Подобрать по модели», затем «Вписать модель в заготовку».</li>
-<li>Проверьте симуляцию целиком. Убедитесь, что струна нигде не «прорубает» воздух и не задевает станок.</li>
-<li>Экспортируйте G-code, прогоните в симуляторе вашего контроллера (LinuxCNC/Axiom/Mach3).</li>
-<li>Запускайте на реальном станке.</li>
+<li>Демо-модель загружена — она идеальна для знакомства.</li>
+<li>Запустите симуляцию (Space).</li>
+<li>Посмотрите развёртку траектории внизу.</li>
+<li>Нажмите «G-code» — изучите постпроцессор.</li>
+<li>Загрузите свою STL-модель, настройте ориентацию.</li>
+<li>Установите заготовку, «Подобрать по модели», «Вписать модель».</li>
+<li>Проверьте симуляцию.</li>
+<li>Экспортируйте G-code, прогоните в контроллере.</li>
+<li>Запускайте на станке.</li>
 </ol>
-<div class="tip">
-<b>Совет:</b> начните с <b>числа проходов 24–36</b> и небольшой модели. Если деталь устраивает — не увеличивайте. Каждый дополнительный проход увеличивает время реза линейно.
-</div>
+<div class="tip"><b>Совет:</b> начните с <b>числа проходов 24–36</b> и небольшой модели.</div>
 <h3>Горячие клавиши</h3>
-<p>Полный список — по клавише <kbd>?</kbd>. Основные: <kbd>Space</kbd> — пуск/пауза, <kbd>R</kbd> — пересчёт, <kbd>F</kbd> — показать всё, <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> — виды, <kbd>⌘K</kbd> — палитра команд, <kbd>T</kbd> — тема.</p>
+<p>Полный список — по клавише <kbd>?</kbd>. Основные: <kbd>Space</kbd> — пуск/пауза, <kbd>R</kbd> — пересчёт, <kbd>F</kbd> — показать всё, <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> — виды, <kbd>⌘K</kbd> — палитра, <kbd>T</kbd> — тема, <kbd>Esc</kbd> — отмена расчёта.</p>
 </div>
-<div class="help-foot">
-<button id="helpOk">Понятно</button>
-</div>
+<div class="help-foot"><button id="helpOk">Понятно</button></div>
 </div></div>
 <input type="file" id="file" accept=".stl,model/stl" hidden>
 <script type="importmap">
@@ -639,9 +616,7 @@ font-weight:600;box-shadow:0 .5px 0 var(--sep2);white-space:nowrap;display:inlin
 "three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
 "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
 }}
-</script>
 <script>
-/* Обработчик ошибок в обычном (не module) скрипте — сработает даже если CDN недоступен */
 window.addEventListener('error',function(e){
 var b=document.getElementById('boot');
 if(b){b.style.display='grid';
@@ -670,8 +645,7 @@ function trimLabel(){
 if(!trimActive())return 'нет';
 if(S.trimMode==='full')return 'на всю ширину, '+nf(S.trimBelow,1)+' мм ниже модели';
 const cnt=S.trimCount||2;
-return 'с перемычкой '+nf(S.bridge,0)+' мм ('+cnt+' подрезов, шаг '+(360/cnt)+'°), '+
-nf(S.trimBelow,1)+' мм ниже модели';
+return 'с перемычкой '+nf(S.bridge,0)+' мм ('+cnt+' подрезов, шаг '+(360/cnt)+'°), '+nf(S.trimBelow,1)+' мм ниже модели';
 }
 function trimModeName(){return ({none:'не подрезать',full:'на всю ширину',bridge:'с перемычкой'})[S.trimMode]||'выкл';}
 function toast(msg,ok){const t=$('#toast');if(!t)return;$('#toastText').textContent=msg;
@@ -730,35 +704,25 @@ collapse:'<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5
 ================================================================== */
 const S={
 theme:localStorage.getItem('pr-theme')||'auto',
-/* ориентация и размещение модели */
 scale:100, rotX:0, rotY:0, rotZ:0, orient:'asis',
 offX:0, offY:16, offZ:0,
-/* заготовка */
 stockD:150, stockH:215, stockX:0, stockZ:0,
-/* парковочная позиция струны (начало и конец программы) */
 homeAuto:true, homeX:170, homeY:230, homeOffset:15,
-/* модель станка */
 machineGrid:620, machineTableD:260, machineTableH:20,
-/* проходы */
 motionMode:'shuttle2',
 angleMode:'passes', passes:24, angleStep:15, startAngle:0,
 halvingLevels:4,
 feed:280, rapid:1400, aFeed:1080, wireR:0.35, safeGap:10, dwell:0.7,
 exitLen:12, waitRot:0.6,
 zigzag:true, compBacklash:false, backlash:0.6,
-/* точность */
 slices:150, tol:0.12, smooth:false,
-/* основание */
 keepBase:true, baseH:16, baseW:100, trimMode:'bridge', trimCount:2, trimBelow:2, bridge:16,
-/* G-code */
 post:'linuxcnc', wireOn:'M3 S255', wireOff:'M5', wireKeepOn:false, gComments:true, commentStyle:'paren', gDec:3, gExt:'nc', fileName:'penorez_model',
-/* буквы осей станка для DRO и G-code */
 axisX:'X', axisY:'Y', axisA:'A', axisCustom:false,
 layers:{stock:true,model:true,result:true,base:true,path:true,contours:false,
 wire:true,table:true,grid:true},
 view:'iso', simSpeed:20, tabL:'model', tabR:'cut', tabB:'unroll'
 };
-/* ---------- Сохранение / восстановление состояния ---------- */
 const STATE_KEY='pr-state';
 const STATE_SKIP={theme:1};
 let saveStateTimer=null;
@@ -791,10 +755,7 @@ Object.keys(v).forEach(function(lk){if(lk in S.layers)S.layers[lk]=!!v[lk];});
 return;
 }
 const cur=S[k];
-if(typeof cur==='number'){
-const n=parseFloat(v);if(isFinite(n))S[k]=n;
-return;
-}
+if(typeof cur==='number'){const n=parseFloat(v);if(isFinite(n))S[k]=n;return;}
 if(typeof cur==='boolean'){S[k]=!!v;return;}
 if(typeof cur==='string'){S[k]=String(v);return;}
 S[k]=v;
@@ -805,7 +766,7 @@ return true;
 function clearState(){try{localStorage.removeItem(STATE_KEY);}catch(e){}}
 const LNAMES={stock:'Заготовка (цилиндр)',model:'STL-модель',result:'Деталь (прогноз)',
 base:'Основание (технолог.)',path:'Текущий контур',contours:'Все силуэты',
-wire:'Горячая струна',table:'Стол оси A',grid:'Сетка'};
+wire:'Горячая струна + home',table:'Стол оси A',grid:'Сетка'};
 const LCOL={stock:'#8e8e93',model:'#0a84ff',result:'#30d158',base:'#ff9f0a',path:'#ff453a',
 contours:'#af52de',wire:'#ff9f0a',table:'#6b6f76',grid:'#9aa0aa'};
 const ORIENTS=[{t:'Как в файле',v:'asis',rx:0,ry:0,rz:0},
@@ -830,7 +791,6 @@ else n.setAttribute(k,v);}
 n.appendChild(c.nodeType?c:document.createTextNode(String(c)));});
 return n;
 }
-/* ✅ FIX #6: group() валидирует kids (приводит к массиву) */
 function group(title,kids,foot){
 const g=el('div',{cls:'group'});
 if(title)g.appendChild(el('div',{cls:'group-title'},[title]));
@@ -843,25 +803,18 @@ return g;
 }
 function groupCollapsible(title,kids,foot,open){
 const g=el('div',{cls:'group'});
-const arrow=el('span',{style:'font-size:8px;margin-right:2px;opacity:.7;display:inline-block;transition:transform .2s',
-html:open?'▼':'▶'});
-const titleEl=el('div',{cls:'group-title',style:'cursor:pointer;user-select:none'},
-[arrow,title]);
+const arrow=el('span',{style:'font-size:8px;margin-right:2px;opacity:.7;display:inline-block;transition:transform .2s',html:open?'▼':'▶'});
+const titleEl=el('div',{cls:'group-title',style:'cursor:pointer;user-select:none'},[arrow,title]);
 const wrap=el('div');
 const c=el('div',{cls:'card'});
 if(!Array.isArray(kids))kids=(kids===null||kids===undefined)?[]:[kids];
 kids.forEach(function(k){if(k)c.appendChild(k);});
 wrap.appendChild(c);
 if(foot)wrap.appendChild(el('div',{cls:'group-foot',html:foot}));
-g.appendChild(titleEl);
-g.appendChild(wrap);
+g.appendChild(titleEl);g.appendChild(wrap);
 if(!open)wrap.style.display='none';
 let isOpen=open;
-titleEl.onclick=function(){
-isOpen=!isOpen;
-wrap.style.display=isOpen?'':'none';
-arrow.innerHTML=isOpen?'▼':'▶';
-};
+titleEl.onclick=function(){isOpen=!isOpen;wrap.style.display=isOpen?'':'none';arrow.innerHTML=isOpen?'▼':'▶';};
 return g;
 }
 const V={},SEGS={},LBTN={},NUMREG={};
@@ -888,48 +841,30 @@ el('div',{cls:'rt'},[LNAMES[k]]),b]);
 function syncLayerBtns(k){(LBTN[k]||[]).forEach(function(b){b.classList.toggle('on',S.layers[k]);});}
 function paintSlider(inp){
 if(!inp)return;
-const min=parseFloat(inp.min),max=parseFloat(inp.max);
-const v=parseFloat(inp.value);
+const min=parseFloat(inp.min),max=parseFloat(inp.max),v=parseFloat(inp.value);
 if(!isFinite(min)||!isFinite(max)||max<=min)return;
 inp.style.setProperty('--p',clamp((v-min)/(max-min)*100,0,100)+'%');
 }
-function slider(label,key,unit,min,max,step,cb,tint){
-const v=el('div',{cls:'rv'},[S[key]+(unit?' '+unit:'')]);
-const inp=el('input',{cls:'sl',type:'range',min:min,max:max,step:step,value:S[key]});
-inp.style.setProperty('--tintc',tint||'var(--blue)');
-const paint=function(){inp.style.setProperty('--p',((inp.value-min)/(max-min)*100)+'%');};
-paint();
-inp.addEventListener('input',function(){S[key]=parseFloat(inp.value);paint();
-v.textContent=(Math.round(S[key]*1000)/1000)+(unit?' '+unit:'');(cb||scheduleRebuild)();});
-V['sl_'+key]={inp:inp,v:v,paint:paint,unit:unit};
-return el('div',{cls:'row stack'},[el('div',{cls:'head'},[el('div',{cls:'rt'},[label]),v]),inp]);
-}
-/* ---------- iOS-числовое поле со степпером (замена слайдера) ---------- */
 function decOf(stp){const s=String(stp);const i=s.indexOf('.');
 return i<0?0:Math.min(4,s.length-i-1);}
-function numStr(v,d){if(!isFinite(v))v=0;let s=(+v).toFixed(d);
-if(parseFloat(s)===0)s=(0).toFixed(d);return s;}
+function numStr(v,d){if(!isFinite(v))v=0;let s=(+v).toFixed(d);if(parseFloat(s)===0)s=(0).toFixed(d);return s;}
 function numbox(label,key,unit,min,max,step,cb,tint){
 const mn=parseFloat(min),mx=parseFloat(max),sp=parseFloat(step);
 const st=(isFinite(sp)&&sp>0)?sp:1;
 const dec=decOf(st);
 const lo=isFinite(mn)?mn:-1e12,hi=isFinite(mx)?mx:1e12;
-const inp=el('input',{cls:'numfield',type:'text',inputmode:'decimal',
-autocomplete:'off',spellcheck:'false','aria-label':label});
+const inp=el('input',{cls:'numfield',type:'text',inputmode:'decimal',autocomplete:'off',spellcheck:'false','aria-label':label});
 inp.value=numStr(+S[key]||0,dec);
 const uni=unit?el('span',{cls:'numunit'},[unit]):null;
-const bD=el('button',{type:'button',tabindex:'-1',title:'Уменьшить (удерживайте для повтора)',
-html:'<svg viewBox="0 0 24 24"><path d="M5.5 12h13"/></svg>'});
-const bI=el('button',{type:'button',tabindex:'-1',title:'Увеличить (удерживайте для повтора)',
-html:'<svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>'});
+const bD=el('button',{type:'button',tabindex:'-1',html:'<svg viewBox="0 0 24 24"><path d="M5.5 12h13"/></svg>'});
+const bI=el('button',{type:'button',tabindex:'-1',html:'<svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>'});
 const stpW=el('div',{cls:'stepper'},[bD,bI]);
 const wrap=el('div',{cls:'numctl'},uni?[inp,uni,stpW]:[inp,stpW]);
 wrap.style.setProperty('--tintc',tint||'var(--blue)');
 let typing=false;
 const paint=function(){
 if(typing&&document.activeElement===inp)return;
-inp.classList.remove('bad');
-inp.value=numStr(+S[key]||0,dec);
+inp.classList.remove('bad');inp.value=numStr(+S[key]||0,dec);
 bD.disabled=(+S[key]||0)<=lo+1e-9;bI.disabled=(+S[key]||0)>=hi-1e-9;
 };
 (NUMREG[key]=NUMREG[key]||[]).push(paint);
@@ -938,19 +873,12 @@ v=Math.round(clamp(v,lo,hi)*1e6)/1e6;
 if(Math.abs(v-(+S[key]||0))<1e-12){paint();return;}
 S[key]=v;typing=false;paint();repaintKey(key);(cb||scheduleRebuild)();
 };
-const stepBy=function(dir,mult){
-typing=false;
-let v=(+S[key]||0)+dir*st*(mult||1);
-v=Math.round(v/st)*st;
-apply(v);
-};
-/* ✅ FIX #2: hold() корректно снимает listener'ы при отпускании — утечки нет */
+const stepBy=function(dir,mult){typing=false;let v=(+S[key]||0)+dir*st*(mult||1);v=Math.round(v/st)*st;apply(v);};
 const hold=function(btn,dir){
 let t1=null,t2=null,n=0,act=false;
 const stop=function(){
 if(!act)return;
-act=false;
-clearTimeout(t1);clearInterval(t2);t1=t2=null;n=0;
+act=false;clearTimeout(t1);clearInterval(t2);t1=t2=null;n=0;
 btn.classList.remove('press');
 window.removeEventListener('pointerup',stop);
 window.removeEventListener('pointercancel',stop);
@@ -980,8 +908,7 @@ inp.addEventListener('blur',function(){typing=false;paint();});
 inp.addEventListener('focus',function(){inp.select();});
 inp.addEventListener('keydown',function(e){
 e.stopPropagation();
-if(e.key==='Enter'){e.preventDefault();
-const v=parseFloat(String(inp.value).replace(',','.'));
+if(e.key==='Enter'){e.preventDefault();const v=parseFloat(String(inp.value).replace(',','.'));
 typing=false;if(isFinite(v))apply(v);else paint();inp.blur();}
 else if(e.key==='ArrowUp'){e.preventDefault();stepBy(1,e.shiftKey?10:1);}
 else if(e.key==='ArrowDown'){e.preventDefault();stepBy(-1,e.shiftKey?10:1);}
@@ -993,8 +920,7 @@ V['sl_'+key]={inp:dummy,v:dummy,paint:paint,unit:'',wrap:wrap,realInput:inp,step
 return el('div',{cls:'row numrow'},[el('div',{cls:'rt'},[label]),wrap]);
 }
 function sync(key){const o=V['sl_'+key];
-if(o){o.inp.value=S[key];o.paint();
-o.v.textContent=(Math.round(S[key]*1000)/1000)+(o.unit?' '+o.unit:'');}
+if(o){o.inp.value=S[key];o.paint();o.v.textContent=(Math.round(S[key]*1000)/1000)+(o.unit?' '+o.unit:'');}
 repaintKey(key);}
 function seg(opts,key,cb,plain){
 const w=el('div',{cls:'seg'}),th=el('div',{cls:'thumb'});w.appendChild(th);
@@ -1024,7 +950,7 @@ i.oninput=function(){S[key]=i.value;(cb||scheduleRebuild)();};
 return el('div',{cls:'row'},[el('div',{cls:'rt',style:'flex:0 0 104px'},[label]),i]);
 }
 function setVal(id,t,c){const n=V[id];if(n){n.textContent=t;n.className='rv '+(c||'');}}
-/* ----- Буквы осей станка ----- */
+/* ----- Буквы осей ----- */
 function axisLetter(which){
 if(!S.axisCustom)return which==='x'?'X':(which==='y'?'Y':'A');
 return which==='x'?(S.axisX||'X'):(which==='y'?(S.axisY||'Y'):(S.axisA||'A'));
@@ -1035,7 +961,7 @@ if(lx)lx.textContent=axisLetter('x')+' · мм';
 if(ly)ly.textContent=axisLetter('y')+' · мм';
 if(la)la.textContent=axisLetter('a')+' · град';
 }
-/* ----- Начало координат XY (парковка струны) ----- */
+/* ----- Начало координат XY ----- */
 function autoHomeX(){ return S.stockX + S.stockD/2 + S.homeOffset; }
 function autoHomeY(){ return S.stockH + S.homeOffset; }
 function getHome(){ return S.homeAuto ? [autoHomeX(), autoHomeY()] : [S.homeX, S.homeY]; }
@@ -1043,6 +969,16 @@ function syncHomeValues(){
 if(S.homeAuto){
 S.homeX = Math.round(autoHomeX()*1000)/1000;
 S.homeY = Math.round(autoHomeY()*1000)/1000;
+}
+}
+/* ✅ NEW: подсказка-формула + маркер в 3D */
+function updateHomeHint(){
+const hh=document.getElementById('homeHint');if(!hh)return;
+if(S.homeAuto){
+hh.innerHTML = 'X = '+fmt(S.stockX,1)+' + '+fmt(S.stockD/2,1)+' + '+fmt(S.homeOffset,1)+' = <b>'+fmt(autoHomeX(),1)+'</b><br>'+
+               'Y = '+fmt(S.stockH,1)+' + '+fmt(S.homeOffset,1)+' = <b>'+fmt(autoHomeY(),1)+'</b>';
+}else{
+hh.innerHTML = 'Ручной режим · авто-значения: X = '+fmt(autoHomeX(),1)+', Y = '+fmt(autoHomeY(),1);
 }
 }
 function updateHomeUI(){
@@ -1058,6 +994,8 @@ o.wrap.style.pointerEvents = S.homeAuto ? 'none' : 'auto';
 if(o.realInput){ o.realInput.disabled = S.homeAuto; }
 });
 if(V.sw_homeAuto) V.sw_homeAuto.classList.toggle('on', S.homeAuto);
+updateHomeHint();
+updateHomeMarker();
 }
 function openAxisDialog(){
 $('#axXInput').value=S.axisX;
@@ -1069,21 +1007,14 @@ const sw=$('#axEnableSw');
 const syncEnabled=function(){
 const on=!!S.axisCustom;
 if(sw)sw.classList.toggle('on',on);
-const box=$('#axInputs');
-if(box)box.style.opacity=on?'1':'0.4';
+const box=$('#axInputs');if(box)box.style.opacity=on?'1':'0.4';
 ['axXInput','axYInput','axAInput'].forEach(function(id){
-const el=document.getElementById(id);
-if(el)el.disabled=!on;
+const el=document.getElementById(id);if(el)el.disabled=!on;
 });
 };
 syncEnabled();
 if(sw)sw.onclick=function(){
-S.axisCustom=!S.axisCustom;
-syncEnabled();
-applyAxisLabels();
-genGCode();
-updateInfoUI();
-saveState();
+S.axisCustom=!S.axisCustom;syncEnabled();applyAxisLabels();genGCode();updateInfoUI();saveState();
 if(S.axisCustom)setTimeout(function(){$('#axXInput').focus();$('#axXInput').select();},20);
 };
 ['axXInput','axYInput','axAInput'].forEach(function(id){
@@ -1094,9 +1025,7 @@ if(e.key==='Enter'){e.preventDefault();saveAxisDialog();}
 if(e.key==='Escape'){e.preventDefault();closeAxisDialog();}
 };
 });
-setTimeout(function(){
-if(S.axisCustom){$('#axXInput').focus();$('#axXInput').select();}
-},40);
+setTimeout(function(){if(S.axisCustom){$('#axXInput').focus();$('#axXInput').select();}},40);
 }
 function closeAxisDialog(){$('#axisScrim').hidden=true;}
 function saveAxisDialog(){
@@ -1105,45 +1034,21 @@ const rawY=$('#axYInput').value.toUpperCase().trim();
 const rawA=$('#axAInput').value.toUpperCase().trim();
 const err=$('#axisErr');
 const re=/^[A-Z]$/;
-if(!re.test(rawX)||!re.test(rawY)||!re.test(rawA)){
-err.textContent='Каждая буква должна быть одной заглавной латинской A–Z';
-return;
-}
-if(rawX===rawY||rawX===rawA||rawY===rawA){
-err.textContent='Буквы не должны повторяться';
-return;
-}
-if('GM'.indexOf(rawX)>=0||'GM'.indexOf(rawY)>=0||'GM'.indexOf(rawA)>=0){
-err.textContent='Буквы G и M зарезервированы для G-кодов';
-return;
-}
+if(!re.test(rawX)||!re.test(rawY)||!re.test(rawA)){err.textContent='Каждая буква должна быть одной заглавной латинской A–Z';return;}
+if(rawX===rawY||rawX===rawA||rawY===rawA){err.textContent='Буквы не должны повторяться';return;}
+if('GM'.indexOf(rawX)>=0||'GM'.indexOf(rawY)>=0||'GM'.indexOf(rawA)>=0){err.textContent='Буквы G и M зарезервированы для G-кодов';return;}
 S.axisX=rawX;S.axisY=rawY;S.axisA=rawA;
-applyAxisLabels();
-genGCode();
-updateInfoUI();
-saveState();
-closeAxisDialog();
-if(S.axisCustom){
-toast('Буквы осей: '+rawX+', '+rawY+', '+rawA);
-log('Буквы осей изменены: линейные → '+rawX+'/'+rawY+', поворотная → '+rawA,'s');
-}else{
-toast('Используются стандартные буквы X, Y, A');
-log('Свои буквы отключены — используются X, Y, A','s');
-}
+applyAxisLabels();genGCode();updateInfoUI();saveState();closeAxisDialog();
+toast(S.axisCustom?('Буквы осей: '+rawX+', '+rawY+', '+rawA):'Стандартные буквы X, Y, A');
+log('Буквы осей: '+rawX+', '+rawY+', '+rawA,'s');
 }
 function resetAxisDialog(){
-$('#axXInput').value='X';
-$('#axYInput').value='Y';
-$('#axAInput').value='A';
-$('#axisErr').textContent='';
-S.axisCustom=false;
-const sw=$('#axEnableSw');
-if(sw)sw.classList.toggle('on',false);
-const box=$('#axInputs');
-if(box)box.style.opacity='0.4';
+$('#axXInput').value='X';$('#axYInput').value='Y';$('#axAInput').value='A';
+$('#axisErr').textContent='';S.axisCustom=false;
+const sw=$('#axEnableSw');if(sw)sw.classList.toggle('on',false);
+const box=$('#axInputs');if(box)box.style.opacity='0.4';
 ['axXInput','axYInput','axAInput'].forEach(function(id){
-const el=document.getElementById(id);
-if(el)el.disabled=true;
+const el=document.getElementById(id);if(el)el.disabled=true;
 });
 }
 /* ==================================================================
@@ -1182,45 +1087,37 @@ numbox('Поворот вокруг Z','rotZ','°','-180','180','1',null,'var(--
 btns([{t:'Сбросить ориентацию',k:'btn-gray',fn:function(){
 S.rotX=0;S.rotY=0;S.rotZ=0;
 ['rotX','rotY','rotZ'].forEach(sync);rebuild();}}])
-],'Кнопки +90° поворачивают модель пошагово. Числовые поля позволяют задать произвольный угол (Enter — применить, Esc — отменить). Поворот выполняется относительно центра габаритов модели, поэтому положение не «уезжает».'));
+],'Кнопки +90° поворачивают модель пошагово. Числовые поля позволяют задать произвольный угол.'));
 pM.appendChild(group('Размещение модели',[
 numbox('Масштаб','scale','%','10','1000','0.5',null,'var(--indigo)'),
 numbox('Смещение X','offX','мм','-200','200','1',null,'var(--indigo)'),
 numbox('Смещение Y','offY','мм','-200','200','1',null,'var(--indigo)'),
 numbox('Смещение Z','offZ','мм','-200','200','1',null,'var(--indigo)'),
-btns([{t:'Центрировать по оси A',k:'btn-gray',fn:function(){S.offX=0;S.offZ=0;sync('offX');sync('offZ');rebuild();
-log('Модель центрирована по оси A');}}])
-],'Поле Y задаёт высоту низа модели над столом. Отрицательные значения опускают модель ниже плоскости стола — полезно, если у модели тонкое основание и нужно «врезать» её глубже. Деталь (зелёный прогноз) по-прежнему строится строго в пределах STL.'));
-pM.appendChild(group('Точность аппроксимации',[
-numbox('Срезов по высоте','slices','','16','400','2',null,'var(--purple)'),
-numbox('Допуск упрощения','tol','мм','0','1.5','0.01',null,'var(--purple)'),
-toggle('Сглаживание контура','smooth','Chaikin — скругление углов силуэта')
-],'Срезы по высоте определяют, сколько горизонтальных сечений берётся из STL. Допуск и сглаживание влияют на форму силуэтов.'));
+btns([{t:'Центрировать по оси A',k:'btn-gray',fn:function(){S.offX=0;S.offZ=0;sync('offX');sync('offZ');rebuild();}}])
+],'Поле Y задаёт высоту низа модели над столом.'));
+/* ✅ УБРАНО дублирование «Точность аппроксимации» из вкладки Модель */
 pS.appendChild(group('Виртуальная цилиндрическая заготовка',[
 numbox('Диаметр','stockD','мм','20','2000','1',function(){updateHomeUI();scheduleRebuild();},'var(--teal)'),
 numbox('Высота','stockH','мм','20','2000','1',function(){updateHomeUI();scheduleRebuild();},'var(--teal)'),
 numbox('Смещение центра X','stockX','мм','-1500','1500','0.5',function(){updateHomeUI();scheduleRebuild();},'var(--teal)'),
 numbox('Смещение центра Z','stockZ','мм','-1500','1500','0.5',function(){updateHomeUI();scheduleRebuild();},'var(--teal)'),
 btns([{t:'Подобрать по модели',k:'btn-tint',fn:autoStock}])
-],'Ноль координат — центр поворотного стола оси A, ось Y направлена вверх вдоль оси вращения.'));
+],'Ноль координат — центр поворотного стола оси A.'));
 pS.appendChild(group('Модель станка',[
-numbox('Размер сетки','machineGrid','мм','300','2000','10',function(){
-rebuildMachine();fitAll();},'var(--gray)'),
-numbox('Диаметр стола A','machineTableD','мм','100','2000','5',function(){
-rebuildMachine();fitAll();},'var(--gray)'),
-numbox('Высота стола','machineTableH','мм','5','200','1',function(){
-rebuildMachine();},'var(--gray)'),
+numbox('Размер сетки','machineGrid','мм','300','2000','10',function(){rebuildMachine();fitAll();},'var(--gray)'),
+numbox('Диаметр стола A','machineTableD','мм','100','2000','5',function(){rebuildMachine();fitAll();},'var(--gray)'),
+numbox('Высота стола','machineTableH','мм','5','200','1',function(){rebuildMachine();},'var(--gray)'),
 btns([{t:'Подогнать под заготовку',k:'btn-tint',fn:autoMachine}])
-],'Размеры станочной оснастки в сцене. Кнопка «Подогнать» подбирает их по габаритам заготовки — удобно для крупных моделей.'));
+]));
 pS.appendChild(group('Контроль размещения',[
 info('Модель в заготовке','—','chkFit'),info('Запас по диаметру','—','chkD'),
 info('Запас по высоте','—','chkH'),info('Проходов / шаг A','—','chkP'),
 info('Рабочая зона X','—','chkX'),info('Подрезка основания','—','chkT')
 ]));
 pL.appendChild(group('Слои сцены',Object.keys(LNAMES).map(layerToggle),
-'Сетка станины и полярная сетка стола включаются одним тумблером.'));
+'Маркер home привязан к слою «Горячая струна + home».'));
 pL.appendChild(group('Проекция камеры',[seg(VIEWS,'view',function(v){setView(v);})]));
-/* правая */
+/* правая панель */
 const tr=$('#tabsR');tr.innerHTML='';
 [['cut','Резание',IC.sliders],['base','Основание',IC.base],['code','G-code',IC.code],['rep','Отчёт',IC.chart]].forEach(function(a){
 const b=el('button',{cls:'ptab'+(S.tabR===a[0]?' active':''),html:a[2]+'<span>'+a[1]+'</span>',
@@ -1235,17 +1132,15 @@ seg([
 {t:'Силуэт (180°)',v:'shuttle2'},
 {t:'Радиальное (360°)',v:'shuttleAxis'},
 {t:'Равновесие',v:'equilibrium'}
-],'motionMode',function(){
-buildCutMode();
-scheduleRebuild();
-toast('Режим: '+({shuttle2:'точка ↔ точка',shuttleAxis:'точка ↔ ось',equilibrium:'равновесие'}[S.motionMode]));
-})
-],'«Точка ↔ точка» — полный силуэт за проход, стол 180°. «Точка ↔ ось» — 360°. «Равновесие» — двоичное удвоение числа граней: 2ⁿ резов, 2ⁿ⁺¹ граней.'));
+],'motionMode',function(){buildCutMode();scheduleRebuild();
+toast('Режим: '+({shuttle2:'точка ↔ точка',shuttleAxis:'точка ↔ ось',equilibrium:'равновесие'}[S.motionMode]));})
+],'«Точка ↔ точка» — полный силуэт за проход, стол 180°. «Точка ↔ ось» — 360°. «Равновесие» — двоичное удвоение граней.'));
 rC.appendChild(group('Разбиение на проходы',[
 seg([{t:'Число проходов',v:'passes'},{t:'Угол поворота A',v:'angle'}],'angleMode',function(){buildCutMode();scheduleRebuild();}),
 el('div',{id:'cutMode'}),
 numbox('Начальный угол A','startAngle','°','0','359','1'),
-toggle('Реверс обхода (зиг-заг)','zigzag','Стол всегда в одну сторону, струна — встречно'),
+/* ✅ ПЕРЕИМЕНОВАНО */
+toggle('Зиг-заг — чередовать направление','zigzag','Стол всегда в одну сторону, струна — встречно'),
 toggle('Компенсация люфта A','compBacklash','Перелёт на угол люфта и возврат перед резом'),
 numbox('Люфт оси A','backlash','°','0','3','0.05',null,'var(--gray)')
 ]));
@@ -1259,19 +1154,16 @@ numbox('Безопасный отступ','safeGap','мм','1','60','0.5',null,
 numbox('Прогрев струны','dwell','с','0','5','0.1',null,'var(--orange)'),
 numbox('Пауза перед поворотом A','waitRot','с','0','10','0.1',null,'var(--orange)')
 ]));
-/* ----- Блок «Начало координат XY» ----- */
+/* ----- НОВЫЙ БЛОК: Начало координат XY с подсказкой-формулой ----- */
 rC.appendChild(group('Начало координат XY', (function(){
   syncHomeValues();
-  const homeSub = el('div',{cls:'sub'},
-    [S.homeAuto?'X и Y считаются от края и верха заготовки':'Введите X и Y вручную']);
+  const homeSub = el('div',{cls:'sub'},[S.homeAuto?'X и Y считаются от края и верха заготовки':'Введите X и Y вручную']);
   const sw = el('button',{cls:'switch'+(S.homeAuto?' on':'')});
   sw.onclick = function(){
     S.homeAuto = !S.homeAuto;
     sw.classList.toggle('on', S.homeAuto);
     homeSub.textContent = S.homeAuto?'X и Y считаются от края и верха заготовки':'Введите X и Y вручную';
-    updateHomeUI();
-    rebuild();
-    saveState();
+    updateHomeUI();rebuild();saveState();
   };
   V.sw_homeAuto = sw;
   return [
@@ -1286,33 +1178,28 @@ rC.appendChild(group('Начало координат XY', (function(){
       function(){updateHomeUI();scheduleRebuild();},'var(--orange)'),
     numbox('Позиция X','homeX','мм','-2000','2000','1',null,'var(--orange)'),
     numbox('Позиция Y','homeY','мм','-2000','2000','1',null,'var(--orange)'),
-    el('div',{cls:'row nosep',style:'padding:2px 10px 8px'},[
-      el('div',{cls:'sub',style:'font-size:11px;line-height:1.4'},[
-        'Струна стартует отсюда и возвращается сюда после завершения программы. '+
-        'Между проходами струна паркуется там, где закончила предыдущий рез.'
-      ])
+    /* ✅ NEW: подсказка-формула */
+    el('div',{cls:'row nosep',style:'padding:6px 10px 8px;flex-direction:column;align-items:flex-start;gap:2px'},[
+      el('div',{cls:'home-hint',id:'homeHint'})
     ])
   ];
 })(),
-'При включённом авто-положении X и Y считаются от края заготовки и её верха на расстоянии «отступ за заготовку». При выключенном — задаются вручную.'));
+'Струна стартует отсюда и возвращается сюда после завершения программы. Маркер <b style="color:var(--green)">зелёный круг</b> в сцене показывает позицию.'));
 rC.appendChild(group('Точность аппроксимации',[
 numbox('Срезов по высоте','slices','','16','400','2',null,'var(--purple)'),
 numbox('Допуск упрощения','tol','мм','0','1.5','0.01',null,'var(--purple)'),
 toggle('Сглаживание контура','smooth','Chaikin — скругляет углы силуэта')
-]));
+],'Единственное место, где настраивается точность.'));
 rB.appendChild(group('Технологическое основание',[
 toggle('Оставлять основание','keepBase','Держит деталь на столе до конца резки'),
 numbox('Высота основания','baseH','мм','0','80','0.5',null,'var(--mint)'),
 numbox('Ширина основания','baseW','%','40','160','1',null,'var(--mint)')
-],'Основание — неподрезанный низ заготовки: струна не опускается ниже этой высоты, деталь не падает.'));
+]));
 rB.appendChild(group('Подрезка основания (в самом конце)',[
-seg([
-{t:'Не подрезать',v:'none'},
-{t:'На всю ширину',v:'full'},
-{t:'С перемычкой',v:'bridge'}
-],'trimMode',function(){buildTrimUI();scheduleRebuild();}),
+seg([{t:'Не подрезать',v:'none'},{t:'На всю ширину',v:'full'},{t:'С перемычкой',v:'bridge'}],
+'trimMode',function(){buildTrimUI();scheduleRebuild();}),
 el('div',{id:'trimOpts'})
-],'Струна режет горизонтально на заданной высоте — деталь отваливается от основания. Режим «с перемычкой»: сначала рез с одной стороны, возврат, поворот стола 180°, рез с другой стороны — остаётся тонкая перемычка, которую легко отломить.'));
+]));
 rB.appendChild(groupCollapsible('Карта операций',
 [el('div',{id:'passList',style:'max-height:300px;overflow:auto'})],
 'Клик по операции — переход к ней в симуляции.',false));
@@ -1326,12 +1213,10 @@ toggle('Не выключать струну до конца','wireKeepOn','M3 �
 seg([{t:'2 знака',v:2},{t:'3 знака',v:3},{t:'4 знака',v:4}],'gDec',function(){genGCode();}),
 field('Имя файла','fileName','program',false,function(){}),
 seg([{t:'NC',v:'nc'},{t:'TAP',v:'tap'},{t:'TXT',v:'txt'},{t:'CNC',v:'cnc'}],'gExt',function(v){
-updateDownloadBtn();
-toast('Расширение файла: .'+v);
-}),
+updateDownloadBtn();toast('Расширение файла: .'+v);}),
 info('Строк / размер','—','sFile'),
 btns([{t:'Скачать .nc',id:'btnDownload',k:'btn-blue',fn:download},{t:'Копировать',k:'btn-tint',fn:copyCode}])
-],'Ось A — поворотный стол вокруг Y. По умолчанию струна включается перед резом и выключается перед поворотом стола. Опция «Не выключать струну» оставляет M3 активным между проходами — струна горит от первого реза до конца программы.'));
+]));
 rG.appendChild(group('Предпросмотр УП',[
 el('div',{style:'padding:8px 10px'},[el('div',{cls:'codebox',id:'codeBox',
 style:'max-height:330px;border-radius:8px;border:.5px solid var(--sep)'})])]));
@@ -1339,8 +1224,7 @@ rR.appendChild(group('Сводка',[el('div',{cls:'kpi',id:'kpi'})]));
 rR.appendChild(group('Структура времени',[el('div',{cls:'bars',id:'bars'})]));
 rR.appendChild(group('Параметры',[el('div',{id:'repRows'})]));
 rR.appendChild(group('',[btns([{t:'Экспорт отчёта .txt',k:'btn-gray',fn:exportReport}])]));
-buildCutMode();
-buildTrimUI();
+buildCutMode();buildTrimUI();
 const tb=$('#tabsB');tb.innerHTML='';
 [['unroll','Развёртка траектории',IC.wave],['log','Журнал',IC.list],['code','G-code',IC.code]].forEach(function(a){
 const b=el('button',{cls:'ptab'+(S.tabB===a[0]?' active':''),html:a[2]+'<span>'+a[1]+'</span>',
@@ -1348,9 +1232,7 @@ onclick:function(){switchB(a[0]);}});
 b.dataset.k=a[0];tb.appendChild(b);});
 const s2=seg([{t:'Изо',v:'iso'},{t:'Спереди',v:'front'},{t:'Сверху',v:'top'},{t:'Сбоку',v:'side'}],
 'view',function(v){setView(v);},true);s2.classList.add('sm');$('#vpSeg').appendChild(s2);
-buildSpeedSlider();
-drawLegend();
-updateHomeUI();
+buildSpeedSlider();drawLegend();updateHomeUI();
 switchL(S.tabL);switchR(S.tabR);switchB(S.tabB);
 updateDownloadBtn();
 setTimeout(syncSegs,60);
@@ -1362,10 +1244,7 @@ if(S.trimMode==='none')return;
 box.appendChild(numbox('Рез ниже низа модели','trimBelow','мм','0','40','0.5',null,'var(--mint)'));
 if(S.trimMode==='bridge'){
 box.appendChild(numbox('Ширина перемычки','bridge','мм','0','80','1',null,'var(--mint)'));
-box.appendChild(seg([
-{t:'2 подреза (180°)',v:2},
-{t:'4 подреза (90°)', v:4}
-],'trimCount',function(){scheduleRebuild();}));
+box.appendChild(seg([{t:'2 подреза (180°)',v:2},{t:'4 подреза (90°)',v:4}],'trimCount',function(){scheduleRebuild();}));
 }
 setTimeout(syncSegs,30);
 }
@@ -1375,8 +1254,7 @@ if(S.motionMode==='equilibrium'){
 const n=clamp(Math.round(S.halvingLevels||4),1,8);
 box.appendChild(numbox('Уровней удвоения','halvingLevels','','1','8','1',
 function(){buildCutMode();scheduleRebuild();},'var(--blue)'));
-const cuts=Math.pow(2,n);
-const faces=cuts*2;
+const cuts=Math.pow(2,n),faces=cuts*2;
 let totalA=0;
 for(let k=1;k<=n;k++){
 const count=Math.pow(2,k-1);
@@ -1386,8 +1264,7 @@ totalA+=(smallStep+(count-1)*bigStep);
 }
 box.appendChild(el('div',{cls:'row nosep',style:'padding:2px 10px 8px'},[
 el('div',{cls:'sub',style:'font-size:11px;line-height:1.4'},[
-'Резов: '+cuts+' (2^'+n+'). Граней: '+faces+'. '+
-'Суммарный поворот A ≈ '+nf(totalA,2)+'°.'
+'Резов: '+cuts+' (2^'+n+'). Граней: '+faces+'. Суммарный поворот A ≈ '+nf(totalA,2)+'°.'
 ])]));
 }else{
 box.appendChild(S.angleMode==='passes'
@@ -1396,45 +1273,32 @@ box.appendChild(S.angleMode==='passes'
 }
 setTimeout(syncSegs,30);
 }
-function updateDownloadBtn(){
-const b=$('#btnDownload');
-if(b)b.textContent='Скачать .'+(S.gExt||'nc');
-}
+function updateDownloadBtn(){const b=$('#btnDownload');if(b)b.textContent='Скачать .'+(S.gExt||'nc');}
 function buildSpeedSlider(){
 const box=$('#tpSpeed');if(!box)return;box.innerHTML='';
 const inp=el('input',{cls:'sl',type:'range',min:1,max:100,step:1,value:S.simSpeed});
-inp.style.setProperty('--tintc','var(--blue)');
-inp.style.flex='1 1 auto';
-inp.style.minWidth='0';
+inp.style.setProperty('--tintc','var(--blue)');inp.style.flex='1 1 auto';inp.style.minWidth='0';
 const lbl=el('span',{cls:'mono',
 style:'flex:0 0 auto;min-width:44px;text-align:right;font-size:11.5px;font-weight:700;color:var(--label)'},
 ['×'+S.simSpeed]);
 const paint=function(){inp.style.setProperty('--p',((inp.value-1)/(100-1)*100)+'%');};
 paint();
-inp.addEventListener('input',function(){
-S.simSpeed=parseFloat(inp.value);
-paint();
-lbl.textContent='×'+S.simSpeed;
-});
-box.appendChild(inp);
-box.appendChild(lbl);
+inp.addEventListener('input',function(){S.simSpeed=parseFloat(inp.value);paint();lbl.textContent='×'+S.simSpeed;});
+box.appendChild(inp);box.appendChild(lbl);
 V['sl_simSpeed']={inp:inp,v:lbl,paint:paint,unit:''};
 }
 function switchL(k){S.tabL=k;
 $$('#tabsL .ptab').forEach(function(b){b.classList.toggle('active',b.dataset.k===k);});
 $$('#bodyL>[data-ltab]').forEach(function(n){n.hidden=(n.dataset.ltab!==k);});
-saveState();
-requestAnimationFrame(syncSegs);}
+saveState();requestAnimationFrame(syncSegs);}
 function switchR(k){S.tabR=k;
 $$('#tabsR .ptab').forEach(function(b){b.classList.toggle('active',b.dataset.k===k);});
 $$('#bodyR>[data-rtab]').forEach(function(n){n.hidden=(n.dataset.rtab!==k);});
-saveState();
-requestAnimationFrame(syncSegs);}
+saveState();requestAnimationFrame(syncSegs);}
 function switchB(k){S.tabB=k;
 $$('#tabsB .ptab').forEach(function(b){b.classList.toggle('active',b.dataset.k===k);});
 $$('[data-btab]').forEach(function(n){n.hidden=(n.dataset.btab!==k);});
-saveState();
-requestAnimationFrame(resizeAll);}
+saveState();requestAnimationFrame(resizeAll);}
 function drawLegend(){
 const L=$('#legend');if(!L)return;L.innerHTML='';
 Object.keys(LNAMES).forEach(function(k){
@@ -1448,17 +1312,13 @@ const o=ORIENTS.filter(function(x){return x.v===v;})[0];
 if(!o)return;
 S.rotX=o.rx;S.rotY=o.ry;S.rotZ=o.rz;
 ['rotX','rotY','rotZ'].forEach(sync);
-rebuild();log('Ориентация модели: '+o.t+' (X '+o.rx+'° Y '+o.ry+'° Z '+o.rz+'°)');
+rebuild();log('Ориентация модели: '+o.t);
 }
 function rotateAxis90(axis){
 if(axis!=='rotX'&&axis!=='rotY'&&axis!=='rotZ')return;
-let v=(+S[axis]||0)+90;
-v=((v+180)%360+360)%360-180;
-S[axis]=v;
-sync(axis);
-rebuild();
-const nm={rotX:'X',rotY:'Y',rotZ:'Z'}[axis]||axis;
-log('Ориентация модели: поворот '+nm+' → '+nf(S[axis],1)+'°');
+let v=(+S[axis]||0)+90;v=((v+180)%360+360)%360-180;
+S[axis]=v;sync(axis);rebuild();
+log('Поворот '+({rotX:'X',rotY:'Y',rotZ:'Z'}[axis])+' → '+nf(S[axis],1)+'°');
 }
 /* ==================================================================
 4 · МЕНЮ
@@ -1479,8 +1339,10 @@ edit:[{t:'Пересчитать траекторию',k:'R',fn:function(){rebui
 {t:'Сбросить всё (включая сохранённые)',fn:resetAllState},{sep:1},
 {t:'Тема оформления',k:'T',fn:cycleTheme},{sep:1},
 {t:'О методе резки',k:'?',fn:aboutMethod}],
-view:[{t:'Изометрия',k:'1',fn:function(){setView('iso');}},{t:'Спереди (плоскость XY)',k:'2',fn:function(){setView('front');}},
-{t:'Сверху',k:'3',fn:function(){setView('top');}},{t:'Сбоку',k:'4',fn:function(){setView('side');}},
+view:[{t:'Изометрия',k:'1',fn:function(){setView('iso');}},
+{t:'Спереди (плоскость XY)',k:'2',fn:function(){setView('front');}},
+{t:'Сверху',k:'3',fn:function(){setView('top');}},
+{t:'Сбоку',k:'4',fn:function(){setView('side');}},
 {t:'Показать всё',k:'F',fn:fitAll},{sep:1}].concat(
 Object.keys(LNAMES).map(function(k){return {t:LNAMES[k],check:function(){return S.layers[k];},
 fn:function(){S.layers[k]=!S.layers[k];syncLayerBtns(k);applyLayers();drawLegend();}};})).concat(
@@ -1495,7 +1357,7 @@ tools:[{t:'Пуск / пауза симуляции',k:'Space',fn:function(){set
 {t:'Проверить размещение',fn:function(){validate(false);}}],
 help:[{t:'О методе резки',fn:aboutMethod},{t:'Горячие клавиши',k:'?',fn:showKeys},
 {t:'О программе',fn:function(){alert_('HotWireStudio — векторный CAM - Rotary A',
-'4-осевая ЧПУ-резка пенопласта горячей струной. X и Y — линейные оси, A — поворотный стол вокруг оси Y. Версия 2026.10.17 (v4).','');}}]
+'4-осевая ЧПУ-резка пенопласта горячей струной. Версия 2026.10.17 (v5 UX).','');}}]
 };
 function toggleConsole(){const b=$('#bottom');
 b.style.display=(b.style.display==='none')?'flex':'none';resizeAll();}
@@ -1565,7 +1427,7 @@ toast('Парковка струны: '+(S.homeAuto?'авто':'вручную')
 {t:'Подрезка основания: с перемычкой',i:IC.base,fn:function(){S.trimMode='bridge';segAll('trimMode','bridge');buildTrimUI();rebuild();}},
 {t:'Технологическое основание: вкл/выкл',i:IC.base,fn:function(){S.keepBase=!S.keepBase;
 if(V.sw_keepBase)V.sw_keepBase.classList.toggle('on',S.keepBase);rebuild();}},
-{t:'Струна: показать / скрыть',i:IC.wire,fn:function(){S.layers.wire=!S.layers.wire;
+{t:'Струна + home: показать / скрыть',i:IC.wire,fn:function(){S.layers.wire=!S.layers.wire;
 syncLayerBtns('wire');applyLayers();drawLegend();}},
 {t:'Показать все силуэты',i:IC.layers,fn:function(){S.layers.contours=!S.layers.contours;
 syncLayerBtns('contours');applyLayers();drawLegend();}},
@@ -1610,8 +1472,8 @@ const rows=[['⌘/Ctrl + K','Палитра команд'],['⌘/Ctrl + O','От
 ['Space','Пуск / пауза симуляции'],['R','Пересчитать траекторию'],['F','Показать всё'],
 ['Shift + F','Вписать модель в заготовку'],['1  2  3  4','Изометрия / спереди / сверху / сбоку'],
 ['←  →','Предыдущая / следующая операция'],['Home / End','В начало / в конец симуляции'],
-['↑  ↓  (в числовом поле)','Изменить значение на шаг, Shift — ×10'],['Enter / Esc (в поле)','Применить / отменить ввод значения'],
-['⌘/Ctrl + ~','Показать или скрыть консоль'],['T','Переключить тему'],['?','Эта справка']];
+['↑  ↓  (в числовом поле)','Изменить значение на шаг, Shift — ×10'],['Enter / Esc (в поле)','Применить / отменить ввод'],
+['Esc','Отмена расчёта (если идёт)'],['⌘/Ctrl + ~','Показать / скрыть консоль'],['T','Переключить тему'],['?','Эта справка']];
 let html='<div class="keys">';
 rows.forEach(function(r){html+='<kbd>'+r[0]+'</kbd><span>'+r[1]+'</span>';});
 html+='</div>';
@@ -1623,10 +1485,8 @@ const body=document.querySelector('#helpScrim .help-body');
 if(body)body.scrollTop=0;
 }
 function closeHelp(){$('#helpScrim').hidden=true;}
-/* ✅ FIX #5: добавлен сброс simSpeed */
 function resetParams(){
-S.motionMode='shuttle2';
-S.orient='asis';
+S.motionMode='shuttle2';S.orient='asis';
 S.rotX=0;S.rotY=0;S.rotZ=0;
 S.machineGrid=620;S.machineTableD=260;S.machineTableH=20;
 S.axisX='X';S.axisY='Y';S.axisA='A';S.axisCustom=false;
@@ -1640,44 +1500,30 @@ S.simSpeed=20;
 ['passes','angleStep','startAngle','halvingLevels','feed','rapid','aFeed','wireR','safeGap','dwell','exitLen','waitRot',
 'backlash','slices','tol','baseH','baseW','trimBelow','bridge','homeOffset','homeX','homeY',
 'machineGrid','machineTableD','machineTableH','simSpeed'].forEach(sync);
-segAll('motionMode','shuttle2');
-segAll('orient','asis');
-segAll('gExt','nc');
-segAll('commentStyle','paren');
+segAll('motionMode','shuttle2');segAll('orient','asis');segAll('gExt','nc');segAll('commentStyle','paren');
 updateDownloadBtn();
 ['rotX','rotY','rotZ'].forEach(sync);
 [['zigzag',true],['compBacklash',false],['smooth',false],['keepBase',true],['wireKeepOn',false]].forEach(function(p){
 if(V['sw_'+p[0]])V['sw_'+p[0]].classList.toggle('on',p[1]);});
-segAll('trimMode','bridge');
-segAll('trimCount',2);
-buildTrimUI();
-rebuildMachine();
-applyAxisLabels();
-updateHomeUI();
-rebuild();toast('Параметры сброшены');log('Параметры резания сброшены к значениям по умолчанию');
+segAll('trimMode','bridge');segAll('trimCount',2);
+buildTrimUI();rebuildMachine();applyAxisLabels();updateHomeUI();
+rebuild();toast('Параметры сброшены');log('Параметры резания сброшены','s');
 }
 function resetAllState(){
 alert_('Сбросить все настройки?',
-'Все параметры резания, размещения, заготовки, G-code и сохранённое состояние будут очищены. Программа вернётся к заводским настройкам.',
+'Все параметры резания, размещения, заготовки, G-code и сохранённое состояние будут очищены.',
 '<div style="display:flex;gap:8px;justify-content:center;margin-top:12px">'+
 '<button class="btn btn-gray" id="rsCancel" style="flex:1;padding:8px">Отмена</button>'+
 '<button class="btn btn-blue" id="rsOk" style="flex:1;padding:8px">Сбросить</button>'+
 '</div>');
 const ok=$('#rsOk'),cancel=$('#rsCancel');
 if(cancel)cancel.onclick=function(){$('#scrim').hidden=true;};
-if(ok)ok.onclick=function(){
-$('#scrim').hidden=true;
-clearState();
-resetParams();
-toast('Все настройки сброшены');
-log('Полный сброс: параметры и сохранённое состояние очищены','w');
-};
+if(ok)ok.onclick=function(){$('#scrim').hidden=true;clearState();resetParams();toast('Все настройки сброшены');};
 }
 function cycleTheme(){
 const o=['auto','light','dark'];S.theme=o[(o.indexOf(S.theme)+1)%3];applyTheme();
 localStorage.setItem('pr-theme',S.theme);
 toast('Тема: '+({auto:'системная',light:'светлая',dark:'тёмная'})[S.theme]);
-log('Тема оформления: '+S.theme);
 }
 function applyTheme(){
 let t=S.theme;
@@ -1691,7 +1537,7 @@ requestAnimationFrame(function(){resizeAll();});
 ================================================================== */
 let renderer,scene,camera,controls,tableGroup,machineGroup,wireGroup,wireCore,wireLine,wireGlowA,wireGlowB,
 coneA,coneB,stockMesh,modelMesh,resultMesh,baseMesh,pathLine,pathRest,contourGroup,
-gridH,polarG,bedMesh,tableMesh;
+gridH,polarG,tableMesh,homeMarker;
 function initScene(){
 renderer=new THREE.WebGLRenderer({canvas:$('#scene'),antialias:true,alpha:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
@@ -1705,7 +1551,6 @@ scene.add(new THREE.HemisphereLight(0xffffff,0x8a99ac,0.9));
 const d1=new THREE.DirectionalLight(0xffffff,1.05);d1.position.set(260,460,280);scene.add(d1);
 const d2=new THREE.DirectionalLight(0xa9c6ff,0.45);d2.position.set(-280,150,-240);scene.add(d2);
 machineGroup=new THREE.Group();scene.add(machineGroup);
-bedMesh=null;
 gridH=new THREE.GridHelper(620,31,0x9aa0aa,0xb9bec7);gridH.position.y=-19.5;
 gridH.material.transparent=true;gridH.material.opacity=0.34;machineGroup.add(gridH);
 tableGroup=new THREE.Group();scene.add(tableGroup);
@@ -1751,26 +1596,45 @@ wireGlowA.scale.set(70,70,1);wireGroup.add(wireGlowA);
 wireGlowB=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(),color:0xff9f0a,transparent:true,opacity:0,
 blending:THREE.AdditiveBlending,depthWrite:false}));
 wireGlowB.scale.set(70,70,1);wireGroup.add(wireGlowB);
+/* ✅ NEW: маркер home в сцене */
+homeMarker=new THREE.Group();
+const homeRingGeo=new THREE.RingGeometry(0.75,1,24);
+const homeRing=new THREE.Mesh(homeRingGeo,
+new THREE.MeshBasicMaterial({color:0x34c759,side:THREE.DoubleSide,transparent:true,opacity:0.85,depthWrite:false}));
+homeMarker.add(homeRing);
+const crossMat=new THREE.LineBasicMaterial({color:0x34c759,transparent:true,opacity:0.9});
+const cross1=new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+new THREE.Vector3(-1.3,0,0),new THREE.Vector3(1.3,0,0)]),crossMat);
+const cross2=new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+new THREE.Vector3(0,-1.3,0),new THREE.Vector3(0,1.3,0)]),crossMat);
+homeMarker.add(cross1);homeMarker.add(cross2);
+homeMarker.renderOrder=10;
+scene.add(homeMarker);
 updateWireLen();
+updateHomeMarker();
 if(window.ResizeObserver)new ResizeObserver(function(){resizeAll();}).observe($('#stage'));
 resizeAll();
 animate(0);
 }
+/* ✅ NEW: обновление позиции/видимости маркера home */
+function updateHomeMarker(){
+if(!homeMarker) return;
+const h = getHome();
+homeMarker.position.set(h[0], h[1], 0);
+const s = Math.max(3, S.stockD*0.025);
+homeMarker.scale.setScalar(s);
+homeMarker.visible = S.layers.wire;
+}
 function rebuildMachine(){
 if(!tableMesh||!polarG)return;
-const G=S.machineGrid;
-const TD=S.machineTableD/2,TH=S.machineTableH;
-machineGroup.remove(gridH);
-gridH.geometry.dispose();
+const G=S.machineGrid,TD=S.machineTableD/2,TH=S.machineTableH;
+machineGroup.remove(gridH);gridH.geometry.dispose();
 const div=Math.max(6,Math.round(G/20));
 gridH=new THREE.GridHelper(G,div,0x9aa0aa,0xb9bec7);
-gridH.position.y=-19.5;
-gridH.material.transparent=true;gridH.material.opacity=0.34;
+gridH.position.y=-19.5;gridH.material.transparent=true;gridH.material.opacity=0.34;
 machineGroup.add(gridH);
 while(tableMesh.children.length){
-const c=tableMesh.children[0];
-if(c.geometry)c.geometry.dispose();
-tableMesh.remove(c);
+const c=tableMesh.children[0];if(c.geometry)c.geometry.dispose();tableMesh.remove(c);
 }
 const tm=new THREE.MeshStandardMaterial({color:0x3c4046,roughness:0.55,metalness:0.5});
 const plate=new THREE.Mesh(new THREE.CylinderGeometry(TD*0.95,TD,TH*0.6,72),tm);
@@ -1786,8 +1650,7 @@ const a=i*Math.PI/2+Math.PI/4;
 j.position.set(Math.cos(a)*TD*0.65,-TH*0.65,Math.sin(a)*TD*0.65);
 j.rotation.y=-a;tableMesh.add(j);
 }
-tableGroup.remove(polarG);
-polarG.geometry.dispose();
+tableGroup.remove(polarG);polarG.geometry.dispose();
 polarG=new THREE.PolarGridHelper(TD,8,6,72,0x6c727c,0x4a4f57);
 polarG.position.y=-19.4;tableGroup.add(polarG);
 updateWireLen();
@@ -1828,14 +1691,10 @@ drawUnroll();
 }
 let camTween=null;
 function setView(v){
-S.view=v;segAll('view',v);
-saveState();
+S.view=v;segAll('view',v);saveState();
 if(!camera)return;
 const c=controls.target.clone();
-const R=Math.max(210,
-(S.stockD||150)*2.05,
-(S.stockH||215)*1.15,
-(S.machineGrid||620)*1.4);
+const R=Math.max(210,(S.stockD||150)*2.05,(S.stockH||215)*1.15,(S.machineGrid||620)*1.4);
 const P={iso:new THREE.Vector3(R*0.98,R*0.88,R*1.08),
 front:new THREE.Vector3(0,c.y,R*1.6),
 top:new THREE.Vector3(0,c.y+R*1.7,0.01),
@@ -1864,6 +1723,7 @@ contourGroup.visible=S.layers.contours;
 tableMesh.visible=S.layers.table;
 polarG.visible=S.layers.grid;gridH.visible=S.layers.grid;
 wireGroup.visible=S.layers.wire;
+if(homeMarker) homeMarker.visible=S.layers.wire;
 pathLine.visible=S.layers.path;pathRest.visible=S.layers.path;
 }
 function toggleFullscreen(){
@@ -1883,10 +1743,7 @@ b.innerHTML=on?IC.collapse:IC.expand;
 b.title=on?'Выйти из полноэкранного режима':'На весь экран';
 }
 ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange'].forEach(function(ev){
-document.addEventListener(ev,function(){
-syncFullBtn();
-setTimeout(resizeAll,150);
-});
+document.addEventListener(ev,function(){syncFullBtn();setTimeout(resizeAll,150);});
 });
 function screenshot(){
 if(!renderer)return;
@@ -1895,7 +1752,7 @@ const a=document.createElement('a');
 a.download=(S.fileName||'view')+'.png';a.href=renderer.domElement.toDataURL('image/png');
 document.body.appendChild(a);a.click();
 setTimeout(function(){if(a.parentNode)a.parentNode.removeChild(a);},500);
-toast('Снимок вида сохранён');log('Снимок вида экспортирован в PNG','s');
+toast('Снимок вида сохранён');
 }
 const AXV=[{v:new THREE.Vector3(1,0,0),c:'#ff453a',l:'X'},
 {v:new THREE.Vector3(0,1,0),c:'#30d158',l:'Y'},
@@ -2016,7 +1873,7 @@ for(let j=0;j<NS;j++)quad(out[0][j],inn[0][j],inn[0][j+1],out[0][j+1]);
 return new Float32Array(P);
 }
 /* ==================================================================
-8 · ОРИЕНТАЦИЯ (XYZ) + СРЕЗЫ
+8 · ОРИЕНТАЦИЯ + СРЕЗЫ
 ================================================================== */
 function buildOrient(){
 const key=[S.scale,S.rotX,S.rotY,S.rotZ].join('|');
@@ -2031,8 +1888,7 @@ v.multiplyScalar(s).applyMatrix4(m);
 pos[i]=v.x;pos[i+1]=v.y;pos[i+2]=v.z;
 }
 ORIENT={pos:pos,bb:bboxOf(pos),key:key};
-ORIENT_KEY=key;
-SLICES=null;SLICES_KEY='';
+ORIENT_KEY=key;SLICES=null;SLICES_KEY='';
 return ORIENT;
 }
 function hull2(pts){
@@ -2085,7 +1941,7 @@ function placedSlices(){
 const O=buildOrient(),bb=O.bb;
 const key=S.slices+'|'+O.key;
 if(!SLICES||SLICES_KEY!==key){SLICES=slicePositions(O.pos,S.slices|0,bb);SLICES_KEY=key;}
-const dx=S.offX-bb.cx, dy=S.offY-bb.min[1], dz=S.offZ-bb.cz;
+const dx=S.offX-bb.cx,dy=S.offY-bb.min[1],dz=S.offZ-bb.cz;
 const src=SLICES,n=src.n;
 let first=-1,last=-1;
 for(let i=0;i<n;i++)if(src.hulls[i]){if(first<0)first=i;last=i;}
@@ -2139,69 +1995,47 @@ q.push(p[p.length-1]);return q;
 }
 function post(ch){let c=rdp(ch,S.tol);if(S.smooth&&c.length>3)c=chaikin(c);return c;}
 function passCount(){
-if(S.motionMode==='equilibrium'){
-const n=clamp(Math.round(S.halvingLevels||4),1,8);
-return Math.pow(2,n);
-}
+if(S.motionMode==='equilibrium'){const n=clamp(Math.round(S.halvingLevels||4),1,8);return Math.pow(2,n);}
 const totalAngle=(S.motionMode==='shuttleAxis')?360:180;
 if(S.angleMode==='passes')return clamp(Math.round(S.passes),2,180);
 return clamp(Math.round(totalAngle/Math.max(0.5,S.angleStep)),2,240);
 }
 function equilibriumAngles(){
 const n=clamp(Math.round(S.halvingLevels||4),1,8);
-const angles=[S.startAngle];
-let cur=S.startAngle;
+const angles=[S.startAngle];let cur=S.startAngle;
 for(let k=1;k<=n;k++){
 const count=Math.pow(2,k-1);
 const smallStep=90/Math.pow(2,k-1);
 const bigStep=90/Math.pow(2,k-2);
-for(let i=0;i<count;i++){
-cur+=(i===0)?smallStep:bigStep;
-angles.push(cur);
-}
+for(let i=0;i<count;i++){cur+=(i===0)?smallStep:bigStep;angles.push(cur);}
 }
 return angles;
 }
 function polyLen(pts){let L=0;for(let i=1;i<pts.length;i++)L+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);return L;}
 function buildSides(P,smax,smin,yBot,yTop){
 const samples=[];
-for(let i=0;i<P.n;i++){
-if(!P.hulls[i])continue;
-samples.push({y:P.levels[i],smax:smax[i],smin:smin[i]});
-}
+for(let i=0;i<P.n;i++){if(!P.hulls[i])continue;samples.push({y:P.levels[i],smax:smax[i],smin:smin[i]});}
 if(samples.length<1)return null;
 let first=-1,last=-1;
 for(let s=0;s<samples.length;s++){
-if(samples[s].y>=yBot-1e-6&&samples[s].y<=yTop+1e-6){
-if(first<0)first=s;
-last=s;
+if(samples[s].y>=yBot-1e-6&&samples[s].y<=yTop+1e-6){if(first<0)first=s;last=s;}
 }
-}
-if(first<0){
-first=0;last=samples.length-1;
-}
+if(first<0){first=0;last=samples.length-1;}
 const right=[],left=[];
 if(first>0){
 const A=samples[first-1],B=samples[first];
 const t=clamp((yBot-A.y)/(B.y-A.y),0,1);
-right.push([lerp(A.smax,B.smax,t),yBot]);
-left.push([lerp(A.smin,B.smin,t),yBot]);
+right.push([lerp(A.smax,B.smax,t),yBot]);left.push([lerp(A.smin,B.smin,t),yBot]);
 }else{
-right.push([samples[0].smax,yBot]);
-left.push([samples[0].smin,yBot]);
+right.push([samples[0].smax,yBot]);left.push([samples[0].smin,yBot]);
 }
-for(let s=first;s<=last;s++){
-right.push([samples[s].smax,samples[s].y]);
-left.push([samples[s].smin,samples[s].y]);
-}
+for(let s=first;s<=last;s++){right.push([samples[s].smax,samples[s].y]);left.push([samples[s].smin,samples[s].y]);}
 if(last<samples.length-1){
 const A=samples[last],B=samples[last+1];
 const t=clamp((yTop-A.y)/(B.y-A.y),0,1);
-right.push([lerp(A.smax,B.smax,t),yTop]);
-left.push([lerp(A.smin,B.smin,t),yTop]);
+right.push([lerp(A.smax,B.smax,t),yTop]);left.push([lerp(A.smin,B.smin,t),yTop]);
 }else{
-right.push([samples[samples.length-1].smax,yTop]);
-left.push([samples[samples.length-1].smin,yTop]);
+right.push([samples[samples.length-1].smax,yTop]);left.push([samples[samples.length-1].smin,yTop]);
 }
 return {right:right,left:left};
 }
@@ -2213,9 +2047,8 @@ const P=PLACED;
 if(!P||!P.valid.length)return [];
 const mode=S.motionMode||'shuttle2';
 let angles;
-if(mode==='equilibrium'){
-angles=equilibriumAngles();
-}else{
+if(mode==='equilibrium'){angles=equilibriumAngles();}
+else{
 const Na=passCount();
 const totalAngle=(mode==='shuttleAxis')?360:180;
 const stepA=totalAngle/Na;
@@ -2233,8 +2066,7 @@ const trimY=Math.max(0.4,yModelBot-Math.max(0,S.trimBelow));
 const gapY=S.safeGap;
 const out=[];
 const homePos=getHome();
-let prevX=homePos[0];
-let prevY=homePos[1];
+let prevX=homePos[0],prevY=homePos[1];
 for(let k=0;k<N;k++){
 const ang=angles[k];
 const a=ang*D2R,ca=Math.cos(a),sa=Math.sin(a);
@@ -2244,8 +2076,7 @@ for(let i=0;i<P.n;i++){
 const hh=P.hulls[i];
 if(!hh){sminArr[i]=NaN;smaxArr[i]=NaN;continue;}
 const sp=support(hh,ca,sa);
-sminArr[i]=sp.mn-w;
-smaxArr[i]=sp.mx+w;
+sminArr[i]=sp.mn-w;smaxArr[i]=sp.mx+w;
 }
 const cp=S.stockX*ca+S.stockZ*sa;
 const X1=cp+R+S.exitLen;
@@ -2257,52 +2088,31 @@ const dir=(S.zigzag&&k%2===1)?-1:1;
 let contour;
 if(mode!=='shuttleAxis'){
 const pA=[X1,yBot],pB=[X2,yBot];
-if(dir>0){
-contour=[pA].concat(right);
-contour=contour.concat(left.slice().reverse());
-contour.push(pB);
-}else{
-contour=[pB].concat(left);
-contour=contour.concat(right.slice().reverse());
-contour.push(pA);
-}
+if(dir>0){contour=[pA].concat(right);contour=contour.concat(left.slice().reverse());contour.push(pB);}
+else{contour=[pB].concat(left);contour=contour.concat(right.slice().reverse());contour.push(pA);}
 }else{
 const axisX=cp;
 const pA=[X1,yBot];
 const pB=[axisX,yTop+gapY];
-if(dir>0){
-contour=[pA].concat(right);
-contour.push([axisX,yTop]);
-contour.push(pB);
-}else{
-contour=[pB];
-contour.push([axisX,yTop]);
-contour=contour.concat(right.slice().reverse());
-contour.push(pA);
-}
+if(dir>0){contour=[pA].concat(right);contour.push([axisX,yTop]);contour.push(pB);}
+else{contour=[pB];contour.push([axisX,yTop]);contour=contour.concat(right.slice().reverse());contour.push(pA);}
 }
 contour=post(contour);
 if(contour.length<2)continue;
 const moves=[];
 const startPt=contour[0];
 const dx=Math.abs(startPt[0]-prevX),dy=Math.abs(startPt[1]-prevY);
-if(dx<0.05&&dy<0.05){
-/* уже на месте */
-}else if(k===0){
-moves.push({t:'rap',pts:[[prevX,prevY],[startPt[0],safeTop],[startPt[0],startPt[1]]]});
-}else if(dx<0.05){
-moves.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[startPt[0],startPt[1]]]});
-}else{
-moves.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[startPt[0],safeTop],[startPt[0],startPt[1]]]});
-}
+if(dx<0.05&&dy<0.05){}
+else if(k===0){moves.push({t:'rap',pts:[[prevX,prevY],[startPt[0],safeTop],[startPt[0],startPt[1]]]});}
+else if(dx<0.05){moves.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[startPt[0],startPt[1]]]});}
+else{moves.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[startPt[0],safeTop],[startPt[0],startPt[1]]]});}
 moves.push({t:'cut',pts:contour.slice()});
 const cm=polyCum(contour);
 out.push({
 k:k,type:'cut',ang:ang,a:a,dir:dir,
 contour:contour,moves:moves,
 cutPts:contour,cum:cm.cum,cutLen:cm.len,
-smin:sminArr,smax:smaxArr,
-yBot:yBot,yTop:yTop,
+smin:sminArr,smax:smaxArr,yBot:yBot,yTop:yTop,
 pointA:[X1,yBot],
 pointB:(mode==='shuttle2'?[X2,yBot]:[cp,yTop+gapY])
 });
@@ -2323,16 +2133,10 @@ const moves=[];
 moves.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[X1,safeTop],[X1,trimY]]});
 moves.push({t:'cut',pts:[[X1,trimY],[X2,trimY]]});
 let cutPts=[],cutLen=0;
-moves.forEach(function(m){
-if(m.t==='cut'){cutPts=cutPts.concat(m.pts);cutLen+=polyLen(m.pts);}
-});
-out.push({
-k:N,type:'trim',subtype:'full',ang:angFinal,a:a,dir:1,
-contour:[[X1,trimY],[X2,trimY]],
-moves:moves,cutPts:cutPts,cum:null,cutLen:cutLen,
-smin:null,smax:null,yBot:trimY,yTop:trimY,
-trimY:trimY,X1:X1,X2:X2
-});
+moves.forEach(function(m){if(m.t==='cut'){cutPts=cutPts.concat(m.pts);cutLen+=polyLen(m.pts);}});
+out.push({k:N,type:'trim',subtype:'full',ang:angFinal,a:a,dir:1,
+contour:[[X1,trimY],[X2,trimY]],moves:moves,cutPts:cutPts,cum:null,cutLen:cutLen,
+smin:null,smax:null,yBot:trimY,yTop:trimY,trimY:trimY,X1:X1,X2:X2});
 prevX=X2;prevY=trimY;
 }
 else if(S.trimMode==='bridge'){
@@ -2344,26 +2148,17 @@ for(let i=0;i<total;i++){
 const angI=angFinal+i*angleStepTrim;
 const aI=angI*D2R;
 const movesI=[];
-if(i===0){
-movesI.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[Xstay,safeTop],[Xstay,trimY]]});
-}else{
-movesI.push({t:'rap',pts:[[Xstay,trimY],[Xstay,trimY]]});
-}
+if(i===0){movesI.push({t:'rap',pts:[[prevX,prevY],[prevX,safeTop],[Xstay,safeTop],[Xstay,trimY]]});}
+else{movesI.push({t:'rap',pts:[[Xstay,trimY],[Xstay,trimY]]});}
 movesI.push({t:'cut',pts:[[Xstay,trimY],[gRstay,trimY]]});
 movesI.push({t:'cut',pts:[[gRstay,trimY],[Xstay,trimY]]});
 let cPtsI=[],cLenI=0;
-movesI.forEach(function(m){
-if(m.t==='cut'){cPtsI=cPtsI.concat(m.pts);cLenI+=polyLen(m.pts);}
-});
+movesI.forEach(function(m){if(m.t==='cut'){cPtsI=cPtsI.concat(m.pts);cLenI+=polyLen(m.pts);}});
 const sub=(i===0)?'first':(i===total-1?'last':'mid');
-out.push({
-k:N+i,type:'trim',subtype:sub,trimIndex:i,trimTotal:total,
-ang:angI,a:aI,dir:1,
-contour:[[Xstay,trimY],[gRstay,trimY]],
+out.push({k:N+i,type:'trim',subtype:sub,trimIndex:i,trimTotal:total,
+ang:angI,a:aI,dir:1,contour:[[Xstay,trimY],[gRstay,trimY]],
 moves:movesI,cutPts:cPtsI,cum:null,cutLen:cLenI,
-smin:null,smax:null,yBot:trimY,yTop:trimY,
-trimY:trimY,X1:Xstay,bridgeEdge:gRstay
-});
+smin:null,smax:null,yBot:trimY,yTop:trimY,trimY:trimY,X1:Xstay,bridgeEdge:gRstay});
 }
 prevX=Xstay;prevY=trimY;
 }
@@ -2379,8 +2174,7 @@ for(let i=0;i<n;i++){
 const A=poly[i],B=poly[(i+1)%n];
 const da=A[0]*nx+A[1]*ny-d,db=B[0]*nx+B[1]*ny-d;
 if(da<=0)o.push(A);
-if((da<0&&db>0)||(da>0&&db<0)){
-const t=da/(da-db);o.push([A[0]+t*(B[0]-A[0]),A[1]+t*(B[1]-A[1])]);}
+if((da<0&&db>0)||(da>0&&db<0)){const t=da/(da-db);o.push([A[0]+t*(B[0]-A[0]),A[1]+t*(B[1]-A[1])]);}
 }
 return o;
 }
@@ -2508,13 +2302,12 @@ modelMesh.rotation.set(0,0,0);modelMesh.scale.setScalar(1);
 tableMesh.position.set(S.stockX,0,S.stockZ);
 polarG.position.set(S.stockX,-19.4,S.stockZ);
 updateWireLen();
+updateHomeMarker();
 }
 function buildContours(){
 if(!contourGroup)return;
 while(contourGroup.children.length){
-const c=contourGroup.children[0];
-if(c.geometry)c.geometry.dispose();
-contourGroup.remove(c);
+const c=contourGroup.children[0];if(c.geometry)c.geometry.dispose();contourGroup.remove(c);
 }
 const mat=new THREE.LineBasicMaterial({color:0xaf52de,transparent:true,opacity:0.3});
 PASSES.forEach(function(p){
@@ -2532,8 +2325,7 @@ let label;
 if(p.type==='trim'){
 let sub='';
 if(p.trimIndex!==undefined&&p.trimTotal){
-sub=' ('+(p.trimIndex+1)+'/'+p.trimTotal+' · '+
-(p.trimIndex===0?'старт':(p.trimIndex===p.trimTotal-1?'финал':'промежут.'))+')';
+sub=' ('+(p.trimIndex+1)+'/'+p.trimTotal+')';
 }
 label='⚑ Подрезка основания'+sub+' · A '+nf(p.ang,2)+'° · Y '+nf(p.trimY,1);
 }else{
@@ -2558,12 +2350,11 @@ jumpPass(clamp(cur+d,0,PASSES.length-1));
 /* ==================================================================
 12 · G-CODE
 ================================================================== */
-/* ✅ FIX #4: круглые скобки в тексте заменяем на ], не удаляем содержимое */
 function cmtWrap(s){
 const st=S.commentStyle||'paren';
 let body=String(s==null?'':s);
 if(body.length>=2&&body.charAt(0)==='('&&body.charAt(body.length-1)===')')body=body.slice(1,-1);
-if(st==='paren')body=body.replace(/[()]/g,'');
+if(st==='paren')body=body.replace(/\)/g,']');
 if(!body)return '';
 if(st==='semi')return '; '+body;
 if(st==='slash')return '/ '+body;
@@ -2602,7 +2393,7 @@ motionLine='equilibrium doubling: 2^'+nH+'='+NPASS+' cuts, '+(NPASS*2)+' faces';
 passesLine=NPASS+'   halving levels '+nH+'   start '+F(S.startAngle)+' deg';
 }else{
 const totalAng=(S.motionMode==='shuttleAxis')?360:180;
-motionLine=(S.motionMode==='shuttleAxis'?'shuttle to axis A, '+totalAng+' deg total':'shuttle between two points, '+totalAng+' deg total');
+motionLine=(S.motionMode==='shuttleAxis'?'shuttle to axis A':'shuttle between two points')+', '+totalAng+' deg total';
 passesLine=NPASS+'   step '+F(totalAng/Math.max(1,NPASS))+' deg   start '+F(S.startAngle)+' deg';
 }
 C('(Motion    : '+motionLine+')');
@@ -2612,10 +2403,6 @@ C('(Exit beyond stock: '+F(S.exitLen)+' mm   wait before rotate: '+F(S.waitRot,1
 C('(Home XY   : X'+F(home[0])+' Y'+F(home[1])+' mm'+
   (S.homeAuto?(' (auto, offset '+F(S.homeOffset)+' mm)'):' (manual)')+')');
 C('(Cycle     : home -> approach -> wire ON -> contour -> exit -> wait -> wire OFF -> rotate '+rot+')');
-C('(Base trim : '+(S.trimMode==='full'?('full width, '+F(Math.max(0.4,PLACED.yMin-S.trimBelow),2)+' mm below model')
-:S.trimMode==='bridge'?('bridge '+F(S.bridge)+' mm, '+F(Math.max(0.4,PLACED.yMin-S.trimBelow),2)+' mm below model, '+
-(S.trimCount||2)+' cuts with '+(360/(S.trimCount||2))+' deg flip')
-:'none')+')');
 C('(Cut length: '+F(STATS.cutLen,1)+' mm   est. time '+hms(STATS.time)+')');
 C('(Generated: '+new Date().toLocaleString('ru-RU')+')');
 L.push('G21 G90 G94 G17');
@@ -2626,13 +2413,7 @@ if(S.wireKeepOn)L.push(S.wireOn+cmtInline('wire on — stays on until M2'));
 PASSES.forEach(function(p,k){
 C('');
 if(p.type==='trim'){
-let sub='';
-if(p.trimIndex!==undefined&&p.trimTotal){
-const rotStep=360/p.trimTotal;
-sub=' / '+(p.trimIndex+1)+' of '+p.trimTotal+
-(p.trimIndex>0?' (after '+F(rotStep)+' deg)':'');
-}
-C('(--- FINAL: BASE TRIM'+sub+'  '+rot+'='+F(p.ang)+'  Y='+F(p.trimY)+' ---)');
+C('(--- FINAL: BASE TRIM'+(p.trimIndex!==undefined?(' / '+(p.trimIndex+1)+' of '+p.trimTotal):'')+'  '+rot+'='+F(p.ang)+'  Y='+F(p.trimY)+' ---)');
 }
 else{
 const modeTag=(S.motionMode==='shuttleAxis')?'AXIS':(S.motionMode==='equilibrium'?'EQUILIBRIUM':'SHUTTLE');
@@ -2679,9 +2460,7 @@ function hlLine(s){
 let o=String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 if(/^\s*[();]/.test(o))return '<span class="cd">'+o+'</span>';
 const letters=axisLetter('x')+axisLetter('y')+axisLetter('a')+'Z';
-const uniq=Array.from(new Set(letters.split(''))).filter(function(c){
-return c!=='G'&&c!=='M';
-}).join('');
+const uniq=Array.from(new Set(letters.split(''))).filter(function(c){return c!=='G'&&c!=='M';}).join('');
 const re=new RegExp('\\b(['+uniq+'])(-?\\d+\\.?\\d*)','g');
 return o.replace(/\b(G)(\d+\.?\d*)/g,'<span class="g">$1$2</span>')
 .replace(/\b(M)(\d+\.?\d*)/g,'<span class="m">$1$2</span>')
@@ -2707,15 +2486,14 @@ const ext=(S.gExt||'nc');
 const name=(S.fileName||'program')+'.'+ext;
 const a=document.createElement('a');
 a.href=URL.createObjectURL(new Blob([GCODE],{type:'text/plain'}));
-a.download=name;
-document.body.appendChild(a);a.click();
+a.download=name;document.body.appendChild(a);a.click();
 setTimeout(function(){URL.revokeObjectURL(a.href);if(a.parentNode)a.parentNode.removeChild(a);},3000);
 toast('УП сохранена: '+name);
 log('Экспорт УП '+name+' ('+nf(STATS.bytes/1024,1)+' КБ)','s');
 }
 function copyCode(){
 if(!GCODE){toast('Нет данных для копирования',false);return;}
-const done=function(){toast('G-code скопирован');log('G-code скопирован в буфер обмена','s');};
+const done=function(){toast('G-code скопирован');log('G-code скопирован','s');};
 const fallback=function(){
 const ta=document.createElement('textarea');ta.value=GCODE;document.body.appendChild(ta);
 ta.select();try{document.execCommand('copy');done();}catch(e){toast('Не удалось скопировать',false);}
@@ -2730,21 +2508,17 @@ const t=[
 'МОДЕЛЬ: '+RAW.info.name,'  треугольников: '+RAW.info.count,'  объём: '+nf(RAW.info.vol/1000,1)+' см3',
 '  габариты (файл): '+RAW.info.size.map(function(v){return nf(v,1);}).join(' x ')+' мм',
 '  ориентация: X '+nf(S.rotX,1)+'  Y '+nf(S.rotY,1)+'  Z '+nf(S.rotZ,1)+' град',
-'  масштаб '+nf(S.scale,1)+'%   смещение X '+nf(S.offX,1)+' / зазор от стола '+nf(S.offY,1)+' / Z '+nf(S.offZ,1),
-'  высота после поворота: '+nf(PLACED?PLACED.hModel:0,1)+' мм','',
+'  масштаб '+nf(S.scale,1)+'%   смещение X '+nf(S.offX,1)+' / Y '+nf(S.offY,1)+' / Z '+nf(S.offZ,1),'',
 'ЗАГОТОВКА: цилиндр D'+nf(S.stockD,1)+' x H'+nf(S.stockH,1)+' мм, центр X'+nf(S.stockX,1)+' Z'+nf(S.stockZ,1),'',
 'ПАРКОВКА XY: X'+nf(home[0],1)+' Y'+nf(home[1],1)+' мм  '+(S.homeAuto?('(авто, отступ '+nf(S.homeOffset,1)+' мм)'):'(вручную)'),'',
-'ЦИКЛ: home -> подход вне заготовки -> струна ВКЛ -> рез по силуэту -> выход за заготовку ('+nf(S.exitLen,1)+' мм) -> '+
-'пауза '+nf(S.waitRot,1)+' с -> струна ВЫКЛ -> поворот стола A -> … -> возврат в home','',
+'ЦИКЛ: home -> подход -> струна ВКЛ -> рез -> выход -> пауза -> струна ВЫКЛ -> поворот A -> возврат в home','',
 'РЕЗАНИЕ: проходов '+NPASS+(S.motionMode==='equilibrium'
-?('  метод «равновесие», уровней удвоения '+(S.halvingLevels||4)+', граней '+(NPASS*2))
+?('  метод «равновесие», уровней '+(S.halvingLevels||4)+', граней '+(NPASS*2))
 :('  шаг A '+nf(360/Math.max(1,NPASS),3)+' град'))+'  начальный угол '+nf(S.startAngle,1),
 '  подача '+S.feed+' мм/мин  холостой ход '+S.rapid+' мм/мин  скорость A '+S.aFeed+' град/мин',
 '  радиус струны '+nf(S.wireR,2)+' мм  отступ '+nf(S.safeGap,1)+' мм  прогрев '+nf(S.dwell,1)+' с',
 '  зиг-заг: '+(S.zigzag?'да':'нет')+'   компенсация люфта: '+(S.compBacklash?nf(S.backlash,2)+' град':'нет'),
-'  срезов по высоте '+S.slices+'  допуск упрощения '+nf(S.tol,2)+' мм  сглаживание: '+(S.smooth?'да':'нет'),'',
-'ОСНОВАНИЕ: '+(S.keepBase?'высота '+nf(S.baseH,1)+' мм, ширина '+nf(S.baseW,0)+'%':'нет')+
-'   подрезка в конце: '+(trimActive()?('да, '+trimModeName()+', '+nf(S.trimBelow,1)+' мм ниже модели'+(S.trimMode==='bridge'?', перемычка '+nf(S.bridge,0)+' мм':'')):'нет'),'',
+'  срезов '+S.slices+'  допуск '+nf(S.tol,2)+' мм  сглаживание: '+(S.smooth?'да':'нет'),'',
 'РЕЗУЛЬТАТ: длина реза '+nf(STATS.cutLen,1)+' мм   холостые '+nf(STATS.airLen,0)+' мм   поворот A '+nf(STATS.rotDeg,0)+' град',
 '  расчётное время '+hms(STATS.time),
 '  объём детали (прогноз) '+nf(STATS.volR,1)+' см3   избыток +'+nf(STATS.excess,1)+'%   макс. отклонение '+nf(STATS.maxDev,2)+' мм',
@@ -2757,7 +2531,7 @@ setTimeout(function(){URL.revokeObjectURL(a.href);if(a.parentNode)a.parentNode.r
 toast('Отчёт сохранён');log('Экспорт отчёта','s');
 }
 /* ==================================================================
-13 · РАЗВЁРТКА ТРАЕКТОРИИ
+13 · РАЗВЁРТКА
 ================================================================== */
 function drawUnroll(){
 const c=$('#unroll');if(!c||!c.width||!c.height)return;
@@ -2826,22 +2600,36 @@ g.fillText(NPASS+' проходов · '+(S.motionMode==='equilibrium'
 (trimActive()?' · + подрезка основания':''),ml+4*k,mt+3*k);
 }
 /* ==================================================================
-14 · ПЕРЕСЧЁТ
+14 · ПЕРЕСЧЁТ (с поддержкой отмены)
 ================================================================== */
 let tmr=null;
+let rebuildToken=0;
 function scheduleRebuild(){clearTimeout(tmr);tmr=setTimeout(function(){rebuild();},120);}
+function cancelRebuild(){
+rebuildToken++;
+if($('#busy').classList.contains('on')){
+busy(false);
+log('Пересчёт отменён','w');
+}
+}
+$('#busyCancel').onclick=function(){cancelRebuild();};
 function rebuild(quiet){
 clearTimeout(tmr);
 if(!RAW)return;
 busy(!quiet);
+const myToken=++rebuildToken;
 setTimeout(function(){
+if(myToken!==rebuildToken){busy(false);return;}
 const t0=(window.performance&&performance.now)?performance.now():Date.now();
 try{
 PLACED=placedSlices();
+if(myToken!==rebuildToken){busy(false);return;}
 if(!PLACED)throw new Error('модель не имеет ни одного горизонтального сечения');
 buildSceneObjects();
 PASSES=buildPasses();
+if(myToken!==rebuildToken){busy(false);return;}
 RESULT=computeResult(PASSES.length);
+if(myToken!==rebuildToken){busy(false);return;}
 buildContours();
 buildResultMesh();
 computeStats();
@@ -2851,8 +2639,7 @@ passListUI();
 updateInfoUI();
 reportUI();
 setPassPath(0,0,false);
-SIM.done=-1;
-SIM.t=0;
+SIM.done=-1;SIM.t=0;
 setSimTime(0);
 applyLayers();
 resizeAll();
@@ -2860,9 +2647,7 @@ const ms=Math.round(((window.performance&&performance.now)?performance.now():Dat
 if(!quiet)toast('Пересчитано за '+ms+' мс · '+NPASS+' проходов'+(trimActive()?' + подрезка':''));
 log('Пересчёт: '+NPASS+' проходов ('+(S.motionMode==='equilibrium'
 ?('равновесие, '+(NPASS*2)+' граней')
-:('шаг '+nf(360/Math.max(1,NPASS),2)+'°'))+')'+
-(trimActive()?(' + '+trimModeName()):'')+', '+nf(STATS.pts)+' точек, '+
-nf(STATS.cutLen/1000,2)+' м реза, '+hms(STATS.time)+' · '+ms+' мс','s');
+:('шаг '+nf(360/Math.max(1,NPASS),2)+'°'))+')'+', '+nf(STATS.cutLen/1000,2)+' м реза, '+hms(STATS.time)+' · '+ms+' мс','s');
 saveState();
 validate(true);
 }catch(err){
@@ -2886,7 +2671,6 @@ else{air+=L;tAir+=L/S.rapid*60;}
 tDwell+=S.dwell+S.waitRot;
 const nxt=PASSES[k+1];
 if(nxt){const da=Math.abs(nxt.ang-p.ang)+(S.compBacklash?S.backlash*2:0);rot+=da;tRot+=da/S.aFeed*60;}
-else rot+=0;
 });
 rot+=Math.abs(PASSES.length?PASSES[0].ang-pa:0);
 tRot+=Math.abs(PASSES.length?PASSES[0].ang-pa:0)/S.aFeed*60;
@@ -2982,12 +2766,10 @@ rows.appendChild(box);
 function autoMachine(){
 S.machineTableD=Math.max(260,Math.ceil(S.stockD*1.25/5)*5);
 S.machineTableH=Math.max(20,Math.ceil(S.stockD*0.05));
-S.machineGrid=Math.max(620,
-Math.ceil(Math.max(S.stockD*1.8,S.stockH*0.7)/10)*10);
+S.machineGrid=Math.max(620,Math.ceil(Math.max(S.stockD*1.8,S.stockH*0.7)/10)*10);
 ['machineGrid','machineTableD','machineTableH'].forEach(sync);
 rebuildMachine();fitAll();
 toast('Станок подогнан: Ø'+S.machineTableD+' · сетка '+S.machineGrid+' мм');
-log('Модель станка подогнана: стол Ø'+S.machineTableD+', сетка '+S.machineGrid+' мм','s');
 }
 function autoStock(){
 let rMax=0,hTop=0;
@@ -3002,7 +2784,6 @@ S.stockX=0;S.stockZ=0;
 ['stockD','stockH','stockX','stockZ'].forEach(sync);
 updateHomeUI();
 rebuild();toast('Заготовка: Ø'+S.stockD+' × '+S.stockH+' мм');
-log('Заготовка подобрана автоматически: Ø'+S.stockD+' × H'+S.stockH,'s');
 }
 function fitModel(){
 const O=buildOrient(),bb=O.bb;
@@ -3010,11 +2791,10 @@ const d=Math.max(1e-6,Math.hypot(bb.size[0],bb.size[2])),h=Math.max(1e-6,bb.size
 const baseZone=S.keepBase?Math.max(0,S.baseH):0;
 const s=Math.min((S.stockD-16)/d,(S.stockH-baseZone-14)/h);
 S.scale=clamp(Math.round(s*1000)/10,5,1000);
-S.offX=0;S.offZ=0;S.offY=baseZone>0?baseZone:1;S.rotX=S.rotX;
+S.offX=0;S.offZ=0;S.offY=baseZone>0?baseZone:1;
 ['scale','offX','offZ','offY'].forEach(sync);
 rebuild();fitAll();
 toast('Модель вписана · '+nf(S.scale,1)+' %');
-log('Модель вписана в заготовку, масштаб '+nf(S.scale,1)+' %, низ на Y='+nf(S.offY,1),'s');
 }
 function loadDemo(){
 const pos=buildDemoModel();
@@ -3050,8 +2830,7 @@ S.fileName='penorez_'+RAW.info.name.slice(0,28).replace(/[^\w\-а-яА-Я]/g,'_'
 ORIENT=null;ORIENT_KEY='';SLICES=null;SLICES_KEY='';
 fitModelSilent();rebuild();fitAll();
 toast('Загружено '+nf(RAW.info.count)+' треугольников');
-log('STL прочитан: '+nf(RAW.info.count)+' треугольников, габариты '+
-RAW.info.size.map(function(v){return nf(v,1);}).join(' × ')+' мм','s');
+log('STL прочитан: '+nf(RAW.info.count)+' треугольников','s');
 }catch(err){
 busy(false);alert_('Не удалось прочитать STL',String((err&&err.message)||err));
 log('Ошибка чтения STL: '+((err&&err.message)||err),'e');
@@ -3064,7 +2843,6 @@ fr.readAsArrayBuffer(f);
 15 · СИМУЛЯЦИЯ
 ================================================================== */
 const SIM={segs:[],total:1,t:0,playing:false,done:-1,everRun:false,wire:null};
-/* ✅ FIX #3: добавлен финальный сегмент возврата в home */
 function buildTimeline(){
 SIM.segs=[];let t=0;
 if(!PASSES.length){SIM.total=0.001;return;}
@@ -3087,8 +2865,7 @@ t+=d;
 px=m.pts[m.pts.length-1][0];py=m.pts[m.pts.length-1][1];
 });
 if(S.dwell>0){
-SIM.segs.push({type:'wait',t0:t,t1:t+S.dwell,k:k,done:k-1,cut:true,
-x:px,y:py,a:p.ang});
+SIM.segs.push({type:'wait',t0:t,t1:t+S.dwell,k:k,done:k-1,cut:true,x:px,y:py,a:p.ang});
 t+=S.dwell;
 }
 p.moves.forEach(function(m){
@@ -3102,8 +2879,7 @@ t+=d;
 px=m.pts[m.pts.length-1][0];py=m.pts[m.pts.length-1][1];
 });
 if(S.waitRot>0){
-SIM.segs.push({type:'wait',t0:t,t1:t+S.waitRot,k:k,done:k,cut:true,
-x:px,y:py,a:p.ang});
+SIM.segs.push({type:'wait',t0:t,t1:t+S.waitRot,k:k,done:k,cut:true,x:px,y:py,a:p.ang});
 t+=S.waitRot;
 }
 const nxt=PASSES[k+1];
@@ -3118,7 +2894,7 @@ SIM.segs.push({type:'rot',t0:t,t1:t+d,a0:p.ang,a1:nxt.ang,k:k,done:k,wx:px,wy:py
 t+=d;pa=nxt.ang;
 }
 });
-/* Возврат в home после завершения программы (соответствует G0 home в G-code) */
+/* финальный возврат в home */
 if(Math.abs(px-home[0])>0.05||Math.abs(py-home[1])>0.05){
 const safeTop=S.stockH+S.safeGap;
 const returnPts=[[px,py],[px,safeTop],[home[0],safeTop],[home[0],home[1]]];
@@ -3177,8 +2953,7 @@ if(fin)label='Готово · '+NPASS+' проходов'+(trimActive()?' + по
 else if(s.type==='rot')label='Поворот стола A → '+nf(ang,2)+'°';
 else if(s.type==='wait')label='Ожидание · струна вне заготовки · A '+nf(ang,2)+'°';
 else label=(s.pt==='trim'?'Подрезка основания':(S.motionMode==='equilibrium'?'Равновесие ':'Проход ')+
-(s.k+1)+'/'+NPASS)+' · A '+nf(ang,2)+'° · '+
-(s.cut?'рез':'холостой ход')+' · '+nf(u*100,0)+' %';
+(s.k+1)+'/'+NPASS)+' · A '+nf(ang,2)+'° · '+(s.cut?'рез':'холостой ход')+' · '+nf(u*100,0)+' %';
 spp.textContent=label;
 }
 const now=(window.performance&&performance.now)?performance.now():Date.now();
@@ -3218,10 +2993,8 @@ const n=pts.length,cut=cutting?clamp(1+Math.floor(u*(n-1)),1,n):n;
 pathLine.geometry.setDrawRange(0,cut);
 pathRest.geometry.setDrawRange(cut,Math.max(0,n-cut));
 pathLine.visible=S.layers.path;pathRest.visible=S.layers.path;
-if(lastHl!==k){
-lastHl=k;
-$$('#passList .row').forEach(function(r,i){r.style.background=(i===k)?'var(--tintf)':'';});
-}
+if(lastHl!==k){lastHl=k;
+$$('#passList .row').forEach(function(r,i){r.style.background=(i===k)?'var(--tintf)':'';});}
 }
 function setPlaying(v){
 SIM.playing=v;SIM.everRun=true;
@@ -3246,7 +3019,7 @@ if(SIM.playing){
 SIM.t+=dt*S.simSpeed;
 if(SIM.t>=SIM.total){SIM.t=SIM.total;setPlaying(false);
 toast('Резка завершена · '+NPASS+' проходов'+(trimActive()?' + подрезка':''));
-log('Симуляция завершена. Деталь готова к снятию со стола.','s');}
+log('Симуляция завершена','s');}
 setSimTime(SIM.t);
 }
 if(controls)controls.update();
@@ -3342,6 +3115,8 @@ window.addEventListener('keydown',function(e){
 const tag=(e.target.tagName||'').toLowerCase();
 if((tag==='input'&&e.target.type!=='range')||tag==='textarea'||tag==='select')return;
 const mod=e.metaKey||e.ctrlKey;
+/* ✅ NEW: Escape во время расчёта = отмена */
+if(e.key==='Escape' && $('#busy').classList.contains('on')){e.preventDefault();cancelRebuild();return;}
 if(mod&&(e.key==='k'||e.key==='K'||e.key==='л'||e.key==='Л')){e.preventDefault();openPalette();return;}
 if(mod&&(e.key==='o'||e.key==='O'||e.key==='щ'||e.key==='Щ')){e.preventDefault();$('#file').click();return;}
 if(mod&&(e.key==='s'||e.key==='S'||e.key==='ы'||e.key==='Ы')){e.preventDefault();
@@ -3406,9 +3181,9 @@ RAW={pos:pos,info:meshInfo(pos)};
 RAW.info.name='демо-ваза (процедурная)';
 if(!hadState)fitModelSilent();
 log('HotWireStudio — векторный CAM - Rotary A запущен','s');
-log(hadState?'Параметры восстановлены из сохранения (pr-state)':'Настройки по умолчанию — сохранений пока нет',hadState?'s':'i');
-log('Оси: X и Y — линейные; A — поворотный стол вокруг оси Y. Струна перпендикулярна плоскости XY.');
-log('Цикл: home → подход → рез по силуэту → выход за заготовку → пауза → поворот стола → … → возврат в home.');
+log(hadState?'Параметры восстановлены из сохранения':'Настройки по умолчанию','s');
+log('Маркер home отображается зелёным кругом в сцене');
+log('Цикл: home → рез → возврат в home. Escape — отмена расчёта.');
 rebuild(true);
 setTimeout(function(){
 const b=$('#boot');if(b&&b.parentNode)b.parentNode.removeChild(b);
